@@ -223,18 +223,33 @@
         }
         
         .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            display: none; /* Hidden - replaced with status icons */
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-connected {
+            background-color: #10b981; /* Green */
+        }
+        
+        .status-disconnected {
+            background-color: #ef4444; /* Red */
+        }
+        
+        .status-checking {
+            background-color: #f59e0b; /* Yellow */
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .section-title {
@@ -279,12 +294,12 @@
                     <div class="status-item">
                         <div class="status-icon"><i class="fas fa-database"></i></div>
                         <div>Database</div>
-                        <div id="db-status" class="loading"></div>
+                        <div id="db-status" class="status-icon status-checking"></div>
                     </div>
                     <div class="status-item">
                         <div class="status-icon"><i class="fas fa-chart-line"></i></div>
                         <div>Analytics</div>
-                        <div id="analytics-status" class="loading"></div>
+                        <div id="analytics-status" class="status-icon status-checking"></div>
                     </div>
                     <div class="status-item">
                         <div class="status-icon"><i class="fas fa-cloud"></i></div>
@@ -383,18 +398,20 @@
                 const response = await fetch('/health');
                 const data = await response.json();
                 
-                document.getElementById('db-status').innerHTML = data.status === 'healthy' ? 
-                    '<i class="fas fa-check-circle" style="color: #4caf50;"></i>' : 
-                    '<i class="fas fa-times-circle" style="color: #f44336;"></i>';
-                    
-                document.getElementById('analytics-status').innerHTML = 
-                    '<i class="fas fa-check-circle" style="color: #4caf50;"></i>';
+                const dbStatus = document.getElementById('db-status');
+                const analyticsStatus = document.getElementById('analytics-status');
+                
+                if (data.status === 'healthy') {
+                    dbStatus.className = 'status-icon status-connected';
+                    analyticsStatus.className = 'status-icon status-connected';
+                } else {
+                    dbStatus.className = 'status-icon status-disconnected';
+                    analyticsStatus.className = 'status-icon status-disconnected';
+                }
                     
             } catch (error) {
-                document.getElementById('db-status').innerHTML = 
-                    '<i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i>';
-                document.getElementById('analytics-status').innerHTML = 
-                    '<i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i>';
+                document.getElementById('db-status').className = 'status-icon status-disconnected';
+                document.getElementById('analytics-status').className = 'status-icon status-disconnected';
             }
         }
         
