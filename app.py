@@ -602,31 +602,50 @@ def index():
 @login_required
 def save_mood():
     try:
-        mood = request.form['mood']
+        # Check if user is authenticated
+        if not current_user.is_authenticated:
+            print("❌ User not authenticated")
+            return redirect(url_for('login'))
+        
+        mood = request.form.get('mood')
+        if not mood:
+            print("❌ No mood selected")
+            flash('Please select a mood before saving.')
+            return redirect(url_for('index'))
+            
         notes = request.form.get('notes', '')
         date = datetime.now().strftime('%Y-%m-%d')
-        timestamp = datetime.now()  # Add current timestamp
+        timestamp = datetime.now()
         
         print(f"🔍 Saving mood: {mood} for user {current_user.id} at {timestamp}")
+        print(f"🔍 Form data: mood={mood}, notes='{notes}', date={date}")
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Always insert new entries - no conflict resolution
-        cursor.execute('''INSERT INTO moods (user_id, date, mood, notes, timestamp) 
-                         VALUES (%s, %s, %s, %s, %s)''',
-                      (current_user.id, date, mood, notes, timestamp))
+        # Insert with explicit column names
+        cursor.execute('''
+            INSERT INTO moods (user_id, date, mood, notes, timestamp) 
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (current_user.id, date, mood, notes, timestamp))
         
         conn.commit()
+        
+        # Verify the insert worked
+        cursor.execute('SELECT COUNT(*) as count FROM moods WHERE user_id = %s', (current_user.id,))
+        count = cursor.fetchone()['count']
+        print(f"✅ Mood saved! Total moods for user: {count}")
+        
         conn.close()
         
-        print(f"✅ Mood saved successfully!")
+        flash('Mood saved successfully!')
         return redirect(url_for('index'))
         
     except Exception as e:
         print(f"❌ Error saving mood: {e}")
         import traceback
         traceback.print_exc()
+        flash('Error saving mood. Please try again.')
         return redirect(url_for('index'))
 
 def calculate_analytics(moods):
