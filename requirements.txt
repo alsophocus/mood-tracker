@@ -1,6 +1,6 @@
 Flask==2.3.3
 reportlab==4.0.4
-psycopg2-binary==2.9.9
+psycopg[binary]==3.2.10
 Flask-Login==0.6.3
 Authlib==1.2.1
 python-dotenv==1.0.0

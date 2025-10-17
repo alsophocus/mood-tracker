@@ -24,10 +24,10 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Try to import PostgreSQL support
+# Try to import PostgreSQL support (psycopg3)
 try:
-    import psycopg2
-    from psycopg2.extras import RealDictCursor
+    import psycopg
+    from psycopg.rows import dict_row
     POSTGRES_AVAILABLE = True
 except ImportError:
     POSTGRES_AVAILABLE = False
@@ -35,7 +35,7 @@ except ImportError:
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-# Database configuration - test connection in init_db
+# Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
 ACTUAL_USE_POSTGRES = False  # Will be set in init_db
 
@@ -101,7 +101,7 @@ def load_user(user_id):
 
 def get_db_connection():
     if ACTUAL_USE_POSTGRES:
-        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        return psycopg.connect(DATABASE_URL, row_factory=dict_row)
     else:
         conn = sqlite3.connect('mood.db')
         conn.row_factory = sqlite3.Row
@@ -110,19 +110,28 @@ def get_db_connection():
 def init_db():
     global ACTUAL_USE_POSTGRES
     
-    # Test PostgreSQL connection here instead of at import time
+    # Force PostgreSQL usage for testing - no fallback to SQLite
     if DATABASE_URL and POSTGRES_AVAILABLE:
-        try:
-            test_conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-            test_conn.close()
-            ACTUAL_USE_POSTGRES = True
-            print("✅ PostgreSQL connection successful")
-        except Exception as e:
-            print(f"❌ PostgreSQL failed: {e}, using SQLite")
-            ACTUAL_USE_POSTGRES = False
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
+        ACTUAL_USE_POSTGRES = True
+        print("🔧 FORCING PostgreSQL usage with psycopg3")
+        
+        # Test PostgreSQL connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # PostgreSQL schema
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                         (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                         (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
+                          date DATE, mood TEXT, notes TEXT,
+                          UNIQUE(user_id, date))''')
+        conn.commit()
+        conn.close()
+        print("✅ PostgreSQL connection successful with psycopg3")
+        return
+    else:
+        raise Exception("PostgreSQL required but DATABASE_URL not set or psycopg not available")
     
     try:
         if ACTUAL_USE_POSTGRES:
