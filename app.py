@@ -178,8 +178,16 @@ def init_db():
                          (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
                          (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
-                          date DATE, mood TEXT, notes TEXT,
+                          date DATE, mood TEXT, notes TEXT, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                           UNIQUE(user_id, date))''')
+        
+        # Add timestamp column if it doesn't exist
+        try:
+            cursor.execute('ALTER TABLE moods ADD COLUMN timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+            conn.commit()
+            print("✅ Added timestamp column to moods table")
+        except Exception:
+            pass  # Column already exists
         conn.commit()
         conn.close()
         print("✅ PostgreSQL connection successful with psycopg3")
@@ -564,17 +572,13 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
-        cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
-                      (current_user.id,))
-    else:
-        cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = ? ORDER BY date DESC', 
-                      (current_user.id,))
+    cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
+                  (current_user.id,))
     
     moods = cursor.fetchall()
     
     # Calculate analytics
-    analytics = calculate_analytics(conn)
+    analytics = calculate_analytics(moods)
     
     conn.close()
     return render_template('index.html', moods=moods, analytics=analytics, user=current_user)
@@ -602,41 +606,31 @@ def save_mood():
     
     return redirect(url_for('index'))
 
-def calculate_analytics(conn):
-    cursor = conn.cursor()
-    
-    if ACTUAL_USE_POSTGRES:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
-                      (current_user.id,))
-    else:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
-                      (current_user.id,))
-    
-    moods = cursor.fetchall()
-    
+def calculate_analytics(moods):
     if not moods:
         return {'current_streak': 0, 'best_streak': 0, 'weekly_patterns': {}}
     
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     
-    # Calculate streaks (good = 4 or 5)
+    # Calculate current streak from most recent date
     current_streak = 0
+    for row in moods:  # moods already ordered by date DESC in index()
+        mood = row['mood']
+        if mood_values[mood] >= 5:  # slightly well or better
+            current_streak += 1
+        else:
+            break
+    
+    # Calculate best streak
     best_streak = 0
     temp_streak = 0
-    
-    for row in reversed(list(moods)):  # Start from most recent
-        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
-        if mood_values[mood] >= 5:  # slightly well or better
+    for row in reversed(list(moods)):  # Go chronologically for best streak
+        mood = row['mood']
+        if mood_values[mood] >= 5:
             temp_streak += 1
-            if current_streak == 0:  # First good day from recent
-                current_streak = temp_streak
+            best_streak = max(best_streak, temp_streak)
         else:
-            if temp_streak > best_streak:
-                best_streak = temp_streak
             temp_streak = 0
-    
-    if temp_streak > best_streak:
-        best_streak = temp_streak
     
     # Weekly patterns
     weekly_patterns = defaultdict(list)
@@ -738,28 +732,29 @@ def daily_patterns():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
-                      (current_user.id,))
-    else:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
-                      (current_user.id,))
+    cursor.execute('SELECT timestamp, mood FROM moods WHERE user_id = %s AND timestamp IS NOT NULL ORDER BY timestamp', 
+                  (current_user.id,))
     
     moods = cursor.fetchall()
     conn.close()
     
-    # Group by hour of day (simulated from date patterns)
+    # Group by hour of day using actual timestamps
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     hourly_patterns = defaultdict(list)
     
     for row in moods:
-        date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
-        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
+        timestamp = row['timestamp']
+        mood = row['mood']
         
-        # Simulate hourly patterns based on mood and date
-        import hashlib
-        hour_seed = int(hashlib.md5(f"{date_str}{mood}".encode()).hexdigest()[:2], 16) % 24
-        hourly_patterns[hour_seed].append(mood_values[mood])
+        if timestamp:
+            # Convert to local time and extract hour
+            if isinstance(timestamp, str):
+                from datetime import datetime
+                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            
+            # Extract hour (0-23) from timestamp
+            hour = timestamp.hour
+            hourly_patterns[hour].append(mood_values[mood])
     
     # Calculate average mood for each hour
     hourly_averages = {}
@@ -767,11 +762,19 @@ def daily_patterns():
         if hour in hourly_patterns:
             hourly_averages[hour] = sum(hourly_patterns[hour]) / len(hourly_patterns[hour])
         else:
-            hourly_averages[hour] = 3  # Default neutral
+            hourly_averages[hour] = None  # No data for this hour
+    
+    # Filter out None values for the chart
+    labels = []
+    data = []
+    for hour in range(24):
+        if hourly_averages[hour] is not None:
+            labels.append(f"{hour:02d}:00")
+            data.append(round(hourly_averages[hour], 2))
     
     return jsonify({
-        'labels': [f"{h:02d}:00" for h in range(24)],
-        'data': [round(hourly_averages[h], 2) for h in range(24)]
+        'labels': labels,
+        'data': data
     })
 
 @app.route('/export_pdf')
