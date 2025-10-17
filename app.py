@@ -1,5 +1,14 @@
 # Mood Tracker with OAuth Authentication - Production Ready
 # Last updated: 2025-10-17 11:07 UTC
+# Environment validation
+import os
+print("=== Environment Variables Check ===")
+print(f"GOOGLE_CLIENT_ID: {'SET' if os.environ.get('GOOGLE_CLIENT_ID') else 'NOT SET'}")
+print(f"GOOGLE_CLIENT_SECRET: {'SET' if os.environ.get('GOOGLE_CLIENT_SECRET') else 'NOT SET'}")
+print(f"GITHUB_CLIENT_ID: {'SET' if os.environ.get('GITHUB_CLIENT_ID') else 'NOT SET'}")
+print(f"GITHUB_CLIENT_SECRET: {'SET' if os.environ.get('GITHUB_CLIENT_SECRET') else 'NOT SET'}")
+print("=====================================")
+
 from flask import Flask, render_template, request, redirect, send_file, jsonify, url_for, session, flash
 import sqlite3
 import os
