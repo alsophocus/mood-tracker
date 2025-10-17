@@ -122,6 +122,34 @@ def get_db_connection():
         conn.row_factory = sqlite3.Row
         return conn
 
+def migrate_old_moods():
+    """Migrate old 5-level mood system to new 7-level system"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Mapping from old to new mood system
+        mood_migration = {
+            'super sad': 'very bad',
+            'sad': 'bad', 
+            'neutral': 'neutral',
+            'good': 'well',
+            'super good': 'very well'
+        }
+        
+        for old_mood, new_mood in mood_migration.items():
+            if ACTUAL_USE_POSTGRES:
+                cursor.execute('UPDATE moods SET mood = %s WHERE mood = %s', (new_mood, old_mood))
+            else:
+                cursor.execute('UPDATE moods SET mood = ? WHERE mood = ?', (new_mood, old_mood))
+        
+        conn.commit()
+        conn.close()
+        print("✅ Mood data migration completed")
+        
+    except Exception as e:
+        print(f"⚠️ Mood migration failed: {e}")
+
 def init_db():
     global ACTUAL_USE_POSTGRES
     
@@ -144,6 +172,9 @@ def init_db():
         conn.commit()
         conn.close()
         print("✅ PostgreSQL connection successful with psycopg3")
+        
+        # Migrate old mood data
+        migrate_old_moods()
         return
     else:
         raise Exception("PostgreSQL required but DATABASE_URL not set or psycopg not available")
@@ -236,6 +267,38 @@ def debug_env():
         'PORT': os.environ.get('PORT', 'not_set'),
         'env_vars': list(os.environ.keys())
     }
+
+@app.route('/debug-error')
+def debug_error():
+    try:
+        # Test basic functionality
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        if ACTUAL_USE_POSTGRES:
+            cursor.execute('SELECT COUNT(*) FROM users;')
+            user_count = cursor.fetchone()['count']
+        else:
+            cursor.execute('SELECT COUNT(*) FROM users;')
+            user_count = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return {
+            'status': 'success',
+            'user_count': user_count,
+            'postgres_enabled': ACTUAL_USE_POSTGRES,
+            'database_url_set': DATABASE_URL is not None
+        }
+    except Exception as e:
+        import traceback
+        return {
+            'status': 'error',
+            'error': str(e),
+            'traceback': traceback.format_exc(),
+            'postgres_enabled': ACTUAL_USE_POSTGRES,
+            'database_url_set': DATABASE_URL is not None
+        }, 500
 
 @app.route('/status')
 def status():
