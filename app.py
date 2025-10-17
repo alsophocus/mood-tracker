@@ -722,32 +722,38 @@ def analytics_health():
 def health_check():
     """Health check endpoint to verify database connection"""
     try:
+        ensure_db_initialized()
+        
         conn = get_db_connection()
         cursor = conn.cursor()
         
         if ACTUAL_USE_POSTGRES:
             cursor.execute('SELECT version();')
-            db_info = f"PostgreSQL: {cursor.fetchone()[0]}"
+            db_info = f"PostgreSQL: {cursor.fetchone()['version']}"
         else:
             cursor.execute('SELECT sqlite_version();')
             db_info = f"SQLite: {cursor.fetchone()[0]}"
         
         cursor.execute('SELECT COUNT(*) FROM moods;')
-        mood_count = cursor.fetchone()[0]
+        mood_count = cursor.fetchone()[0] if not ACTUAL_USE_POSTGRES else cursor.fetchone()['count']
         conn.close()
         
         return {
             'status': 'healthy',
             'database': db_info,
-            'mood_entries': mood_count,
+            'mood_count': mood_count,
+            'db_initialized': DB_INITIALIZED,
+            'postgres_enabled': ACTUAL_USE_POSTGRES,
             'database_url_set': DATABASE_URL is not None,
             'postgres_available': POSTGRES_AVAILABLE,
             'using_postgres': ACTUAL_USE_POSTGRES
         }
     except Exception as e:
+        import traceback
         return {
             'status': 'error',
             'error': str(e),
+            'traceback': traceback.format_exc(),
             'database_url_set': DATABASE_URL is not None,
             'postgres_available': POSTGRES_AVAILABLE,
             'using_postgres': ACTUAL_USE_POSTGRES

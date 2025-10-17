@@ -186,12 +186,12 @@
         
         .mood-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 0.75rem;
         }
         
         .mood-btn {
-            padding: 1rem;
+            padding: 1rem 0.5rem;
             border: 2px solid var(--border);
             background: var(--secondary);
             color: var(--text);
@@ -200,16 +200,95 @@
             transition: all 0.2s;
             font-size: 0.875rem;
             font-weight: 500;
+            text-align: center;
         }
         
         .mood-btn:hover {
-            border-color: var(--accent);
-            background: var(--primary);
+            transform: translateY(-2px);
         }
         
-        .mood-btn.selected {
-            border-color: var(--accent);
-            background: var(--accent);
+        .mood-btn[data-mood="super sad"] {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        
+        .mood-btn[data-mood="super sad"]:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+        }
+        
+        .mood-btn[data-mood="super sad"].selected {
+            background: #fca5a5;
+            border-color: #f87171;
+            color: white;
+        }
+        
+        .mood-btn[data-mood="sad"] {
+            background: #fef3c7;
+            border-color: #fbbf24;
+            color: #92400e;
+        }
+        
+        .mood-btn[data-mood="sad"]:hover {
+            background: #fde68a;
+            border-color: #f59e0b;
+        }
+        
+        .mood-btn[data-mood="sad"].selected {
+            background: #fbbf24;
+            border-color: #f59e0b;
+            color: white;
+        }
+        
+        .mood-btn[data-mood="neutral"] {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            color: #374151;
+        }
+        
+        .mood-btn[data-mood="neutral"]:hover {
+            background: #e5e7eb;
+            border-color: #6b7280;
+        }
+        
+        .mood-btn[data-mood="neutral"].selected {
+            background: #9ca3af;
+            border-color: #6b7280;
+            color: white;
+        }
+        
+        .mood-btn[data-mood="good"] {
+            background: #ecfdf5;
+            border-color: #6ee7b7;
+            color: #065f46;
+        }
+        
+        .mood-btn[data-mood="good"]:hover {
+            background: #d1fae5;
+            border-color: #34d399;
+        }
+        
+        .mood-btn[data-mood="good"].selected {
+            background: #6ee7b7;
+            border-color: #34d399;
+            color: white;
+        }
+        
+        .mood-btn[data-mood="super good"] {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            color: #1e40af;
+        }
+        
+        .mood-btn[data-mood="super good"]:hover {
+            background: #dbeafe;
+            border-color: #60a5fa;
+        }
+        
+        .mood-btn[data-mood="super good"].selected {
+            background: #93c5fd;
+            border-color: #60a5fa;
             color: white;
         }
         
@@ -354,7 +433,7 @@
             }
             
             .mood-buttons {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .weekly-patterns {
@@ -382,6 +461,10 @@
             }
             
             .weekly-patterns {
+                grid-template-columns: 1fr;
+            }
+            
+            .mood-buttons {
                 grid-template-columns: 1fr;
             }
         }
