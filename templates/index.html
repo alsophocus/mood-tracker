@@ -680,10 +680,23 @@
         // Mood selection
         document.querySelectorAll('.mood-btn').forEach(btn => {
             btn.addEventListener('click', function() {
+                console.log('🔍 Mood button clicked:', this.dataset.mood);
                 document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
                 this.classList.add('selected');
                 document.getElementById('selected-mood').value = this.dataset.mood;
+                console.log('🔍 Hidden input value set to:', document.getElementById('selected-mood').value);
             });
+        });
+
+        // Add form submission debugging
+        document.querySelector('.mood-form').addEventListener('submit', function(e) {
+            const selectedMood = document.getElementById('selected-mood').value;
+            console.log('🔍 Form submitting with mood:', selectedMood);
+            if (!selectedMood) {
+                e.preventDefault();
+                alert('Please select a mood before saving!');
+                return false;
+            }
         });
 
         // Load weekly patterns chart
