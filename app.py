@@ -180,15 +180,22 @@ def oauth_callback(provider):
                 flash('Failed to get access token from Google')
                 return redirect(url_for('login'))
             
-            # Get user info from Google API
-            resp = google.get('userinfo', token=token)
-            if resp.status_code != 200:
-                flash('Failed to get user information from Google')
+            # Get user info directly from Google's userinfo endpoint
+            try:
+                import requests
+                headers = {'Authorization': f'Bearer {token["access_token"]}'}
+                resp = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', headers=headers)
+                
+                if resp.status_code != 200:
+                    flash('Failed to get user information from Google')
+                    return redirect(url_for('login'))
+                
+                user_info = resp.json()
+                email = user_info.get('email')
+                name = user_info.get('name')
+            except Exception as e:
+                flash(f'Error getting user info from Google: {str(e)}')
                 return redirect(url_for('login'))
-            
-            user_info = resp.json()
-            email = user_info.get('email')
-            name = user_info.get('name')
             
         elif provider == 'github':
             token = github.authorize_access_token()
