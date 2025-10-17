@@ -598,6 +598,23 @@ def index():
     conn.close()
     return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
+@app.route('/debug-form', methods=['POST'])
+@login_required
+def debug_form():
+    """Debug endpoint to see what form data is being sent"""
+    print("🔍 DEBUG: Form data received:")
+    for key, value in request.form.items():
+        print(f"  {key}: '{value}'")
+    
+    print(f"🔍 DEBUG: User ID: {current_user.id}")
+    print(f"🔍 DEBUG: User authenticated: {current_user.is_authenticated}")
+    
+    return jsonify({
+        'form_data': dict(request.form),
+        'user_id': current_user.id,
+        'authenticated': current_user.is_authenticated
+    })
+
 @app.route('/save_mood', methods=['POST'])
 @login_required
 def save_mood():
@@ -606,6 +623,7 @@ def save_mood():
         # Check if user is authenticated
         if not current_user.is_authenticated:
             print("❌ User not authenticated")
+            flash('Authentication error. Please log in again.')
             return redirect(url_for('login'))
         
         mood = request.form.get('mood')
@@ -618,13 +636,16 @@ def save_mood():
         date = datetime.now().strftime('%Y-%m-%d')
         timestamp = datetime.now()
         
-        print(f"🔍 Saving mood: {mood} for user {current_user.id} at {timestamp}")
-        print(f"🔍 Form data: mood={mood}, notes='{notes}', date={date}")
+        print(f"🔍 Attempting to save mood: {mood} for user {current_user.id}")
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Insert with explicit column names
+        # Get count before insert
+        cursor.execute('SELECT COUNT(*) as count FROM moods WHERE user_id = %s', (current_user.id,))
+        count_before = cursor.fetchone()['count']
+        
+        # Insert the mood
         cursor.execute('''
             INSERT INTO moods (user_id, date, mood, notes, timestamp) 
             VALUES (%s, %s, %s, %s, %s)
@@ -632,27 +653,39 @@ def save_mood():
         
         conn.commit()
         
-        # Verify the insert worked
+        # Verify the data was actually saved
         cursor.execute('SELECT COUNT(*) as count FROM moods WHERE user_id = %s', (current_user.id,))
-        count = cursor.fetchone()['count']
-        print(f"✅ Mood saved! Total moods for user: {count}")
+        count_after = cursor.fetchone()['count']
+        
+        # Check if the specific mood was saved
+        cursor.execute('''
+            SELECT id FROM moods 
+            WHERE user_id = %s AND date = %s AND mood = %s AND timestamp = %s
+        ''', (current_user.id, date, mood, timestamp))
+        saved_mood = cursor.fetchone()
         
         conn.close()
         
-        flash('Mood saved successfully!')
+        if saved_mood and count_after > count_before:
+            print(f"✅ Mood successfully saved! ID: {saved_mood['id']}")
+            flash('Mood saved successfully!')
+        else:
+            print(f"❌ Mood not found in database after insert")
+            flash('Error updating data - mood was not saved.')
+            
         return redirect(url_for('index'))
         
     except Exception as e:
         print(f"❌ Error saving mood: {e}")
         if conn:
             try:
-                conn.rollback()  # Rollback the failed transaction
+                conn.rollback()
                 conn.close()
             except:
                 pass
         import traceback
         traceback.print_exc()
-        flash('Error saving mood. Please try again.')
+        flash('Error updating data - please try again.')
         return redirect(url_for('index'))
 
 def calculate_analytics(moods):
