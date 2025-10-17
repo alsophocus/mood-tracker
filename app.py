@@ -36,7 +36,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Database configuration
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:OsFZqHiUQXvawJnFgrWowJctGiWdyznH@postgres-thp7.railway.internal:5432/railway')
 ACTUAL_USE_POSTGRES = False  # Will be set in init_db
 
 # OAuth configuration
@@ -178,47 +178,30 @@ def init_db():
 @app.route('/test-db')
 def test_db():
     try:
-        # Test both internal and public connections
+        # Focus on internal connection only
         internal_url = "postgresql://postgres:OsFZqHiUQXvawJnFgrWowJctGiWdyznH@postgres-thp7.railway.internal:5432/railway"
-        public_url = "postgresql://postgres:OsFZqHiUQXvawJnFgrWowJctGiWdyznH@turntable.proxy.rlwy.net:41615/railway"
         
-        methods = [
-            ("internal", internal_url),
-            ("public", public_url),
-            ("env_var", DATABASE_URL)
-        ]
+        print(f"🔍 Testing internal connection: {internal_url}")
+        conn = psycopg.connect(internal_url, row_factory=dict_row)
+        cursor = conn.cursor()
+        cursor.execute('SELECT version();')
+        version = cursor.fetchone()
+        conn.close()
         
-        results = []
-        for method_name, url in methods:
-            try:
-                print(f"🔍 Testing {method_name}: {url}")
-                conn = psycopg.connect(url, row_factory=dict_row)
-                cursor = conn.cursor()
-                cursor.execute('SELECT version();')
-                version = cursor.fetchone()
-                conn.close()
-                return {
-                    'status': 'success',
-                    'method': method_name,
-                    'url': url,
-                    'database': 'postgresql',
-                    'version': str(version[0]) if version else 'unknown'
-                }
-            except Exception as e:
-                results.append(f"{method_name}: {str(e)}")
-                print(f"❌ Method {method_name} failed: {e}")
-                continue
-                
         return {
-            'status': 'error',
-            'error': 'All connection methods failed',
-            'attempts': results
-        }, 500
+            'status': 'success',
+            'method': 'internal',
+            'database': 'postgresql',
+            'version': str(version[0]) if version else 'unknown'
+        }
         
     except Exception as e:
+        import traceback
         return {
             'status': 'error',
-            'error': str(e)
+            'error': str(e),
+            'error_type': type(e).__name__,
+            'traceback': traceback.format_exc()
         }, 500
 
 @app.route('/debug-env')
