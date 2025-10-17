@@ -116,8 +116,7 @@ def get_db_connection():
     ensure_db_initialized()
     if ACTUAL_USE_POSTGRES:
         print(f"🔍 DATABASE_URL: {DATABASE_URL}")
-        # Try with autocommit=True for Railway compatibility
-        return psycopg.connect(DATABASE_URL, row_factory=dict_row, autocommit=True)
+        return psycopg.connect(DATABASE_URL, row_factory=dict_row)
     else:
         conn = sqlite3.connect('mood.db')
         conn.row_factory = sqlite3.Row
@@ -175,6 +174,10 @@ def init_db():
         conn.rollback()
     finally:
         conn.close()
+
+@app.route('/status')
+def status():
+    return {'status': 'app_running', 'postgres': POSTGRES_AVAILABLE}
 
 @app.route('/login')
 def login():
