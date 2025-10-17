@@ -35,19 +35,9 @@ except ImportError:
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-# Database configuration - minimal approach
+# Database configuration - test connection in init_db
 DATABASE_URL = os.environ.get('DATABASE_URL')
-
-# Test PostgreSQL connection once at startup
-ACTUAL_USE_POSTGRES = False
-if DATABASE_URL and POSTGRES_AVAILABLE:
-    try:
-        test_conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-        test_conn.close()
-        ACTUAL_USE_POSTGRES = True
-        print("✅ PostgreSQL connection successful")
-    except:
-        print("❌ PostgreSQL failed, using SQLite")
+ACTUAL_USE_POSTGRES = False  # Will be set in init_db
 
 # OAuth configuration
 oauth = OAuth(app)
@@ -118,6 +108,19 @@ def get_db_connection():
         return conn
 
 def init_db():
+    global ACTUAL_USE_POSTGRES
+    
+    # Test PostgreSQL connection here instead of at import time
+    if DATABASE_URL and POSTGRES_AVAILABLE:
+        try:
+            test_conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+            test_conn.close()
+            ACTUAL_USE_POSTGRES = True
+            print("✅ PostgreSQL connection successful")
+        except Exception as e:
+            print(f"❌ PostgreSQL failed: {e}, using SQLite")
+            ACTUAL_USE_POSTGRES = False
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     
