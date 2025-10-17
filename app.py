@@ -108,6 +108,7 @@ def ensure_db_initialized():
         try:
             init_db()
             DB_INITIALIZED = True
+            print("✅ Database initialized successfully")
         except Exception as e:
             print(f"⚠️ Database initialization failed: {e}")
             raise
