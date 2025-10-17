@@ -736,27 +736,23 @@ def weekly_patterns():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
-                      (current_user.id,))
-    else:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
-                      (current_user.id,))
+    cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
+                  (current_user.id,))
     
     moods = cursor.fetchall()
     conn.close()
     
-    # Group by day of week
+    # Group by day of week with numerical values
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     weekly_patterns = defaultdict(list)
     
     for row in moods:
-        date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
-        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
+        date_str = str(row['date'])
+        mood = row['mood']
         day_of_week = datetime.strptime(date_str, '%Y-%m-%d').strftime('%A')
         weekly_patterns[day_of_week].append(mood_values[mood])
     
-    # Calculate average mood for each day
+    # Calculate numerical average for each day
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     weekly_averages = []
     
@@ -765,7 +761,7 @@ def weekly_patterns():
             avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
             weekly_averages.append(round(avg, 2))
         else:
-            weekly_averages.append(3)  # Default neutral
+            weekly_averages.append(4.0)  # Default neutral
     
     return jsonify({
         'labels': days,
@@ -805,21 +801,16 @@ def daily_patterns():
             
             hourly_patterns[hour].append(mood_values[mood])
     
-    # Calculate average mood for each hour
-    hourly_averages = {}
+    # Calculate average mood for each hour (all 24 hours from midnight to midnight)
+    labels = [f"{hour:02d}:00" for hour in range(24)]
+    data = []
+    
     for hour in range(24):
         if hour in hourly_patterns:
-            hourly_averages[hour] = sum(hourly_patterns[hour]) / len(hourly_patterns[hour])
+            avg = sum(hourly_patterns[hour]) / len(hourly_patterns[hour])
+            data.append(round(avg, 2))
         else:
-            hourly_averages[hour] = None  # No data for this hour
-    
-    # Filter out None values for the chart
-    labels = []
-    data = []
-    for hour in range(24):
-        if hourly_averages[hour] is not None:
-            labels.append(f"{hour:02d}:00")
-            data.append(round(hourly_averages[hour], 2))
+            data.append(None)  # No data for this hour
     
     return jsonify({
         'labels': labels,
