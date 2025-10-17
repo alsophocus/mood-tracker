@@ -175,6 +175,29 @@ def init_db():
     finally:
         conn.close()
 
+@app.route('/debug-oauth')
+def debug_oauth():
+    try:
+        ensure_db_initialized()
+        return {
+            'status': 'success',
+            'db_initialized': DB_INITIALIZED,
+            'postgres_enabled': ACTUAL_USE_POSTGRES,
+            'oauth_vars': {
+                'google_client_id': os.environ.get('GOOGLE_CLIENT_ID') is not None,
+                'google_client_secret': os.environ.get('GOOGLE_CLIENT_SECRET') is not None,
+                'github_client_id': os.environ.get('GITHUB_CLIENT_ID') is not None,
+                'github_client_secret': os.environ.get('GITHUB_CLIENT_SECRET') is not None
+            }
+        }
+    except Exception as e:
+        import traceback
+        return {
+            'status': 'error',
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }, 500
+
 @app.route('/test-db')
 def test_db():
     try:
