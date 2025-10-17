@@ -51,10 +51,10 @@ google = oauth.register(
     name='google',
     client_id=os.environ.get('GOOGLE_CLIENT_ID'),
     client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
-    server_metadata_url='https://accounts.google.com/.well-known/openid_configuration',
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
+    access_token_url='https://oauth2.googleapis.com/token',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    api_base_url='https://www.googleapis.com/oauth2/v2/',
+    client_kwargs={'scope': 'openid email profile'},
 )
 
 # GitHub OAuth  
@@ -174,10 +174,17 @@ def oauth_callback(provider):
     try:
         if provider == 'google':
             token = google.authorize_access_token()
-            user_info = token.get('userinfo')
-            if not user_info:
+            if not token:
+                flash('Failed to get access token from Google')
+                return redirect(url_for('login'))
+            
+            # Get user info from Google API
+            resp = google.get('userinfo', token=token)
+            if resp.status_code != 200:
                 flash('Failed to get user information from Google')
                 return redirect(url_for('login'))
+            
+            user_info = resp.json()
             email = user_info.get('email')
             name = user_info.get('name')
             
