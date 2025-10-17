@@ -37,7 +37,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-producti
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-ACTUAL_ACTUAL_USE_POSTGRES = False  # Will be set in init_db
+ACTUAL_USE_POSTGRES = False  # Will be set in init_db
 
 # OAuth configuration
 oauth = OAuth(app)
@@ -84,7 +84,7 @@ def load_user(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_ACTUAL_USE_POSTGRES:
+    if ACTUAL_USE_POSTGRES:
         cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
     else:
         cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
@@ -100,41 +100,69 @@ def load_user(user_id):
     return None
 
 def get_db_connection():
-    if ACTUAL_ACTUAL_USE_POSTGRES:
-        return psycopg.connect(DATABASE_URL, row_factory=dict_row)
+    if ACTUAL_USE_POSTGRES:
+        print(f"🔍 DATABASE_URL: {DATABASE_URL}")
+        # Try alternative connection method for Railway
+        try:
+            return psycopg.connect(DATABASE_URL, row_factory=dict_row)
+        except Exception as e:
+            print(f"❌ Connection failed: {e}")
+            # Fallback to SQLite for now
+            print("🔄 Falling back to SQLite")
+            conn = sqlite3.connect('mood.db')
+            conn.row_factory = sqlite3.Row
+            return conn
     else:
         conn = sqlite3.connect('mood.db')
         conn.row_factory = sqlite3.Row
         return conn
 
 def init_db():
-    global ACTUAL_ACTUAL_USE_POSTGRES
+    global ACTUAL_USE_POSTGRES
     
-    # Force PostgreSQL usage for testing - no fallback to SQLite
+    # Try PostgreSQL first, fallback to SQLite if it fails
     if DATABASE_URL and POSTGRES_AVAILABLE:
-        ACTUAL_ACTUAL_USE_POSTGRES = True
-        print("🔧 FORCING PostgreSQL usage with psycopg3")
-        
-        # Test PostgreSQL connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        # PostgreSQL schema
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
-                         (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
-                         (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
-                          date DATE, mood TEXT, notes TEXT,
-                          UNIQUE(user_id, date))''')
-        conn.commit()
-        conn.close()
-        print("✅ PostgreSQL connection successful with psycopg3")
-        return
-    else:
-        raise Exception("PostgreSQL required but DATABASE_URL not set or psycopg not available")
+        try:
+            ACTUAL_USE_POSTGRES = True
+            print("🔧 Attempting PostgreSQL connection with psycopg3")
+            
+            # Test PostgreSQL connection
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            # PostgreSQL schema
+            cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                             (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+            cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                             (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
+                              date DATE, mood TEXT, notes TEXT,
+                              UNIQUE(user_id, date))''')
+            conn.commit()
+            conn.close()
+            print("✅ PostgreSQL connection successful with psycopg3")
+            return
+        except Exception as e:
+            print(f"❌ PostgreSQL failed: {e}")
+            print("🔄 Falling back to SQLite")
+            ACTUAL_USE_POSTGRES = False
+    
+    # SQLite fallback
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # SQLite schema
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                     (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                     (id INTEGER PRIMARY KEY, user_id INTEGER, date TEXT, mood TEXT, notes TEXT,
+                      FOREIGN KEY (user_id) REFERENCES users (id),
+                      UNIQUE(user_id, date))''')
+    conn.commit()
+    conn.close()
+    print("✅ SQLite database initialized")
     
     try:
-        if ACTUAL_ACTUAL_USE_POSTGRES:
+        if ACTUAL_USE_POSTGRES:
             # PostgreSQL schema
             cursor.execute('''CREATE TABLE IF NOT EXISTS users 
                              (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
@@ -342,7 +370,7 @@ def oauth_callback(provider):
         cursor = conn.cursor()
         
         try:
-            if ACTUAL_ACTUAL_USE_POSTGRES:
+            if ACTUAL_USE_POSTGRES:
                 cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
             else:
                 cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
@@ -350,13 +378,13 @@ def oauth_callback(provider):
             user_data = cursor.fetchone()
             
             if user_data:
-                if ACTUAL_ACTUAL_USE_POSTGRES:
+                if ACTUAL_USE_POSTGRES:
                     user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
                 else:
                     user = User(user_data[0], user_data[1], user_data[2], user_data[3])
             else:
                 # Create new user
-                if ACTUAL_ACTUAL_USE_POSTGRES:
+                if ACTUAL_USE_POSTGRES:
                     cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
                                   (email, name, provider))
                     user_id = cursor.fetchone()['id']
@@ -396,7 +424,7 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_ACTUAL_USE_POSTGRES:
+    if ACTUAL_USE_POSTGRES:
         cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
                       (current_user.id,))
     else:
@@ -421,7 +449,7 @@ def save_mood():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_ACTUAL_USE_POSTGRES:
+    if ACTUAL_USE_POSTGRES:
         cursor.execute('''INSERT INTO moods (user_id, date, mood, notes) VALUES (%s, %s, %s, %s)
                          ON CONFLICT (user_id, date) DO UPDATE SET mood = %s, notes = %s''',
                       (current_user.id, date, mood, notes, mood, notes))
