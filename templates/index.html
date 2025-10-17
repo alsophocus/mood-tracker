@@ -782,22 +782,18 @@
             .then(data => {
                 const ctx = document.getElementById('dailyChart').getContext('2d');
                 new Chart(ctx, {
-                    type: 'line',
+                    type: 'scatter',
                     data: {
-                        labels: data.labels,
                         datasets: [{
-                            label: 'Average Mood by Hour',
-                            data: data.data,
+                            label: 'Mood by Time',
+                            data: data.data_points,
                             borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
+                            backgroundColor: '#10b981',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            showLine: true,
                             tension: 0.4,
-                            spanGaps: true,
-                            pointBackgroundColor: '#10b981',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4
+                            borderWidth: 2
                         }]
                     },
                     options: {
@@ -821,8 +817,18 @@
                                 }
                             },
                             x: {
+                                type: 'linear',
+                                position: 'bottom',
+                                min: 0,
+                                max: 24,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                                ticks: { color: '#94a3b8' }
+                                ticks: {
+                                    color: '#94a3b8',
+                                    stepSize: 2,
+                                    callback: function(value) {
+                                        return value.toString().padStart(2, '0') + ':00';
+                                    }
+                                }
                             }
                         }
                     }

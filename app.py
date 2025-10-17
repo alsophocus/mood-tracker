@@ -780,9 +780,9 @@ def daily_patterns():
     moods = cursor.fetchall()
     conn.close()
     
-    # Group by hour of day using UTC-3 timezone
+    # Convert each mood entry to a data point with precise time
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
-    hourly_patterns = defaultdict(list)
+    data_points = []
     
     for row in moods:
         timestamp = row['timestamp']
@@ -797,25 +797,17 @@ def daily_patterns():
             
             # Convert to UTC-3 (subtract 3 hours from UTC)
             utc_minus_3 = timestamp - timedelta(hours=3)
-            hour = utc_minus_3.hour
             
-            hourly_patterns[hour].append(mood_values[mood])
-    
-    # Calculate average mood for each hour (show averages, not individual values)
-    labels = [f"{hour:02d}:00" for hour in range(24)]
-    data = []
-    
-    for hour in range(24):
-        if hour in hourly_patterns and len(hourly_patterns[hour]) > 0:
-            # Calculate average for this hour
-            avg = sum(hourly_patterns[hour]) / len(hourly_patterns[hour])
-            data.append(round(avg, 2))
-        else:
-            data.append(None)  # No data for this hour
+            # Calculate precise time as decimal hours (e.g., 14.5 = 14:30)
+            precise_time = utc_minus_3.hour + (utc_minus_3.minute / 60.0) + (utc_minus_3.second / 3600.0)
+            
+            data_points.append({
+                'x': precise_time,
+                'y': mood_values[mood]
+            })
     
     return jsonify({
-        'labels': labels,
-        'data': data
+        'data_points': data_points
     })
 
 @app.route('/export_pdf')
