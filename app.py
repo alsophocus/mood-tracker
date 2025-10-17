@@ -179,16 +179,44 @@ def init_db():
 def test_db():
     try:
         print(f"🔍 Testing DATABASE_URL: {DATABASE_URL}")
-        conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
-        cursor = conn.cursor()
-        cursor.execute('SELECT version();')
-        version = cursor.fetchone()
-        conn.close()
+        
+        # Try different connection approaches
+        methods = [
+            ("direct", lambda: psycopg.connect(DATABASE_URL, row_factory=dict_row)),
+            ("with_connect_timeout", lambda: psycopg.connect(DATABASE_URL, row_factory=dict_row, connect_timeout=10)),
+            ("parsed", lambda: psycopg.connect(
+                host="postgres.railway.internal",
+                port=5432,
+                user="postgres", 
+                password="cMVvASNKHRXEvZspAlOOcbKiOWfuQOxK",
+                dbname="railway",
+                row_factory=dict_row
+            ))
+        ]
+        
+        for method_name, connect_func in methods:
+            try:
+                conn = connect_func()
+                cursor = conn.cursor()
+                cursor.execute('SELECT version();')
+                version = cursor.fetchone()
+                conn.close()
+                return {
+                    'status': 'success',
+                    'method': method_name,
+                    'database': 'postgresql',
+                    'version': str(version[0]) if version else 'unknown'
+                }
+            except Exception as e:
+                print(f"❌ Method {method_name} failed: {e}")
+                continue
+                
         return {
-            'status': 'success',
-            'database': 'postgresql',
-            'version': str(version[0]) if version else 'unknown'
-        }
+            'status': 'error',
+            'error': 'All connection methods failed',
+            'database_url_length': len(DATABASE_URL) if DATABASE_URL else 0
+        }, 500
+        
     except Exception as e:
         return {
             'status': 'error',
