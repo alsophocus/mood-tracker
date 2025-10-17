@@ -807,25 +807,32 @@ def weekly_trends():
     
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     
-    # Group by week
+    # Group by month and week within month
     from datetime import datetime
-    weekly_moods = defaultdict(list)
+    import calendar
+    monthly_weeks = defaultdict(lambda: defaultdict(list))
     
     for row in moods:
         date = datetime.strptime(str(row['date']), '%Y-%m-%d')
-        # Get year, week number
-        year_week = f"{date.year}-W{date.isocalendar()[1]:02d}"
-        weekly_moods[year_week].append(mood_values[row['mood']])
+        year_month = f"{date.year}-{date.month:02d}"
+        
+        # Calculate week of month (1-5)
+        first_day = date.replace(day=1)
+        first_weekday = first_day.weekday()
+        week_of_month = ((date.day - 1 + first_weekday) // 7) + 1
+        
+        monthly_weeks[year_month][week_of_month].append(mood_values[row['mood']])
     
-    # Calculate weekly averages
+    # Calculate weekly averages within each month
     labels = []
     data = []
     
-    for week in sorted(weekly_moods.keys()):
-        mood_list = weekly_moods[week]
-        weekly_average = sum(mood_list) / len(mood_list)
-        labels.append(week)
-        data.append(round(weekly_average, 2))
+    for month in sorted(monthly_weeks.keys()):
+        for week in sorted(monthly_weeks[month].keys()):
+            mood_list = monthly_weeks[month][week]
+            weekly_average = sum(mood_list) / len(mood_list)
+            labels.append(f"{month} W{week}")
+            data.append(round(weekly_average, 2))
     
     return jsonify({
         'labels': labels,
