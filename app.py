@@ -37,7 +37,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-producti
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-ACTUAL_USE_POSTGRES = False  # Will be set in init_db
+ACTUAL_ACTUAL_USE_POSTGRES = False  # Will be set in init_db
 
 # OAuth configuration
 oauth = OAuth(app)
@@ -84,7 +84,7 @@ def load_user(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if USE_POSTGRES:
+    if ACTUAL_ACTUAL_USE_POSTGRES:
         cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
     else:
         cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
@@ -93,14 +93,14 @@ def load_user(user_id):
     conn.close()
     
     if user_data:
-        if USE_POSTGRES:
+        if ACTUAL_USE_POSTGRES:
             return User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
         else:
             return User(user_data[0], user_data[1], user_data[2], user_data[3])
     return None
 
 def get_db_connection():
-    if ACTUAL_USE_POSTGRES:
+    if ACTUAL_ACTUAL_USE_POSTGRES:
         return psycopg.connect(DATABASE_URL, row_factory=dict_row)
     else:
         conn = sqlite3.connect('mood.db')
@@ -108,11 +108,11 @@ def get_db_connection():
         return conn
 
 def init_db():
-    global ACTUAL_USE_POSTGRES
+    global ACTUAL_ACTUAL_USE_POSTGRES
     
     # Force PostgreSQL usage for testing - no fallback to SQLite
     if DATABASE_URL and POSTGRES_AVAILABLE:
-        ACTUAL_USE_POSTGRES = True
+        ACTUAL_ACTUAL_USE_POSTGRES = True
         print("🔧 FORCING PostgreSQL usage with psycopg3")
         
         # Test PostgreSQL connection
@@ -134,7 +134,7 @@ def init_db():
         raise Exception("PostgreSQL required but DATABASE_URL not set or psycopg not available")
     
     try:
-        if ACTUAL_USE_POSTGRES:
+        if ACTUAL_ACTUAL_USE_POSTGRES:
             # PostgreSQL schema
             cursor.execute('''CREATE TABLE IF NOT EXISTS users 
                              (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
@@ -342,7 +342,7 @@ def oauth_callback(provider):
         cursor = conn.cursor()
         
         try:
-            if ACTUAL_USE_POSTGRES:
+            if ACTUAL_ACTUAL_USE_POSTGRES:
                 cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
             else:
                 cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
@@ -350,13 +350,13 @@ def oauth_callback(provider):
             user_data = cursor.fetchone()
             
             if user_data:
-                if ACTUAL_USE_POSTGRES:
+                if ACTUAL_ACTUAL_USE_POSTGRES:
                     user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
                 else:
                     user = User(user_data[0], user_data[1], user_data[2], user_data[3])
             else:
                 # Create new user
-                if ACTUAL_USE_POSTGRES:
+                if ACTUAL_ACTUAL_USE_POSTGRES:
                     cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
                                   (email, name, provider))
                     user_id = cursor.fetchone()['id']
@@ -396,7 +396,7 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if USE_POSTGRES:
+    if ACTUAL_ACTUAL_USE_POSTGRES:
         cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
                       (current_user.id,))
     else:
@@ -421,7 +421,7 @@ def save_mood():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if USE_POSTGRES:
+    if ACTUAL_ACTUAL_USE_POSTGRES:
         cursor.execute('''INSERT INTO moods (user_id, date, mood, notes) VALUES (%s, %s, %s, %s)
                          ON CONFLICT (user_id, date) DO UPDATE SET mood = %s, notes = %s''',
                       (current_user.id, date, mood, notes, mood, notes))
@@ -437,7 +437,7 @@ def save_mood():
 def calculate_analytics(conn):
     cursor = conn.cursor()
     
-    if USE_POSTGRES:
+    if ACTUAL_USE_POSTGRES:
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                       (current_user.id,))
     else:
@@ -457,7 +457,7 @@ def calculate_analytics(conn):
     temp_streak = 0
     
     for row in reversed(list(moods)):  # Start from most recent
-        mood = row['mood'] if USE_POSTGRES else row[1]
+        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
         if mood_values[mood] >= 4:  # good or super good
             temp_streak += 1
             if current_streak == 0:  # First good day from recent
@@ -473,8 +473,8 @@ def calculate_analytics(conn):
     # Weekly patterns
     weekly_patterns = defaultdict(list)
     for row in moods:
-        date_str = str(row['date']) if USE_POSTGRES else row[0]
-        mood = row['mood'] if USE_POSTGRES else row[1]
+        date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
+        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
         day_of_week = datetime.strptime(date_str, '%Y-%m-%d').strftime('%A')
         weekly_patterns[day_of_week].append(mood_values[mood])
     
@@ -495,7 +495,7 @@ def mood_data():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if USE_POSTGRES:
+    if ACTUAL_USE_POSTGRES:
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                       (current_user.id,))
     else:
@@ -509,8 +509,8 @@ def mood_data():
     monthly_data = defaultdict(list)
     
     for row in moods:
-        date_str = str(row['date']) if USE_POSTGRES else row[0]
-        mood = row['mood'] if USE_POSTGRES else row[1]
+        date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
+        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
         month = date_str[:7]  # YYYY-MM format
         monthly_data[month].append(mood_values[mood])
     
@@ -528,7 +528,7 @@ def export_pdf():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if USE_POSTGRES:
+    if ACTUAL_USE_POSTGRES:
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                       (current_user.id,))
     else:
@@ -545,8 +545,8 @@ def export_pdf():
     y = 700
     
     for row in moods:
-        date_str = str(row['date']) if USE_POSTGRES else row[0]
-        mood = row['mood'] if USE_POSTGRES else row[1]
+        date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
+        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
         p.drawString(100, y, f"{date_str}: {mood}")
         y -= 20
     
@@ -581,7 +581,7 @@ def health_check():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        if USE_POSTGRES:
+        if ACTUAL_USE_POSTGRES:
             cursor.execute('SELECT version();')
             db_info = f"PostgreSQL: {cursor.fetchone()[0]}"
         else:
@@ -598,7 +598,7 @@ def health_check():
             'mood_entries': mood_count,
             'database_url_set': DATABASE_URL is not None,
             'postgres_available': POSTGRES_AVAILABLE,
-            'using_postgres': USE_POSTGRES
+            'using_postgres': ACTUAL_USE_POSTGRES
         }
     except Exception as e:
         return {
@@ -606,7 +606,7 @@ def health_check():
             'error': str(e),
             'database_url_set': DATABASE_URL is not None,
             'postgres_available': POSTGRES_AVAILABLE,
-            'using_postgres': USE_POSTGRES
+            'using_postgres': ACTUAL_USE_POSTGRES
         }, 500
 
 if __name__ == '__main__':
