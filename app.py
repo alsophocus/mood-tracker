@@ -175,6 +175,16 @@ def init_db():
     finally:
         conn.close()
 
+@app.route('/debug-env')
+def debug_env():
+    return {
+        'DATABASE_URL_set': DATABASE_URL is not None,
+        'DATABASE_URL_length': len(DATABASE_URL) if DATABASE_URL else 0,
+        'POSTGRES_AVAILABLE': POSTGRES_AVAILABLE,
+        'PORT': os.environ.get('PORT', 'not_set'),
+        'env_vars': list(os.environ.keys())
+    }
+
 @app.route('/status')
 def status():
     return {'status': 'app_running', 'postgres': POSTGRES_AVAILABLE}
@@ -629,12 +639,8 @@ def health_check():
         }, 500
 
 if __name__ == '__main__':
-    # Try to initialize database, but don't crash if it fails
-    try:
-        init_db()
-    except Exception as e:
-        print(f"⚠️ Database initialization failed: {e}")
-        print("🚀 Starting app anyway - will retry database connection on requests")
+    # Skip database initialization completely on startup
+    print("🚀 Starting app without database initialization")
     
     import os
     port = int(os.environ.get('PORT', 5000))
