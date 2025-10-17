@@ -647,16 +647,6 @@
             </div>
         </div>
         
-        <!-- Monthly Chart -->
-        <div class="card">
-            <div class="card-title">
-                <i class="fas fa-chart-line"></i> Monthly Mood Trends
-            </div>
-            <div class="chart-container">
-                <canvas id="moodChart"></canvas>
-            </div>
-        </div>
-        
         <!-- Mood History -->
         <div class="card">
             <div class="card-title">
@@ -696,54 +686,6 @@
             });
         });
 
-        // Load monthly chart
-        fetch('/mood_data')
-            .then(response => response.json())
-            .then(data => {
-                const ctx = document.getElementById('moodChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Average Mood',
-                            data: data.data,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: false,
-                                min: 1,
-                                max: 7,
-                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                                ticks: {
-                                    color: '#94a3b8',
-                                    callback: function(value) {
-                                        const labels = ['', 'Very Bad', 'Bad', 'Slightly Bad', 'Neutral', 'Slightly Well', 'Well', 'Very Well'];
-                                        return labels[value];
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                                ticks: { color: '#94a3b8' }
-                            }
-                        }
-                    }
-                });
-            });
-        
         // Load weekly patterns chart
         fetch('/weekly_patterns')
             .then(response => response.json())
