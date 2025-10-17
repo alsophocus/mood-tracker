@@ -173,8 +173,20 @@ def oauth_login(provider):
             if not os.environ.get('GITHUB_CLIENT_ID') or not os.environ.get('GITHUB_CLIENT_SECRET'):
                 flash('GitHub OAuth not configured')
                 return redirect(url_for('login'))
+            
+            # Manual GitHub OAuth - bypass Authlib
+            import urllib.parse
             redirect_uri = url_for('oauth_callback', provider='github', _external=True, _scheme='https')
-            return github.authorize_redirect(redirect_uri)
+            
+            params = {
+                'client_id': os.environ.get('GITHUB_CLIENT_ID'),
+                'redirect_uri': redirect_uri,
+                'scope': 'user:email',
+                'response_type': 'code'
+            }
+            
+            auth_url = 'https://github.com/login/oauth/authorize?' + urllib.parse.urlencode(params)
+            return redirect(auth_url)
         else:
             flash('Invalid OAuth provider')
             return redirect(url_for('login'))
@@ -237,29 +249,68 @@ def oauth_callback(provider):
                 return redirect(url_for('login'))
             
         elif provider == 'github':
-            token = github.authorize_access_token()
-            if not token:
-                flash('Failed to get access token from GitHub')
+            # Manual GitHub OAuth callback
+            try:
+                code = request.args.get('code')
+                if not code:
+                    flash('No authorization code received from GitHub')
+                    return redirect(url_for('login'))
+                
+                # Exchange code for access token
+                import requests
+                redirect_uri = url_for('oauth_callback', provider='github', _external=True, _scheme='https')
+                
+                token_data = {
+                    'client_id': os.environ.get('GITHUB_CLIENT_ID'),
+                    'client_secret': os.environ.get('GITHUB_CLIENT_SECRET'),
+                    'code': code,
+                    'redirect_uri': redirect_uri
+                }
+                
+                headers = {'Accept': 'application/json'}
+                token_response = requests.post('https://github.com/login/oauth/access_token', 
+                                             data=token_data, headers=headers)
+                
+                if token_response.status_code != 200:
+                    flash('Failed to exchange code for access token')
+                    return redirect(url_for('login'))
+                
+                token_json = token_response.json()
+                access_token = token_json.get('access_token')
+                
+                if not access_token:
+                    flash('No access token received from GitHub')
+                    return redirect(url_for('login'))
+                
+                # Get user info
+                headers = {'Authorization': f'token {access_token}'}
+                user_response = requests.get('https://api.github.com/user', headers=headers)
+                
+                if user_response.status_code != 200:
+                    flash('Failed to get user information from GitHub')
+                    return redirect(url_for('login'))
+                
+                user_info = user_response.json()
+                email = user_info.get('email')
+                name = user_info.get('name') or user_info.get('login')
+                
+                # If email is private, get it from emails endpoint
+                if not email:
+                    emails_response = requests.get('https://api.github.com/user/emails', headers=headers)
+                    if emails_response.status_code == 200:
+                        emails = emails_response.json()
+                        primary_email = next((e['email'] for e in emails if e['primary']), None)
+                        email = primary_email
+                
+                if not email:
+                    flash('Could not get email from GitHub')
+                    return redirect(url_for('login'))
+                
+            except Exception as e:
+                app.logger.error(f'Manual GitHub OAuth error: {str(e)}')
+                flash(f'GitHub authentication failed: {str(e)}')
                 return redirect(url_for('login'))
-            
-            # Get user info from GitHub API
-            resp = github.get('user', token=token)
-            if resp.status_code != 200:
-                flash('Failed to get user information from GitHub')
-                return redirect(url_for('login'))
-            
-            user_info = resp.json()
-            email = user_info.get('email')
-            name = user_info.get('name') or user_info.get('login')
-            
-            # If email is private, get it from emails endpoint
-            if not email:
-                emails_resp = github.get('user/emails', token=token)
-                if emails_resp.status_code == 200:
-                    emails = emails_resp.json()
-                    primary_email = next((e['email'] for e in emails if e['primary']), None)
-                    email = primary_email
-            
+        
         else:
             flash('Invalid OAuth provider')
             return redirect(url_for('login'))
