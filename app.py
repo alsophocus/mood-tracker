@@ -178,25 +178,21 @@ def init_db():
 @app.route('/test-db')
 def test_db():
     try:
-        print(f"🔍 Testing DATABASE_URL: {DATABASE_URL}")
+        # Test both internal and public connections
+        internal_url = "postgresql://postgres:OsFZqHiUQXvawJnFgrWowJctGiWdyznH@postgres-thp7.railway.internal:5432/railway"
+        public_url = "postgresql://postgres:OsFZqHiUQXvawJnFgrWowJctGiWdyznH@turntable.proxy.rlwy.net:41615/railway"
         
-        # Try different connection approaches
         methods = [
-            ("direct", lambda: psycopg.connect(DATABASE_URL, row_factory=dict_row)),
-            ("with_connect_timeout", lambda: psycopg.connect(DATABASE_URL, row_factory=dict_row, connect_timeout=10)),
-            ("parsed", lambda: psycopg.connect(
-                host="postgres.railway.internal",
-                port=5432,
-                user="postgres", 
-                password="cMVvASNKHRXEvZspAlOOcbKiOWfuQOxK",
-                dbname="railway",
-                row_factory=dict_row
-            ))
+            ("internal", internal_url),
+            ("public", public_url),
+            ("env_var", DATABASE_URL)
         ]
         
-        for method_name, connect_func in methods:
+        results = []
+        for method_name, url in methods:
             try:
-                conn = connect_func()
+                print(f"🔍 Testing {method_name}: {url}")
+                conn = psycopg.connect(url, row_factory=dict_row)
                 cursor = conn.cursor()
                 cursor.execute('SELECT version();')
                 version = cursor.fetchone()
@@ -204,24 +200,25 @@ def test_db():
                 return {
                     'status': 'success',
                     'method': method_name,
+                    'url': url,
                     'database': 'postgresql',
                     'version': str(version[0]) if version else 'unknown'
                 }
             except Exception as e:
+                results.append(f"{method_name}: {str(e)}")
                 print(f"❌ Method {method_name} failed: {e}")
                 continue
                 
         return {
             'status': 'error',
             'error': 'All connection methods failed',
-            'database_url_length': len(DATABASE_URL) if DATABASE_URL else 0
+            'attempts': results
         }, 500
         
     except Exception as e:
         return {
             'status': 'error',
-            'error': str(e),
-            'database_url_length': len(DATABASE_URL) if DATABASE_URL else 0
+            'error': str(e)
         }, 500
 
 @app.route('/debug-env')
