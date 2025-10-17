@@ -102,16 +102,8 @@ def load_user(user_id):
 def get_db_connection():
     if ACTUAL_USE_POSTGRES:
         print(f"🔍 DATABASE_URL: {DATABASE_URL}")
-        # Try alternative connection method for Railway
-        try:
-            return psycopg.connect(DATABASE_URL, row_factory=dict_row)
-        except Exception as e:
-            print(f"❌ Connection failed: {e}")
-            # Fallback to SQLite for now
-            print("🔄 Falling back to SQLite")
-            conn = sqlite3.connect('mood.db')
-            conn.row_factory = sqlite3.Row
-            return conn
+        # Try with autocommit=True for Railway compatibility
+        return psycopg.connect(DATABASE_URL, row_factory=dict_row, autocommit=True)
     else:
         conn = sqlite3.connect('mood.db')
         conn.row_factory = sqlite3.Row
@@ -120,46 +112,28 @@ def get_db_connection():
 def init_db():
     global ACTUAL_USE_POSTGRES
     
-    # Try PostgreSQL first, fallback to SQLite if it fails
+    # Force PostgreSQL usage - no fallback
     if DATABASE_URL and POSTGRES_AVAILABLE:
-        try:
-            ACTUAL_USE_POSTGRES = True
-            print("🔧 Attempting PostgreSQL connection with psycopg3")
-            
-            # Test PostgreSQL connection
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            
-            # PostgreSQL schema
-            cursor.execute('''CREATE TABLE IF NOT EXISTS users 
-                             (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
-            cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
-                             (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
-                              date DATE, mood TEXT, notes TEXT,
-                              UNIQUE(user_id, date))''')
-            conn.commit()
-            conn.close()
-            print("✅ PostgreSQL connection successful with psycopg3")
-            return
-        except Exception as e:
-            print(f"❌ PostgreSQL failed: {e}")
-            print("🔄 Falling back to SQLite")
-            ACTUAL_USE_POSTGRES = False
-    
-    # SQLite fallback
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # SQLite schema
-    cursor.execute('''CREATE TABLE IF NOT EXISTS users 
-                     (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
-    cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
-                     (id INTEGER PRIMARY KEY, user_id INTEGER, date TEXT, mood TEXT, notes TEXT,
-                      FOREIGN KEY (user_id) REFERENCES users (id),
-                      UNIQUE(user_id, date))''')
-    conn.commit()
-    conn.close()
-    print("✅ SQLite database initialized")
+        ACTUAL_USE_POSTGRES = True
+        print("🔧 FORCING PostgreSQL usage with psycopg3")
+        
+        # Test PostgreSQL connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # PostgreSQL schema
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                         (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                         (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
+                          date DATE, mood TEXT, notes TEXT,
+                          UNIQUE(user_id, date))''')
+        conn.commit()
+        conn.close()
+        print("✅ PostgreSQL connection successful with psycopg3")
+        return
+    else:
+        raise Exception("PostgreSQL required but DATABASE_URL not set or psycopg not available")
     
     try:
         if ACTUAL_USE_POSTGRES:
