@@ -601,23 +601,33 @@ def index():
 @app.route('/save_mood', methods=['POST'])
 @login_required
 def save_mood():
-    mood = request.form['mood']
-    notes = request.form.get('notes', '')
-    date = datetime.now().strftime('%Y-%m-%d')
-    timestamp = datetime.now()  # Add current timestamp
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # Always insert new entries - no conflict resolution
-    cursor.execute('''INSERT INTO moods (user_id, date, mood, notes, timestamp) 
-                     VALUES (%s, %s, %s, %s, %s)''',
-                  (current_user.id, date, mood, notes, timestamp))
-    
-    conn.commit()
-    conn.close()
-    
-    return redirect(url_for('index'))
+    try:
+        mood = request.form['mood']
+        notes = request.form.get('notes', '')
+        date = datetime.now().strftime('%Y-%m-%d')
+        timestamp = datetime.now()  # Add current timestamp
+        
+        print(f"🔍 Saving mood: {mood} for user {current_user.id} at {timestamp}")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Always insert new entries - no conflict resolution
+        cursor.execute('''INSERT INTO moods (user_id, date, mood, notes, timestamp) 
+                         VALUES (%s, %s, %s, %s, %s)''',
+                      (current_user.id, date, mood, notes, timestamp))
+        
+        conn.commit()
+        conn.close()
+        
+        print(f"✅ Mood saved successfully!")
+        return redirect(url_for('index'))
+        
+    except Exception as e:
+        print(f"❌ Error saving mood: {e}")
+        import traceback
+        traceback.print_exc()
+        return redirect(url_for('index'))
 
 def calculate_analytics(moods):
     if not moods:
