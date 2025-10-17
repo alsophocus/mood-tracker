@@ -176,6 +176,41 @@ def export_pdf():
     
     return send_file(buffer, as_attachment=True, download_name='mood_report.pdf', mimetype='application/pdf')
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint to verify database connection"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        if USE_POSTGRES:
+            cursor.execute('SELECT version();')
+            db_info = f"PostgreSQL: {cursor.fetchone()[0]}"
+        else:
+            cursor.execute('SELECT sqlite_version();')
+            db_info = f"SQLite: {cursor.fetchone()[0]}"
+        
+        cursor.execute('SELECT COUNT(*) FROM moods;')
+        mood_count = cursor.fetchone()[0]
+        conn.close()
+        
+        return {
+            'status': 'healthy',
+            'database': db_info,
+            'mood_entries': mood_count,
+            'database_url_set': DATABASE_URL is not None,
+            'postgres_available': POSTGRES_AVAILABLE,
+            'using_postgres': USE_POSTGRES
+        }
+    except Exception as e:
+        return {
+            'status': 'error',
+            'error': str(e),
+            'database_url_set': DATABASE_URL is not None,
+            'postgres_available': POSTGRES_AVAILABLE,
+            'using_postgres': USE_POSTGRES
+        }, 500
+
 if __name__ == '__main__':
     init_db()
     import os
