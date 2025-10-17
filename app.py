@@ -624,31 +624,40 @@ def save_mood():
 def calculate_analytics(moods):
     if not moods:
         return {
-            'good_mood_average': 0, 
-            'bad_mood_average': 0,
+            'daily_average': 0, 
+            'good_days_average': 0,
+            'bad_days_average': 0,
             'total_entries': 0,
             'weekly_patterns': {}
         }
     
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     
-    # Separate good and bad moods
-    good_moods = []  # 5, 6, 7
-    bad_moods = []   # 1, 2, 3
-    
+    # Group moods by date and calculate daily averages
+    daily_moods = defaultdict(list)
     for row in moods:
-        mood = row['mood']
-        mood_value = mood_values[mood]
-        
-        if mood_value >= 5:  # Good moods: slightly well, well, very well
-            good_moods.append(mood_value)
-        elif mood_value <= 3:  # Bad moods: very bad, bad, slightly bad
-            bad_moods.append(mood_value)
-        # Neutral (4) is not counted in either average
+        date = row['date']
+        mood_value = mood_values[row['mood']]
+        daily_moods[date].append(mood_value)
     
-    # Calculate averages
-    good_mood_average = round(sum(good_moods) / len(good_moods), 2) if good_moods else 0
-    bad_mood_average = round(sum(bad_moods) / len(bad_moods), 2) if bad_moods else 0
+    # Calculate daily averages
+    daily_averages = []
+    good_days = []  # Days with average >= 5
+    bad_days = []   # Days with average <= 3
+    
+    for date, mood_list in daily_moods.items():
+        daily_avg = sum(mood_list) / len(mood_list)
+        daily_averages.append(daily_avg)
+        
+        if daily_avg >= 5:
+            good_days.append(daily_avg)
+        elif daily_avg <= 3:
+            bad_days.append(daily_avg)
+    
+    # Calculate overall averages
+    daily_average = round(sum(daily_averages) / len(daily_averages), 2) if daily_averages else 0
+    good_days_average = round(sum(good_days) / len(good_days), 2) if good_days else 0
+    bad_days_average = round(sum(bad_days) / len(bad_days), 2) if bad_days else 0
     
     # Weekly patterns
     weekly_patterns = defaultdict(list)
@@ -664,10 +673,10 @@ def calculate_analytics(moods):
         weekly_avg[day] = round(sum(mood_list) / len(mood_list), 1)
     
     return {
-        'current_good_streak': current_good_streak,
-        'current_bad_streak': current_bad_streak,
-        'best_good_streak': best_good_streak,
-        'best_bad_streak': best_bad_streak,
+        'daily_average': daily_average,
+        'good_days_average': good_days_average,
+        'bad_days_average': bad_days_average,
+        'total_entries': len(daily_averages),
         'weekly_patterns': weekly_avg
     }
 
@@ -748,40 +757,35 @@ def daily_patterns():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT timestamp, mood FROM moods WHERE user_id = %s AND timestamp IS NOT NULL ORDER BY timestamp', 
+    cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                   (current_user.id,))
     
     moods = cursor.fetchall()
     conn.close()
     
-    # Convert each mood entry to a data point with precise time
+    # Group moods by date and calculate daily averages
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
-    data_points = []
+    daily_moods = defaultdict(list)
     
     for row in moods:
-        timestamp = row['timestamp']
-        mood = row['mood']
+        date = row['date']
+        mood_value = mood_values[row['mood']]
+        daily_moods[date].append(mood_value)
+    
+    # Create data points with daily averages
+    labels = []
+    data = []
+    
+    for date in sorted(daily_moods.keys()):
+        mood_list = daily_moods[date]
+        daily_average = sum(mood_list) / len(mood_list)
         
-        if timestamp:
-            from datetime import datetime, timedelta
-            
-            # Convert to UTC-3 timezone
-            if isinstance(timestamp, str):
-                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-            
-            # Convert to UTC-3 (subtract 3 hours from UTC)
-            utc_minus_3 = timestamp - timedelta(hours=3)
-            
-            # Calculate precise time as decimal hours (e.g., 14.5 = 14:30)
-            precise_time = utc_minus_3.hour + (utc_minus_3.minute / 60.0) + (utc_minus_3.second / 3600.0)
-            
-            data_points.append({
-                'x': precise_time,
-                'y': mood_values[mood]
-            })
+        labels.append(str(date))
+        data.append(round(daily_average, 2))
     
     return jsonify({
-        'data_points': data_points
+        'labels': labels,
+        'data': data
     })
 
 @app.route('/export_pdf')

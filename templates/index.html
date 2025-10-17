@@ -577,29 +577,29 @@
                 </div>
                 <div class="analytics-grid">
                     <div class="metric">
-                        <div class="metric-value">{{ analytics.current_good_streak }}</div>
-                        <div class="metric-label">Good Streak</div>
+                        <div class="metric-value">{{ analytics.daily_average }}</div>
+                        <div class="metric-label">Daily Average</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-value">{{ analytics.current_bad_streak }}</div>
-                        <div class="metric-label">Bad Streak</div>
+                        <div class="metric-value">{{ analytics.good_days_average }}</div>
+                        <div class="metric-label">Good Days Avg</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-value">{{ analytics.best_good_streak }}</div>
-                        <div class="metric-label">Best Good Streak</div>
+                        <div class="metric-value">{{ analytics.bad_days_average }}</div>
+                        <div class="metric-label">Bad Days Avg</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-value">{{ analytics.best_bad_streak }}</div>
-                        <div class="metric-label">Best Bad Streak</div>
+                        <div class="metric-value">{{ analytics.total_entries }}</div>
+                        <div class="metric-label">Total Days</div>
                     </div>
                 </div>
                 
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
-                    <strong>What are streaks?</strong><br>
-                    • <strong>Good Streak:</strong> Consecutive days with "Slightly Well" or better moods<br>
-                    • <strong>Bad Streak:</strong> Consecutive days with "Slightly Bad" or worse moods<br>
-                    • <strong>Current:</strong> Your ongoing streak from today backwards<br>
-                    • <strong>Best:</strong> Your longest streak ever recorded
+                    <strong>What are daily averages?</strong><br>
+                    • <strong>Daily Average:</strong> Average mood across all your days<br>
+                    • <strong>Good Days:</strong> Average of days with 5+ mood (Slightly Well or better)<br>
+                    • <strong>Bad Days:</strong> Average of days with 3- mood (Slightly Bad or worse)<br>
+                    • <strong>Total Days:</strong> Number of days you've tracked your mood
                 </div>
                 <a href="/export_pdf" class="btn">
                     <i class="fas fa-download"></i> Export PDF
@@ -782,18 +782,21 @@
             .then(data => {
                 const ctx = document.getElementById('dailyChart').getContext('2d');
                 new Chart(ctx, {
-                    type: 'scatter',
+                    type: 'line',
                     data: {
+                        labels: data.labels,
                         datasets: [{
-                            label: 'Mood by Time',
-                            data: data.data_points,
+                            label: 'Daily Mood Average',
+                            data: data.data,
                             borderColor: '#10b981',
-                            backgroundColor: '#10b981',
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            showLine: true,
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#10b981',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
                             tension: 0.4,
-                            borderWidth: 2
+                            borderWidth: 2,
+                            fill: true
                         }]
                     },
                     options: {
@@ -817,17 +820,10 @@
                                 }
                             },
                             x: {
-                                type: 'linear',
-                                position: 'bottom',
-                                min: 0,
-                                max: 24,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                                ticks: {
+                                ticks: { 
                                     color: '#94a3b8',
-                                    stepSize: 2,
-                                    callback: function(value) {
-                                        return value.toString().padStart(2, '0') + ':00';
-                                    }
+                                    maxTicksLimit: 10
                                 }
                             }
                         }
