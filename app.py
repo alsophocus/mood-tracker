@@ -604,6 +604,48 @@ def mood_data():
     
     return jsonify(chart_data)
 
+@app.route('/weekly_patterns')
+@login_required
+def weekly_patterns():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if ACTUAL_USE_POSTGRES:
+        cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
+                      (current_user.id,))
+    else:
+        cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
+                      (current_user.id,))
+    
+    moods = cursor.fetchall()
+    conn.close()
+    
+    # Group by day of week
+    mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
+    weekly_patterns = defaultdict(list)
+    
+    for row in moods:
+        date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
+        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
+        day_of_week = datetime.strptime(date_str, '%Y-%m-%d').strftime('%A')
+        weekly_patterns[day_of_week].append(mood_values[mood])
+    
+    # Calculate average mood for each day
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    weekly_averages = []
+    
+    for day in days:
+        if day in weekly_patterns:
+            avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
+            weekly_averages.append(round(avg, 2))
+        else:
+            weekly_averages.append(3)  # Default neutral
+    
+    return jsonify({
+        'labels': days,
+        'data': weekly_averages
+    })
+
 @app.route('/daily_patterns')
 @login_required
 def daily_patterns():
@@ -653,29 +695,152 @@ def export_pdf():
     cursor = conn.cursor()
     
     if ACTUAL_USE_POSTGRES:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
+        cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
                       (current_user.id,))
     else:
-        cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
+        cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = ? ORDER BY date DESC', 
                       (current_user.id,))
     
     moods = cursor.fetchall()
     conn.close()
     
+    # Create PDF
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
     
-    p.drawString(100, 750, f"Mood Tracker Report - {current_user.name}")
-    y = 700
+    # Title
+    p.setFont("Helvetica-Bold", 24)
+    p.drawString(50, height - 50, f"Mood Report - {current_user.name}")
+    p.setFont("Helvetica", 12)
+    p.drawString(50, height - 80, f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     
-    for row in moods:
+    y = height - 120
+    
+    # Analytics Summary
+    mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
+    
+    # Calculate analytics
+    current_streak = 0
+    temp_streak = 0
+    total_entries = len(moods)
+    
+    if moods:
+        # Calculate current streak
+        for row in reversed(list(moods)):
+            mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
+            if mood_values[mood] >= 4:  # good or super good
+                temp_streak += 1
+            else:
+                break
+        current_streak = temp_streak
+        
+        # Weekly patterns
+        weekly_patterns = defaultdict(list)
+        monthly_data = defaultdict(list)
+        
+        for row in moods:
+            date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
+            mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
+            day_of_week = datetime.strptime(date_str, '%Y-%m-%d').strftime('%A')
+            month = date_str[:7]  # YYYY-MM format
+            
+            weekly_patterns[day_of_week].append(mood_values[mood])
+            monthly_data[month].append(mood_values[mood])
+        
+        # Best day calculation
+        best_day = "N/A"
+        best_avg = 0
+        for day, values in weekly_patterns.items():
+            avg = sum(values) / len(values)
+            if avg > best_avg:
+                best_avg = avg
+                best_day = day
+    
+    # Summary section
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, y, "Summary")
+    y -= 30
+    
+    p.setFont("Helvetica", 12)
+    p.drawString(70, y, f"• Total Mood Entries: {total_entries}")
+    y -= 20
+    p.drawString(70, y, f"• Current Good Mood Streak: {current_streak} days")
+    y -= 20
+    if moods:
+        p.drawString(70, y, f"• Best Day of Week: {best_day}")
+        y -= 20
+        avg_mood = sum(mood_values[row['mood'] if ACTUAL_USE_POSTGRES else row[1]] for row in moods) / len(moods)
+        p.drawString(70, y, f"• Overall Average Mood: {avg_mood:.2f}/5.0")
+    y -= 40
+    
+    # Weekly Patterns section
+    if moods:
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(50, y, "Weekly Patterns")
+        y -= 30
+        
+        p.setFont("Helvetica", 12)
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        for day in days:
+            if day in weekly_patterns:
+                avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
+                mood_labels = ['', 'Super Sad', 'Sad', 'Neutral', 'Good', 'Super Good']
+                closest_mood = mood_labels[round(avg)]
+                p.drawString(70, y, f"• {day}: {avg:.2f} ({closest_mood})")
+                y -= 20
+        y -= 20
+    
+    # Monthly Trends section
+    if moods and monthly_data:
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(50, y, "Monthly Trends")
+        y -= 30
+        
+        p.setFont("Helvetica", 12)
+        sorted_months = sorted(monthly_data.keys())[-6:]  # Last 6 months
+        for month in sorted_months:
+            avg = sum(monthly_data[month]) / len(monthly_data[month])
+            p.drawString(70, y, f"• {month}: {avg:.2f} average mood ({len(monthly_data[month])} entries)")
+            y -= 20
+            if y < 100:  # Start new page if needed
+                p.showPage()
+                y = height - 50
+        y -= 20
+    
+    # Mood History section
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, y, "Recent Mood History")
+    y -= 30
+    
+    p.setFont("Helvetica", 10)
+    for i, row in enumerate(moods[:20]):  # Last 20 entries
+        if y < 100:  # Start new page if needed
+            p.showPage()
+            y = height - 50
+            
         date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
         mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
-        p.drawString(100, y, f"{date_str}: {mood}")
-        y -= 20
+        notes = row['notes'] if ACTUAL_USE_POSTGRES else row[2]
+        
+        p.drawString(50, y, f"{date_str}: {mood.title()}")
+        y -= 15
+        
+        if notes:
+            # Wrap long notes
+            notes_text = notes[:80] + "..." if len(notes) > 80 else notes
+            p.drawString(70, y, f"Notes: {notes_text}")
+            y -= 15
+        y -= 5
+    
+    # Add footer
+    p.setFont("Helvetica", 8)
+    p.drawString(50, 30, f"Generated by Mood Tracker - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     p.save()
     buffer.seek(0)
+    
+    return send_file(buffer, as_attachment=True, download_name=f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf', mimetype='application/pdf')
     
     return send_file(buffer, as_attachment=True, download_name='mood_report.pdf', mimetype='application/pdf')
 
