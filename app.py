@@ -608,29 +608,58 @@ def save_mood():
 
 def calculate_analytics(moods):
     if not moods:
-        return {'current_streak': 0, 'best_streak': 0, 'weekly_patterns': {}}
+        return {
+            'current_good_streak': 0, 
+            'current_bad_streak': 0,
+            'best_good_streak': 0,
+            'best_bad_streak': 0,
+            'weekly_patterns': {}
+        }
     
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     
-    # Calculate current streak from most recent date
-    current_streak = 0
-    for row in moods:  # moods already ordered by date DESC in index()
+    # Calculate current good streak (5+ = slightly well or better)
+    current_good_streak = 0
+    for row in moods:  # moods already ordered by date DESC
         mood = row['mood']
         if mood_values[mood] >= 5:  # slightly well or better
-            current_streak += 1
+            current_good_streak += 1
         else:
             break
     
-    # Calculate best streak
-    best_streak = 0
-    temp_streak = 0
-    for row in reversed(list(moods)):  # Go chronologically for best streak
+    # Calculate current bad streak (3 or less = slightly bad or worse)
+    current_bad_streak = 0
+    for row in moods:  # moods already ordered by date DESC
         mood = row['mood']
-        if mood_values[mood] >= 5:
-            temp_streak += 1
-            best_streak = max(best_streak, temp_streak)
+        if mood_values[mood] <= 3:  # slightly bad or worse
+            current_bad_streak += 1
         else:
-            temp_streak = 0
+            break
+    
+    # Calculate best streaks
+    best_good_streak = 0
+    best_bad_streak = 0
+    temp_good_streak = 0
+    temp_bad_streak = 0
+    
+    for row in reversed(list(moods)):  # Go chronologically
+        mood = row['mood']
+        mood_value = mood_values[mood]
+        
+        # Good streak tracking
+        if mood_value >= 5:
+            temp_good_streak += 1
+            best_good_streak = max(best_good_streak, temp_good_streak)
+            temp_bad_streak = 0  # Reset bad streak
+        # Bad streak tracking
+        elif mood_value <= 3:
+            temp_bad_streak += 1
+            best_bad_streak = max(best_bad_streak, temp_bad_streak)
+            temp_good_streak = 0  # Reset good streak
+        # Neutral (4) resets both streaks
+        else:
+            temp_good_streak = 0
+            temp_bad_streak = 0
     
     # Weekly patterns
     weekly_patterns = defaultdict(list)
@@ -646,8 +675,10 @@ def calculate_analytics(moods):
         weekly_avg[day] = round(sum(mood_list) / len(mood_list), 1)
     
     return {
-        'current_streak': current_streak,
-        'best_streak': best_streak,
+        'current_good_streak': current_good_streak,
+        'current_bad_streak': current_bad_streak,
+        'best_good_streak': best_good_streak,
+        'best_bad_streak': best_bad_streak,
         'weekly_patterns': weekly_avg
     }
 

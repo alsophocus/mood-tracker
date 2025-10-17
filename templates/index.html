@@ -577,13 +577,29 @@
                 </div>
                 <div class="analytics-grid">
                     <div class="metric">
-                        <div class="metric-value">{{ analytics.current_streak }}</div>
-                        <div class="metric-label">Current Streak</div>
+                        <div class="metric-value">{{ analytics.current_good_streak }}</div>
+                        <div class="metric-label">Good Streak</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-value">{{ analytics.best_day }}</div>
-                        <div class="metric-label">Best Day</div>
+                        <div class="metric-value">{{ analytics.current_bad_streak }}</div>
+                        <div class="metric-label">Bad Streak</div>
                     </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ analytics.best_good_streak }}</div>
+                        <div class="metric-label">Best Good Streak</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ analytics.best_bad_streak }}</div>
+                        <div class="metric-label">Best Bad Streak</div>
+                    </div>
+                </div>
+                
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
+                    <strong>What are streaks?</strong><br>
+                    • <strong>Good Streak:</strong> Consecutive days with "Slightly Well" or better moods<br>
+                    • <strong>Bad Streak:</strong> Consecutive days with "Slightly Bad" or worse moods<br>
+                    • <strong>Current:</strong> Your ongoing streak from today backwards<br>
+                    • <strong>Best:</strong> Your longest streak ever recorded
                 </div>
                 <a href="/export_pdf" class="btn">
                     <i class="fas fa-download"></i> Export PDF
