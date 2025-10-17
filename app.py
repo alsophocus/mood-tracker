@@ -175,6 +175,27 @@ def init_db():
     finally:
         conn.close()
 
+@app.route('/test-db')
+def test_db():
+    try:
+        print(f"🔍 Testing DATABASE_URL: {DATABASE_URL}")
+        conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+        cursor = conn.cursor()
+        cursor.execute('SELECT version();')
+        version = cursor.fetchone()
+        conn.close()
+        return {
+            'status': 'success',
+            'database': 'postgresql',
+            'version': str(version[0]) if version else 'unknown'
+        }
+    except Exception as e:
+        return {
+            'status': 'error',
+            'error': str(e),
+            'database_url_length': len(DATABASE_URL) if DATABASE_URL else 0
+        }, 500
+
 @app.route('/debug-env')
 def debug_env():
     return {
