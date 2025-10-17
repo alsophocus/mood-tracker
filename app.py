@@ -433,25 +433,23 @@ def export_pdf():
     
     return send_file(buffer, as_attachment=True, download_name='mood_report.pdf', mimetype='application/pdf')
 
-@app.route('/debug/oauth')
-def debug_oauth():
-    """Debug route to check OAuth configuration"""
-    config_status = {
-        'google_client_id': bool(os.environ.get('GOOGLE_CLIENT_ID')),
-        'google_client_secret': bool(os.environ.get('GOOGLE_CLIENT_SECRET')),
-        'github_client_id': bool(os.environ.get('GITHUB_CLIENT_ID')),
-        'github_client_secret': bool(os.environ.get('GITHUB_CLIENT_SECRET')),
-        'secret_key': bool(app.secret_key),
-        'base_url': request.base_url.replace('/debug/oauth', ''),
-        'google_client_id_preview': os.environ.get('GOOGLE_CLIENT_ID', 'NOT_SET')[:20] + '...' if os.environ.get('GOOGLE_CLIENT_ID') else 'NOT_SET',
-        'github_client_id_preview': os.environ.get('GITHUB_CLIENT_ID', 'NOT_SET')[:20] + '...' if os.environ.get('GITHUB_CLIENT_ID') else 'NOT_SET',
-        'expected_google_redirect': url_for('oauth_callback', provider='google', _external=True),
-        'expected_github_redirect': url_for('oauth_callback', provider='github', _external=True),
-        'current_host': request.host,
-        'current_scheme': request.scheme,
-    }
+@app.route('/test-oauth')
+def test_oauth():
+    """Simple test page to show OAuth redirect URIs"""
+    google_redirect = url_for('oauth_callback', provider='google', _external=True)
+    github_redirect = url_for('oauth_callback', provider='github', _external=True)
     
-    return jsonify(config_status)
+    html = f"""
+    <h1>OAuth Debug Info</h1>
+    <p><strong>Google Redirect URI:</strong> {google_redirect}</p>
+    <p><strong>GitHub Redirect URI:</strong> {github_redirect}</p>
+    <p><strong>Current Host:</strong> {request.host}</p>
+    <p><strong>Current Scheme:</strong> {request.scheme}</p>
+    <hr>
+    <p>Copy the Google Redirect URI above and make sure it matches EXACTLY in Google Cloud Console</p>
+    <a href="/">Back to App</a>
+    """
+    return html
 
 @app.route('/health')
 def health_check():
