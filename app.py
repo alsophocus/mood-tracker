@@ -173,23 +173,7 @@ def migrate_old_moods():
 def init_db():
     global ACTUAL_USE_POSTGRES
     
-    # Allow SQLite for local testing if DATABASE_URL points to Railway (not accessible locally)
-    if DATABASE_URL and 'railway.internal' in DATABASE_URL:
-        print("🔧 Using SQLite for local testing (Railway DB not accessible)")
-        ACTUAL_USE_POSTGRES = False
-        # Initialize SQLite
-        conn = sqlite3.connect('mood.db')
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
-                         (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
-                         (id INTEGER PRIMARY KEY, date TEXT, mood TEXT, notes TEXT, timestamp TEXT)''')
-        conn.commit()
-        conn.close()
-        print("✅ SQLite initialized for local testing")
-        return
-    
-    # Force PostgreSQL usage for production
+    # Force PostgreSQL usage - no fallback
     if DATABASE_URL and POSTGRES_AVAILABLE:
         ACTUAL_USE_POSTGRES = True
         print("🔧 FORCING PostgreSQL usage with psycopg3")
