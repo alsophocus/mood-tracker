@@ -186,19 +186,19 @@
         
         .mood-buttons {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.75rem;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
         }
         
         .mood-btn {
-            padding: 1rem 0.5rem;
+            padding: 0.75rem 0.25rem;
             border: 2px solid var(--border);
             background: var(--secondary);
             color: var(--text);
             border-radius: 0.5rem;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 500;
             text-align: center;
         }
@@ -207,37 +207,54 @@
             transform: translateY(-2px);
         }
         
-        .mood-btn[data-mood="super sad"] {
+        .mood-btn[data-mood="very bad"] {
             background: #fef2f2;
             border-color: #fca5a5;
             color: #991b1b;
         }
         
-        .mood-btn[data-mood="super sad"]:hover {
+        .mood-btn[data-mood="very bad"]:hover {
             background: #fee2e2;
             border-color: #f87171;
         }
         
-        .mood-btn[data-mood="super sad"].selected {
+        .mood-btn[data-mood="very bad"].selected {
             background: #fca5a5;
             border-color: #f87171;
             color: white;
         }
         
-        .mood-btn[data-mood="sad"] {
+        .mood-btn[data-mood="bad"] {
             background: #fef3c7;
             border-color: #fbbf24;
             color: #92400e;
         }
         
-        .mood-btn[data-mood="sad"]:hover {
+        .mood-btn[data-mood="bad"]:hover {
             background: #fde68a;
             border-color: #f59e0b;
         }
         
-        .mood-btn[data-mood="sad"].selected {
+        .mood-btn[data-mood="bad"].selected {
             background: #fbbf24;
             border-color: #f59e0b;
+            color: white;
+        }
+        
+        .mood-btn[data-mood="slightly bad"] {
+            background: #fef7cd;
+            border-color: #fcd34d;
+            color: #a16207;
+        }
+        
+        .mood-btn[data-mood="slightly bad"]:hover {
+            background: #fef3c7;
+            border-color: #fbbf24;
+        }
+        
+        .mood-btn[data-mood="slightly bad"].selected {
+            background: #fcd34d;
+            border-color: #fbbf24;
             color: white;
         }
         
@@ -258,35 +275,52 @@
             color: white;
         }
         
-        .mood-btn[data-mood="good"] {
+        .mood-btn[data-mood="slightly well"] {
+            background: #f0fdf4;
+            border-color: #86efac;
+            color: #166534;
+        }
+        
+        .mood-btn[data-mood="slightly well"]:hover {
+            background: #dcfce7;
+            border-color: #4ade80;
+        }
+        
+        .mood-btn[data-mood="slightly well"].selected {
+            background: #86efac;
+            border-color: #4ade80;
+            color: white;
+        }
+        
+        .mood-btn[data-mood="well"] {
             background: #ecfdf5;
             border-color: #6ee7b7;
             color: #065f46;
         }
         
-        .mood-btn[data-mood="good"]:hover {
+        .mood-btn[data-mood="well"]:hover {
             background: #d1fae5;
             border-color: #34d399;
         }
         
-        .mood-btn[data-mood="good"].selected {
+        .mood-btn[data-mood="well"].selected {
             background: #6ee7b7;
             border-color: #34d399;
             color: white;
         }
         
-        .mood-btn[data-mood="super good"] {
+        .mood-btn[data-mood="very well"] {
             background: #eff6ff;
             border-color: #93c5fd;
             color: #1e40af;
         }
         
-        .mood-btn[data-mood="super good"]:hover {
+        .mood-btn[data-mood="very well"]:hover {
             background: #dbeafe;
             border-color: #60a5fa;
         }
         
-        .mood-btn[data-mood="super good"].selected {
+        .mood-btn[data-mood="very well"].selected {
             background: #93c5fd;
             border-color: #60a5fa;
             color: white;
@@ -433,7 +467,7 @@
             }
             
             .mood-buttons {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
             
             .weekly-patterns {
@@ -515,11 +549,13 @@
                 </div>
                 <form class="mood-form" action="/save_mood" method="post">
                     <div class="mood-buttons">
-                        <button type="button" class="mood-btn" data-mood="super sad">😢 Super Sad</button>
-                        <button type="button" class="mood-btn" data-mood="sad">😔 Sad</button>
+                        <button type="button" class="mood-btn" data-mood="very bad">😭 Very Bad</button>
+                        <button type="button" class="mood-btn" data-mood="bad">😢 Bad</button>
+                        <button type="button" class="mood-btn" data-mood="slightly bad">😔 Slightly Bad</button>
                         <button type="button" class="mood-btn" data-mood="neutral">😐 Neutral</button>
-                        <button type="button" class="mood-btn" data-mood="good">😊 Good</button>
-                        <button type="button" class="mood-btn" data-mood="super good">😄 Super Good</button>
+                        <button type="button" class="mood-btn" data-mood="slightly well">🙂 Slightly Well</button>
+                        <button type="button" class="mood-btn" data-mood="well">😊 Well</button>
+                        <button type="button" class="mood-btn" data-mood="very well">😄 Very Well</button>
                     </div>
                     <input type="hidden" name="mood" id="selected-mood" required>
                     
@@ -594,7 +630,7 @@
             <div class="mood-entry">
                 <div>
                     <div class="mood-date">{{ date }}</div>
-                    <div class="mood-value">{{ mood }}</div>
+                    <div class="mood-value">{{ mood|title }}</div>
                     {% if notes %}
                     <div class="mood-notes">{{ notes }}</div>
                     {% endif %}
@@ -643,12 +679,12 @@
                             y: {
                                 beginAtZero: false,
                                 min: 1,
-                                max: 5,
+                                max: 7,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
                                 ticks: {
                                     color: '#94a3b8',
                                     callback: function(value) {
-                                        const labels = ['', 'Super Sad', 'Sad', 'Neutral', 'Good', 'Super Good'];
+                                        const labels = ['', 'Very Bad', 'Bad', 'Slightly Bad', 'Neutral', 'Slightly Well', 'Well', 'Very Well'];
                                         return labels[value];
                                     }
                                 }
@@ -695,12 +731,12 @@
                             y: {
                                 beginAtZero: false,
                                 min: 1,
-                                max: 5,
+                                max: 7,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
                                 ticks: {
                                     color: '#94a3b8',
                                     callback: function(value) {
-                                        const labels = ['', 'Super Sad', 'Sad', 'Neutral', 'Good', 'Super Good'];
+                                        const labels = ['', 'Very Bad', 'Bad', 'Slightly Bad', 'Neutral', 'Slightly Well', 'Well', 'Very Well'];
                                         return labels[value];
                                     }
                                 }
@@ -743,12 +779,12 @@
                             y: {
                                 beginAtZero: false,
                                 min: 1,
-                                max: 5,
+                                max: 7,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
                                 ticks: {
                                     color: '#94a3b8',
                                     callback: function(value) {
-                                        const labels = ['', 'Super Sad', 'Sad', 'Neutral', 'Good', 'Super Good'];
+                                        const labels = ['', 'Very Bad', 'Bad', 'Slightly Bad', 'Neutral', 'Slightly Well', 'Well', 'Very Well'];
                                         return labels[value];
                                     }
                                 }

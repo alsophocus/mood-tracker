@@ -531,7 +531,7 @@ def calculate_analytics(conn):
     if not moods:
         return {'current_streak': 0, 'best_streak': 0, 'weekly_patterns': {}}
     
-    mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
+    mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     
     # Calculate streaks (good = 4 or 5)
     current_streak = 0
@@ -540,7 +540,7 @@ def calculate_analytics(conn):
     
     for row in reversed(list(moods)):  # Start from most recent
         mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
-        if mood_values[mood] >= 4:  # good or super good
+        if mood_values[mood] >= 5:  # slightly well or better
             temp_streak += 1
             if current_streak == 0:  # First good day from recent
                 current_streak = temp_streak
@@ -587,7 +587,7 @@ def mood_data():
     moods = cursor.fetchall()
     conn.close()
     
-    mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
+    mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     monthly_data = defaultdict(list)
     
     for row in moods:
@@ -621,7 +621,7 @@ def weekly_patterns():
     conn.close()
     
     # Group by day of week
-    mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
+    mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     weekly_patterns = defaultdict(list)
     
     for row in moods:
@@ -663,7 +663,7 @@ def daily_patterns():
     conn.close()
     
     # Group by hour of day (simulated from date patterns)
-    mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
+    mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     hourly_patterns = defaultdict(list)
     
     for row in moods:
@@ -758,7 +758,7 @@ def export_pdf():
     story.append(Spacer(1, 20))
     
     # Analytics calculations
-    mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
+    mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     
     if moods:
         # Calculate analytics
@@ -769,7 +769,7 @@ def export_pdf():
         # Calculate current streak
         for row in reversed(list(moods)):
             mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
-            if mood_values[mood] >= 4:  # good or super good
+            if mood_values[mood] >= 5:  # slightly well or better
                 temp_streak += 1
             else:
                 break
@@ -832,7 +832,7 @@ def export_pdf():
             ax.plot(days, weekly_averages, marker='o', linewidth=3, markersize=8, 
                    color='#f59e0b', markerfacecolor='#f59e0b', markeredgecolor='white', markeredgewidth=2)
             ax.fill_between(days, weekly_averages, alpha=0.3, color='#f59e0b')
-            ax.set_ylim(1, 5)
+            ax.set_ylim(1, 7)
             ax.set_ylabel('Average Mood', fontsize=12, color='#374151')
             ax.set_title('Weekly Patterns', fontsize=14, fontweight='bold', color='#1e293b', pad=20)
             ax.grid(True, alpha=0.3)
@@ -862,7 +862,7 @@ def export_pdf():
             ax.plot(sorted_months, monthly_averages, marker='o', linewidth=3, markersize=8,
                    color='#3b82f6', markerfacecolor='#3b82f6', markeredgecolor='white', markeredgewidth=2)
             ax.fill_between(sorted_months, monthly_averages, alpha=0.3, color='#3b82f6')
-            ax.set_ylim(1, 5)
+            ax.set_ylim(1, 7)
             ax.set_ylabel('Average Mood', fontsize=12, color='#374151')
             ax.set_title('Monthly Trends', fontsize=14, fontweight='bold', color='#1e293b', pad=20)
             ax.grid(True, alpha=0.3)
@@ -886,7 +886,7 @@ def export_pdf():
             mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
             notes = row['notes'] if ACTUAL_USE_POSTGRES else row[2]
             
-            mood_emoji = {'super sad': '😢', 'sad': '😔', 'neutral': '😐', 'good': '😊', 'super good': '😄'}
+            mood_emoji = {'very bad': '😭', 'bad': '😢', 'slightly bad': '😔', 'neutral': '😐', 'slightly well': '🙂', 'well': '😊', 'very well': '😄'}
             entry_text = f"<b>{date_str}</b> {mood_emoji.get(mood, '😐')} {mood.title()}"
             
             if notes:
