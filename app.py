@@ -761,7 +761,7 @@ def weekly_patterns():
             avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
             weekly_averages.append(round(avg, 2))
         else:
-            weekly_averages.append(4.0)  # Default neutral
+            weekly_averages.append(4)  # Default neutral (4, not 4.0)
     
     return jsonify({
         'labels': days,
@@ -801,12 +801,13 @@ def daily_patterns():
             
             hourly_patterns[hour].append(mood_values[mood])
     
-    # Calculate average mood for each hour (all 24 hours from midnight to midnight)
+    # Calculate average mood for each hour (show averages, not individual values)
     labels = [f"{hour:02d}:00" for hour in range(24)]
     data = []
     
     for hour in range(24):
-        if hour in hourly_patterns:
+        if hour in hourly_patterns and len(hourly_patterns[hour]) > 0:
+            # Calculate average for this hour
             avg = sum(hourly_patterns[hour]) / len(hourly_patterns[hour])
             data.append(round(avg, 2))
         else:
