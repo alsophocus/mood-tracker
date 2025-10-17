@@ -43,7 +43,7 @@ google = oauth.register(
     }
 )
 
-# GitHub OAuth
+# GitHub OAuth  
 github = oauth.register(
     name='github',
     client_id=os.environ.get('GITHUB_CLIENT_ID'),
@@ -142,16 +142,42 @@ def oauth_callback(provider):
         if provider == 'google':
             token = google.authorize_access_token()
             user_info = token.get('userinfo')
-            email = user_info['email']
-            name = user_info['name']
+            if not user_info:
+                flash('Failed to get user information from Google')
+                return redirect(url_for('login'))
+            email = user_info.get('email')
+            name = user_info.get('name')
+            
         elif provider == 'github':
             token = github.authorize_access_token()
+            if not token:
+                flash('Failed to get access token from GitHub')
+                return redirect(url_for('login'))
+            
+            # Get user info from GitHub API
             resp = github.get('user', token=token)
+            if resp.status_code != 200:
+                flash('Failed to get user information from GitHub')
+                return redirect(url_for('login'))
+            
             user_info = resp.json()
-            email = user_info['email']
-            name = user_info['name'] or user_info['login']
+            email = user_info.get('email')
+            name = user_info.get('name') or user_info.get('login')
+            
+            # If email is private, get it from emails endpoint
+            if not email:
+                emails_resp = github.get('user/emails', token=token)
+                if emails_resp.status_code == 200:
+                    emails = emails_resp.json()
+                    primary_email = next((e['email'] for e in emails if e['primary']), None)
+                    email = primary_email
+            
         else:
-            flash('Invalid provider')
+            flash('Invalid OAuth provider')
+            return redirect(url_for('login'))
+        
+        if not email:
+            flash(f'Could not get email from {provider}')
             return redirect(url_for('login'))
         
         # Create or get user
@@ -186,9 +212,11 @@ def oauth_callback(provider):
         
         conn.close()
         login_user(user)
+        flash(f'Successfully logged in with {provider.title()}!')
         return redirect(url_for('index'))
         
     except Exception as e:
+        app.logger.error(f'OAuth callback error for {provider}: {str(e)}')
         flash(f'Authentication failed: {str(e)}')
         return redirect(url_for('login'))
 
@@ -362,6 +390,23 @@ def export_pdf():
     buffer.seek(0)
     
     return send_file(buffer, as_attachment=True, download_name='mood_report.pdf', mimetype='application/pdf')
+
+@app.route('/debug/oauth')
+def debug_oauth():
+    """Debug route to check OAuth configuration"""
+    if not app.debug and not os.environ.get('FLASK_ENV') == 'development':
+        return "Debug route disabled in production", 404
+    
+    config_status = {
+        'google_client_id': bool(os.environ.get('GOOGLE_CLIENT_ID')),
+        'google_client_secret': bool(os.environ.get('GOOGLE_CLIENT_SECRET')),
+        'github_client_id': bool(os.environ.get('GITHUB_CLIENT_ID')),
+        'github_client_secret': bool(os.environ.get('GITHUB_CLIENT_SECRET')),
+        'secret_key': bool(app.secret_key),
+        'base_url': request.base_url.replace('/debug/oauth', ''),
+    }
+    
+    return jsonify(config_status)
 
 @app.route('/health')
 def health_check():
