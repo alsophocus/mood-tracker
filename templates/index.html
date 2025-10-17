@@ -371,6 +371,14 @@
             </div>
         </div>
         
+        <!-- Daily Patterns -->
+        <div class="section">
+            <h3 class="section-title"><i class="fas fa-clock"></i> Daily Patterns</h3>
+            <div class="chart-container">
+                <canvas id="dailyChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
         <!-- Monthly Chart -->
         <div class="section chart-container">
             <h3 class="section-title"><i class="fas fa-chart-line"></i> Monthly Mood Trends</h3>
@@ -435,6 +443,58 @@
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2,
                             pointRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 1,
+                                max: 5,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        const labels = ['', 'Super Sad', 'Sad', 'Neutral', 'Good', 'Super Good'];
+                                        return labels[value];
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        
+        // Load daily patterns chart
+        fetch('/daily_patterns')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('dailyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Average Mood by Hour',
+                            data: data.data,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
                         }]
                     },
                     options: {

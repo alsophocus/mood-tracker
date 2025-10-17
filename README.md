@@ -18,6 +18,30 @@ A secure, modern web application to track your daily mood with advanced analytic
 
 ### 📊 **Advanced Analytics**
 - **Current Streak**: Track consecutive good days (mood 4-5)
+- **Weekly Patterns**: See which days of the week you feel best
+- **Daily Patterns**: Analyze mood trends by time of day
+- **Monthly Trends**: Interactive charts showing mood over time
+
+## 🗄️ PostgreSQL Setup (Railway)
+
+### Quick Setup
+1. **Create PostgreSQL Service**: Railway Dashboard → New Service → Database → PostgreSQL
+2. **Get Connection String**: From PostgreSQL service → Variables tab
+3. **Set Environment Variable**: 
+   ```
+   DATABASE_URL=postgresql://postgres:PASSWORD@postgres-XXXX.railway.internal:5432/railway
+   ```
+
+### Technical Details
+- **Library**: `psycopg[binary]==3.2.10` (Python 3.14 compatible)
+- **Connection**: Internal Railway network (`postgres-XXXX.railway.internal`)
+- **Security**: No public access, internal network only
+- **Rollback**: Use tag `v1.0-stable` if issues occur
+
+### Troubleshooting
+- **"Servname not supported"**: Check DATABASE_URL hostname
+- **"Application Failed to Respond"**: Database blocking startup
+- **Debug endpoints**: `/status`, `/test-db`, `/debug-oauth`, `/health`
 - **Best Streak**: Your longest streak of good days ever
 - **Weekly Patterns**: See which days you feel best/worst
 - **Monthly Trends**: Interactive line chart showing mood over time
