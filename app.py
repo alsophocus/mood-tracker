@@ -114,7 +114,6 @@ def ensure_db_initialized():
             raise
 
 def get_db_connection():
-    ensure_db_initialized()
     if ACTUAL_USE_POSTGRES:
         print(f"🔍 DATABASE_URL: {DATABASE_URL}")
         return psycopg.connect(DATABASE_URL, row_factory=dict_row)
@@ -274,6 +273,7 @@ def oauth_login(provider):
 
 @app.route('/callback/<provider>')
 def oauth_callback(provider):
+    ensure_db_initialized()  # Initialize database before user operations
     try:
         if provider == 'google':
             # Manual Google OAuth callback - bypass Authlib
