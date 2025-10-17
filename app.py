@@ -35,17 +35,19 @@ except ImportError:
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-# Database configuration
+# Database configuration - minimal approach
 DATABASE_URL = os.environ.get('DATABASE_URL')
-# Simple PostgreSQL detection
-USE_POSTGRES = (DATABASE_URL is not None and 
-                POSTGRES_AVAILABLE and 
-                'postgresql://' in DATABASE_URL)
 
-if USE_POSTGRES:
-    print("🐘 PostgreSQL mode enabled")
-else:
-    print("📁 SQLite mode enabled")
+# Test PostgreSQL connection once at startup
+ACTUAL_USE_POSTGRES = False
+if DATABASE_URL and POSTGRES_AVAILABLE:
+    try:
+        test_conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        test_conn.close()
+        ACTUAL_USE_POSTGRES = True
+        print("✅ PostgreSQL connection successful")
+    except:
+        print("❌ PostgreSQL failed, using SQLite")
 
 # OAuth configuration
 oauth = OAuth(app)
@@ -108,15 +110,8 @@ def load_user(user_id):
     return None
 
 def get_db_connection():
-    if USE_POSTGRES:
-        try:
-            conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-            return conn
-        except Exception as e:
-            print(f"PostgreSQL failed: {e}, using SQLite")
-            conn = sqlite3.connect('mood.db')
-            conn.row_factory = sqlite3.Row
-            return conn
+    if ACTUAL_USE_POSTGRES:
+        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     else:
         conn = sqlite3.connect('mood.db')
         conn.row_factory = sqlite3.Row
@@ -127,7 +122,7 @@ def init_db():
     cursor = conn.cursor()
     
     try:
-        if USE_POSTGRES:
+        if ACTUAL_USE_POSTGRES:
             # PostgreSQL schema
             cursor.execute('''CREATE TABLE IF NOT EXISTS users 
                              (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
@@ -335,7 +330,7 @@ def oauth_callback(provider):
         cursor = conn.cursor()
         
         try:
-            if USE_POSTGRES:
+            if ACTUAL_USE_POSTGRES:
                 cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
             else:
                 cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
@@ -343,13 +338,13 @@ def oauth_callback(provider):
             user_data = cursor.fetchone()
             
             if user_data:
-                if USE_POSTGRES:
+                if ACTUAL_USE_POSTGRES:
                     user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
                 else:
                     user = User(user_data[0], user_data[1], user_data[2], user_data[3])
             else:
                 # Create new user
-                if USE_POSTGRES:
+                if ACTUAL_USE_POSTGRES:
                     cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
                                   (email, name, provider))
                     user_id = cursor.fetchone()['id']
