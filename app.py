@@ -791,7 +791,82 @@ def daily_patterns():
         'hourly_data': hourly_data
     })
 
-@app.route('/export_pdf')
+@app.route('/weekly_trends')
+@login_required
+def weekly_trends():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
+                  (current_user.id,))
+    
+    moods = cursor.fetchall()
+    conn.close()
+    
+    mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
+    
+    # Group by week
+    from datetime import datetime
+    weekly_moods = defaultdict(list)
+    
+    for row in moods:
+        date = datetime.strptime(str(row['date']), '%Y-%m-%d')
+        # Get year, week number
+        year_week = f"{date.year}-W{date.isocalendar()[1]:02d}"
+        weekly_moods[year_week].append(mood_values[row['mood']])
+    
+    # Calculate weekly averages
+    labels = []
+    data = []
+    
+    for week in sorted(weekly_moods.keys()):
+        mood_list = weekly_moods[week]
+        weekly_average = sum(mood_list) / len(mood_list)
+        labels.append(week)
+        data.append(round(weekly_average, 2))
+    
+    return jsonify({
+        'labels': labels,
+        'data': data
+    })
+
+@app.route('/monthly_trends')
+@login_required
+def monthly_trends():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
+                  (current_user.id,))
+    
+    moods = cursor.fetchall()
+    conn.close()
+    
+    mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
+    
+    # Group by month
+    from datetime import datetime
+    monthly_moods = defaultdict(list)
+    
+    for row in moods:
+        date = datetime.strptime(str(row['date']), '%Y-%m-%d')
+        year_month = f"{date.year}-{date.month:02d}"
+        monthly_moods[year_month].append(mood_values[row['mood']])
+    
+    # Calculate monthly averages
+    labels = []
+    data = []
+    
+    for month in sorted(monthly_moods.keys()):
+        mood_list = monthly_moods[month]
+        monthly_average = sum(mood_list) / len(mood_list)
+        labels.append(month)
+        data.append(round(monthly_average, 2))
+    
+    return jsonify({
+        'labels': labels,
+        'data': data
+    })
 @login_required
 def export_pdf():
     import matplotlib
