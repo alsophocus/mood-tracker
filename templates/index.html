@@ -811,6 +811,7 @@
         fetch('/weekly_trends')
             .then(response => response.json())
             .then(data => {
+                console.log('Weekly Trends Data:', data);
                 const ctx = document.getElementById('weeklyTrendChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'bar',
@@ -857,6 +858,7 @@
         fetch('/monthly_trends')
             .then(response => response.json())
             .then(data => {
+                console.log('Monthly Trends Data:', data);
                 const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'bar',
