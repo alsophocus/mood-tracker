@@ -802,29 +802,25 @@
             .then(data => {
                 const ctx = document.getElementById('dailyChart').getContext('2d');
                 
-                // Sort data by hour to ensure proper line connection
-                const sortedData = data.hourly_data.sort((a, b) => a.hour - b.hour);
-                
-                // Convert hourly data to chart format
-                const chartData = sortedData.map(item => ({
-                    x: item.hour,
+                // Convert time data to chart format (already sorted by timestamp)
+                const chartData = data.time_data.map(item => ({
+                    x: item.time,
                     y: item.mood_value
                 }));
                 
                 new Chart(ctx, {
-                    type: 'scatter',
+                    type: 'line',
                     data: {
                         datasets: [{
-                            label: 'Mood by Hour',
+                            label: 'Mood Over Time',
                             data: chartData,
                             borderColor: '#10b981',
-                            backgroundColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             pointBackgroundColor: '#10b981',
                             pointBorderColor: '#10b981',
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            showLine: true,
-                            tension: 0.3,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            tension: 0.2,
                             borderWidth: 2,
                             fill: false
                         }]
@@ -852,13 +848,15 @@
                             x: {
                                 type: 'linear',
                                 min: 0,
-                                max: 23,
+                                max: 24,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
                                 ticks: { 
                                     color: '#94a3b8',
                                     stepSize: 2,
                                     callback: function(value) {
-                                        return value.toString().padStart(2, '0') + ':00';
+                                        const hours = Math.floor(value);
+                                        const minutes = Math.round((value - hours) * 60);
+                                        return hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0');
                                     }
                                 }
                             }
