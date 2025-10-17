@@ -153,7 +153,7 @@ def oauth_login(provider):
             if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
                 flash('Google OAuth not configured')
                 return redirect(url_for('login'))
-            redirect_uri = url_for('oauth_callback', provider='google', _external=True)
+            redirect_uri = url_for('oauth_callback', provider='google', _external=True, _scheme='https')
             app.logger.info(f"Google OAuth redirect URI: {redirect_uri}")
             print(f"DEBUG: Google OAuth redirect URI: {redirect_uri}")
             return google.authorize_redirect(redirect_uri)
@@ -161,7 +161,7 @@ def oauth_login(provider):
             if not os.environ.get('GITHUB_CLIENT_ID') or not os.environ.get('GITHUB_CLIENT_SECRET'):
                 flash('GitHub OAuth not configured')
                 return redirect(url_for('login'))
-            redirect_uri = url_for('oauth_callback', provider='github', _external=True)
+            redirect_uri = url_for('oauth_callback', provider='github', _external=True, _scheme='https')
             return github.authorize_redirect(redirect_uri)
         else:
             flash('Invalid OAuth provider')
@@ -436,16 +436,17 @@ def export_pdf():
 @app.route('/test-oauth')
 def test_oauth():
     """Simple test page to show OAuth redirect URIs"""
-    google_redirect = url_for('oauth_callback', provider='google', _external=True)
-    github_redirect = url_for('oauth_callback', provider='github', _external=True)
+    google_redirect = url_for('oauth_callback', provider='google', _external=True, _scheme='https')
+    github_redirect = url_for('oauth_callback', provider='github', _external=True, _scheme='https')
     
     html = f"""
-    <h1>OAuth Debug Info</h1>
+    <h1>OAuth Debug Info (Fixed)</h1>
     <p><strong>Google Redirect URI:</strong> {google_redirect}</p>
     <p><strong>GitHub Redirect URI:</strong> {github_redirect}</p>
     <p><strong>Current Host:</strong> {request.host}</p>
-    <p><strong>Current Scheme:</strong> {request.scheme}</p>
+    <p><strong>Current Scheme:</strong> {request.scheme} (but using HTTPS for OAuth)</p>
     <hr>
+    <p>✅ Now using HTTPS for OAuth redirects!</p>
     <p>Copy the Google Redirect URI above and make sure it matches EXACTLY in Google Cloud Console</p>
     <a href="/">Back to App</a>
     """
