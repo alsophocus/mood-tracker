@@ -1,7 +1,5 @@
 from flask import Flask, render_template, request, redirect, send_file, jsonify
 import sqlite3
-import psycopg2
-from psycopg2.extras import RealDictCursor
 import os
 from datetime import datetime
 from reportlab.pdfgen import canvas
@@ -9,11 +7,19 @@ from reportlab.lib.pagesizes import letter
 import io
 from collections import defaultdict
 
+# Try to import PostgreSQL support
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    POSTGRES_AVAILABLE = False
+
 app = Flask(__name__)
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-USE_POSTGRES = DATABASE_URL is not None
+USE_POSTGRES = DATABASE_URL is not None and POSTGRES_AVAILABLE
 
 def get_db_connection():
     if USE_POSTGRES:
