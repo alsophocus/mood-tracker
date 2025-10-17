@@ -84,18 +84,18 @@ def load_user(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
-    else:
+    # No SQLite fallback
         cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
     
     user_data = cursor.fetchone()
     conn.close()
     
     if user_data:
-        if ACTUAL_USE_POSTGRES:
+        # PostgreSQL only:
             return User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
-        else:
+        # No SQLite fallback
             return User(user_data[0], user_data[1], user_data[2], user_data[3])
     return None
 
@@ -108,34 +108,15 @@ def ensure_db_initialized():
         try:
             init_db()
             DB_INITIALIZED = True
-            print("✅ Database initialized successfully")
+            print("✅ PostgreSQL database initialized successfully")
         except Exception as e:
-            print(f"⚠️ Database initialization failed: {e}")
-            # Initialize SQLite as fallback
-            if not ACTUAL_USE_POSTGRES:
-                conn = sqlite3.connect('mood.db')
-                cursor = conn.cursor()
-                cursor.execute('''CREATE TABLE IF NOT EXISTS users 
-                                 (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
-                cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
-                                 (id INTEGER PRIMARY KEY, user_id INTEGER, date TEXT, mood TEXT, notes TEXT,
-                                  FOREIGN KEY (user_id) REFERENCES users (id),
-                                  UNIQUE(user_id, date))''')
-                conn.commit()
-                conn.close()
-                DB_INITIALIZED = True
-                print("✅ SQLite fallback initialized")
-            else:
-                raise
+            print(f"❌ PostgreSQL initialization failed: {e}")
+            raise Exception(f"PostgreSQL required but initialization failed: {e}")
 
 def get_db_connection():
-    if ACTUAL_USE_POSTGRES:
-        print(f"🔍 DATABASE_URL: {DATABASE_URL}")
-        return psycopg.connect(DATABASE_URL, row_factory=dict_row)
-    else:
-        conn = sqlite3.connect('mood.db')
-        conn.row_factory = sqlite3.Row
-        return conn
+    if not ACTUAL_USE_POSTGRES:
+        raise Exception("PostgreSQL not initialized - check DATABASE_URL")
+    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 def migrate_old_moods():
     """Migrate old 5-level mood system to new 7-level system"""
@@ -153,9 +134,9 @@ def migrate_old_moods():
         }
         
         for old_mood, new_mood in mood_migration.items():
-            if ACTUAL_USE_POSTGRES:
+            # PostgreSQL only:
                 cursor.execute('UPDATE moods SET mood = %s WHERE mood = %s', (new_mood, old_mood))
-            else:
+            # No SQLite fallback
                 cursor.execute('UPDATE moods SET mood = ? WHERE mood = ?', (new_mood, old_mood))
         
         conn.commit()
@@ -191,11 +172,11 @@ def init_db():
         # Migrate old mood data
         migrate_old_moods()
         return
-    else:
+    # No SQLite fallback
         raise Exception("PostgreSQL required but DATABASE_URL not set or psycopg not available")
     
     try:
-        if ACTUAL_USE_POSTGRES:
+        # PostgreSQL only:
             # PostgreSQL schema
             cursor.execute('''CREATE TABLE IF NOT EXISTS users 
                              (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
@@ -203,7 +184,7 @@ def init_db():
                              (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
                               date DATE, mood TEXT, notes TEXT,
                               UNIQUE(user_id, date))''')
-        else:
+        # No SQLite fallback
             # SQLite schema
             cursor.execute('''CREATE TABLE IF NOT EXISTS users 
                              (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
@@ -302,10 +283,10 @@ def debug_error():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        if ACTUAL_USE_POSTGRES:
+        # PostgreSQL only:
             cursor.execute('SELECT COUNT(*) FROM users;')
             user_count = cursor.fetchone()['count']
-        else:
+        # No SQLite fallback
             cursor.execute('SELECT COUNT(*) FROM users;')
             user_count = cursor.fetchone()[0]
         
@@ -376,7 +357,7 @@ def oauth_login(provider):
             
             auth_url = 'https://github.com/login/oauth/authorize?' + urllib.parse.urlencode(params)
             return redirect(auth_url)
-        else:
+        # No SQLite fallback
             flash('Invalid OAuth provider')
             return redirect(url_for('login'))
     except Exception as e:
@@ -501,7 +482,7 @@ def oauth_callback(provider):
                 flash(f'GitHub authentication failed: {str(e)}')
                 return redirect(url_for('login'))
         
-        else:
+        # No SQLite fallback
             flash('Invalid OAuth provider')
             return redirect(url_for('login'))
         
@@ -514,25 +495,25 @@ def oauth_callback(provider):
         cursor = conn.cursor()
         
         try:
-            if ACTUAL_USE_POSTGRES:
+            # PostgreSQL only:
                 cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
-            else:
+            # No SQLite fallback
                 cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
             
             user_data = cursor.fetchone()
             
             if user_data:
-                if ACTUAL_USE_POSTGRES:
+                # PostgreSQL only:
                     user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
-                else:
+                # No SQLite fallback
                     user = User(user_data[0], user_data[1], user_data[2], user_data[3])
-            else:
+            # No SQLite fallback
                 # Create new user
-                if ACTUAL_USE_POSTGRES:
+                # PostgreSQL only:
                     cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
                                   (email, name, provider))
                     user_id = cursor.fetchone()['id']
-                else:
+                # No SQLite fallback
                     cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
                                   (email, name, provider))
                     user_id = cursor.lastrowid
@@ -568,10 +549,10 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
                       (current_user.id,))
-    else:
+    # No SQLite fallback
         cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = ? ORDER BY date DESC', 
                       (current_user.id,))
     
@@ -593,11 +574,11 @@ def save_mood():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('''INSERT INTO moods (user_id, date, mood, notes) VALUES (%s, %s, %s, %s)
                          ON CONFLICT (user_id, date) DO UPDATE SET mood = %s, notes = %s''',
                       (current_user.id, date, mood, notes, mood, notes))
-    else:
+    # No SQLite fallback
         cursor.execute('INSERT OR REPLACE INTO moods (user_id, date, mood, notes) VALUES (?, ?, ?, ?)',
                       (current_user.id, date, mood, notes))
     
@@ -609,10 +590,10 @@ def save_mood():
 def calculate_analytics(conn):
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                       (current_user.id,))
-    else:
+    # No SQLite fallback
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
                       (current_user.id,))
     
@@ -634,7 +615,7 @@ def calculate_analytics(conn):
             temp_streak += 1
             if current_streak == 0:  # First good day from recent
                 current_streak = temp_streak
-        else:
+        # No SQLite fallback
             if temp_streak > best_streak:
                 best_streak = temp_streak
             temp_streak = 0
@@ -667,10 +648,10 @@ def mood_data():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                       (current_user.id,))
-    else:
+    # No SQLite fallback
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
                       (current_user.id,))
     
@@ -700,10 +681,10 @@ def weekly_patterns():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                       (current_user.id,))
-    else:
+    # No SQLite fallback
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
                       (current_user.id,))
     
@@ -728,7 +709,7 @@ def weekly_patterns():
         if day in weekly_patterns:
             avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
             weekly_averages.append(round(avg, 2))
-        else:
+        # No SQLite fallback
             weekly_averages.append(3)  # Default neutral
     
     return jsonify({
@@ -742,10 +723,10 @@ def daily_patterns():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
                       (current_user.id,))
-    else:
+    # No SQLite fallback
         cursor.execute('SELECT date, mood FROM moods WHERE user_id = ? ORDER BY date', 
                       (current_user.id,))
     
@@ -770,7 +751,7 @@ def daily_patterns():
     for hour in range(24):
         if hour in hourly_patterns:
             hourly_averages[hour] = sum(hourly_patterns[hour]) / len(hourly_patterns[hour])
-        else:
+        # No SQLite fallback
             hourly_averages[hour] = 3  # Default neutral
     
     return jsonify({
@@ -794,10 +775,10 @@ def export_pdf():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
+    # PostgreSQL only:
         cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
                       (current_user.id,))
-    else:
+    # No SQLite fallback
         cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = ? ORDER BY date DESC', 
                       (current_user.id,))
     
@@ -861,7 +842,7 @@ def export_pdf():
             mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
             if mood_values[mood] >= 5:  # slightly well or better
                 temp_streak += 1
-            else:
+            # No SQLite fallback
                 break
         current_streak = temp_streak
         
@@ -916,7 +897,7 @@ def export_pdf():
                 if day in weekly_patterns:
                     avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
                     weekly_averages.append(avg)
-                else:
+                # No SQLite fallback
                     weekly_averages.append(3)
             
             ax.plot(days, weekly_averages, marker='o', linewidth=3, markersize=8, 
@@ -986,7 +967,7 @@ def export_pdf():
             story.append(Paragraph(entry_text, body_style))
             story.append(Spacer(1, 8))
     
-    else:
+    # No SQLite fallback
         story.append(Paragraph("No mood data available yet. Start tracking your moods to see analytics!", body_style))
     
     # Footer
@@ -1046,9 +1027,9 @@ def analytics_health():
         cursor = conn.cursor()
         
         # Test analytics queries
-        if ACTUAL_USE_POSTGRES:
+        # PostgreSQL only:
             cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = %s', (current_user.id,))
-        else:
+        # No SQLite fallback
             cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = ?', (current_user.id,))
         
         mood_count = cursor.fetchone()[0] if not ACTUAL_USE_POSTGRES else cursor.fetchone()['count']
@@ -1060,22 +1041,18 @@ def analytics_health():
 
 @app.route('/health')
 def health_check():
-    """Health check endpoint to verify database connection"""
+    """Health check endpoint to verify PostgreSQL connection"""
     try:
         ensure_db_initialized()
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        if ACTUAL_USE_POSTGRES:
-            cursor.execute('SELECT version();')
-            db_info = f"PostgreSQL: {cursor.fetchone()['version']}"
-        else:
-            cursor.execute('SELECT sqlite_version();')
-            db_info = f"SQLite: {cursor.fetchone()[0]}"
+        cursor.execute('SELECT version();')
+        db_info = f"PostgreSQL: {cursor.fetchone()['version']}"
         
         cursor.execute('SELECT COUNT(*) FROM moods;')
-        mood_count = cursor.fetchone()[0] if not ACTUAL_USE_POSTGRES else cursor.fetchone()['count']
+        mood_count = cursor.fetchone()['count']
         conn.close()
         
         return {
