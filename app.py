@@ -173,7 +173,23 @@ def migrate_old_moods():
 def init_db():
     global ACTUAL_USE_POSTGRES
     
-    # Force PostgreSQL usage - no fallback
+    # Allow SQLite for local testing if DATABASE_URL points to Railway (not accessible locally)
+    if DATABASE_URL and 'railway.internal' in DATABASE_URL:
+        print("🔧 Using SQLite for local testing (Railway DB not accessible)")
+        ACTUAL_USE_POSTGRES = False
+        # Initialize SQLite
+        conn = sqlite3.connect('mood.db')
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                         (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                         (id INTEGER PRIMARY KEY, date TEXT, mood TEXT, notes TEXT, timestamp TEXT)''')
+        conn.commit()
+        conn.close()
+        print("✅ SQLite initialized for local testing")
+        return
+    
+    # Force PostgreSQL usage for production
     if DATABASE_URL and POSTGRES_AVAILABLE:
         ACTUAL_USE_POSTGRES = True
         print("🔧 FORCING PostgreSQL usage with psycopg3")
@@ -604,17 +620,15 @@ def save_mood():
     mood = request.form['mood']
     notes = request.form.get('notes', '')
     date = datetime.now().strftime('%Y-%m-%d')
+    timestamp = datetime.now()  # Add current timestamp
     
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if ACTUAL_USE_POSTGRES:
-        cursor.execute('''INSERT INTO moods (user_id, date, mood, notes) VALUES (%s, %s, %s, %s)
-                         ON CONFLICT (user_id, date) DO UPDATE SET mood = %s, notes = %s''',
-                      (current_user.id, date, mood, notes, mood, notes))
-    else:
-        cursor.execute('INSERT OR REPLACE INTO moods (user_id, date, mood, notes) VALUES (?, ?, ?, ?)',
-                      (current_user.id, date, mood, notes))
+    # Always insert new entries - no conflict resolution
+    cursor.execute('''INSERT INTO moods (user_id, date, mood, notes, timestamp) 
+                     VALUES (%s, %s, %s, %s, %s)''',
+                  (current_user.id, date, mood, notes, timestamp))
     
     conn.commit()
     conn.close()

@@ -6,31 +6,32 @@ This should be run on Railway or with proper DATABASE_URL access.
 import os
 import sys
 
+# Set the DATABASE_URL to use Railway's public URL
+os.environ['DATABASE_URL'] = 'postgresql://postgres:OsFZqHiUQXvawJnFgrWowJctGiWdyznH@turntable.proxy.rlwy.net:41615/railway'
+
 # Add current directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from app import get_db_connection, init_db, ACTUAL_USE_POSTGRES
-    print("✅ Successfully imported app modules")
+    import psycopg
+    from psycopg.rows import dict_row
+    print("✅ Successfully imported psycopg")
 except ImportError as e:
-    print(f"❌ Failed to import app modules: {e}")
+    print(f"❌ Failed to import psycopg: {e}")
     sys.exit(1)
 
 def add_fake_data():
     try:
-        # Initialize database first
-        init_db()
+        DATABASE_URL = os.environ.get('DATABASE_URL')
+        print(f"🔗 Connecting to: {DATABASE_URL[:50]}...")
         
-        if not ACTUAL_USE_POSTGRES:
-            print("❌ This script requires PostgreSQL")
-            return
+        # Connect directly to PostgreSQL
+        conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+        cursor = conn.cursor()
         
         # Read and execute SQL file
         with open('fake_data.sql', 'r') as f:
             sql_content = f.read()
-        
-        conn = get_db_connection()
-        cursor = conn.cursor()
         
         # Execute the SQL (split by semicolons for multiple statements)
         statements = [stmt.strip() for stmt in sql_content.split(';') if stmt.strip()]

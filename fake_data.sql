@@ -2,7 +2,7 @@
 -- Insert test user if not exists
 INSERT INTO users (id, email, name, provider) 
 VALUES (1, 'test@example.com', 'Test User', 'local') 
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (email) DO NOTHING;
 
 -- Insert fake mood data for October 2025
 INSERT INTO moods (user_id, date, mood, notes, timestamp) VALUES
@@ -110,7 +110,4 @@ INSERT INTO moods (user_id, date, mood, notes, timestamp) VALUES
 
 (1, '2025-10-31', 'well', 'Beautiful weather today', '2025-10-31 10:40:00'),
 (1, '2025-10-31', 'very well', 'Feeling grateful', '2025-10-31 16:25:00'),
-(1, '2025-10-31', 'well', 'Feeling great today!', '2025-10-31 20:15:00')
-
-ON CONFLICT (user_id, date, timestamp) DO UPDATE SET 
-mood = EXCLUDED.mood, notes = EXCLUDED.notes;
+(1, '2025-10-31', 'well', 'Feeling great today!', '2025-10-31 20:15:00');
