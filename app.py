@@ -1,3 +1,4 @@
+# Mood Tracker with OAuth Authentication - Production Ready
 from flask import Flask, render_template, request, redirect, send_file, jsonify, url_for, session, flash
 import sqlite3
 import os
