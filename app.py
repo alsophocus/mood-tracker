@@ -37,11 +37,8 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-producti
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-# Only use PostgreSQL if we have a valid DATABASE_URL and psycopg2 is available
-USE_POSTGRES = (DATABASE_URL is not None and 
-                POSTGRES_AVAILABLE and 
-                DATABASE_URL.startswith('postgresql://') and
-                'port' not in DATABASE_URL or DATABASE_URL.count(':') >= 2)
+# Force SQLite for now since PostgreSQL connection is problematic
+USE_POSTGRES = False  # Temporarily disabled
 
 # OAuth configuration
 oauth = OAuth(app)
@@ -271,34 +268,21 @@ def oauth_callback(provider):
             flash(f'Could not get email from {provider}')
             return redirect(url_for('login'))
         
-        # Create or get user
+        # Create or get user - using SQLite syntax only
         conn = get_db_connection()
         cursor = conn.cursor()
         
         try:
-            if USE_POSTGRES:
-                cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
-            else:
-                cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
-            
+            cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
             user_data = cursor.fetchone()
             
             if user_data:
-                if USE_POSTGRES:
-                    user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
-                else:
-                    user = User(user_data[0], user_data[1], user_data[2], user_data[3])
+                user = User(user_data[0], user_data[1], user_data[2], user_data[3])
             else:
                 # Create new user
-                if USE_POSTGRES:
-                    cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
-                                  (email, name, provider))
-                    user_id = cursor.fetchone()['id']
-                else:
-                    cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                                  (email, name, provider))
-                    user_id = cursor.lastrowid
-                
+                cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
+                              (email, name, provider))
+                user_id = cursor.lastrowid
                 conn.commit()
                 user = User(user_id, email, name, provider)
             
