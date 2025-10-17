@@ -99,7 +99,21 @@ def load_user(user_id):
             return User(user_data[0], user_data[1], user_data[2], user_data[3])
     return None
 
+# Database initialization flag
+DB_INITIALIZED = False
+
+def ensure_db_initialized():
+    global DB_INITIALIZED
+    if not DB_INITIALIZED:
+        try:
+            init_db()
+            DB_INITIALIZED = True
+        except Exception as e:
+            print(f"⚠️ Database initialization failed: {e}")
+            raise
+
 def get_db_connection():
+    ensure_db_initialized()
     if ACTUAL_USE_POSTGRES:
         print(f"🔍 DATABASE_URL: {DATABASE_URL}")
         # Try with autocommit=True for Railway compatibility
@@ -612,7 +626,13 @@ def health_check():
         }, 500
 
 if __name__ == '__main__':
-    init_db()
+    # Try to initialize database, but don't crash if it fails
+    try:
+        init_db()
+    except Exception as e:
+        print(f"⚠️ Database initialization failed: {e}")
+        print("🚀 Starting app anyway - will retry database connection on requests")
+    
     import os
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
