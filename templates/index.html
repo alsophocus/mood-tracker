@@ -402,12 +402,12 @@
     <script>
         // System status check
         async function checkSystemStatus() {
+            const dbStatus = document.getElementById('db-status');
+            const analyticsStatus = document.getElementById('analytics-status');
+            
             try {
                 const response = await fetch('/health');
                 const data = await response.json();
-                
-                const dbStatus = document.getElementById('db-status');
-                const analyticsStatus = document.getElementById('analytics-status');
                 
                 if (data.status === 'healthy') {
                     dbStatus.className = 'status-icon status-connected';
@@ -418,8 +418,9 @@
                 }
                     
             } catch (error) {
-                document.getElementById('db-status').className = 'status-icon status-disconnected';
-                document.getElementById('analytics-status').className = 'status-icon status-disconnected';
+                // Database/server not responding
+                dbStatus.className = 'status-icon status-disconnected';
+                analyticsStatus.className = 'status-icon status-disconnected';
             }
         }
         
@@ -533,8 +534,8 @@
         // Check system status on load
         checkSystemStatus();
         
-        // Refresh status every 30 seconds
-        setInterval(checkSystemStatus, 30000);
+        // Refresh status every 10 seconds for real-time monitoring
+        setInterval(checkSystemStatus, 10000);
     </script>
 </body>
 </html>
