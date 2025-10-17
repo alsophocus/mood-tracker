@@ -757,35 +757,38 @@ def daily_patterns():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('SELECT date, mood FROM moods WHERE user_id = %s ORDER BY date', 
+    cursor.execute('SELECT timestamp, mood FROM moods WHERE user_id = %s AND timestamp IS NOT NULL ORDER BY timestamp', 
                   (current_user.id,))
     
     moods = cursor.fetchall()
     conn.close()
     
-    # Group moods by date and calculate daily averages
+    # Convert each mood entry to hourly data points
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
-    daily_moods = defaultdict(list)
+    hourly_data = []
     
     for row in moods:
-        date = row['date']
-        mood_value = mood_values[row['mood']]
-        daily_moods[date].append(mood_value)
-    
-    # Create data points with daily averages
-    labels = []
-    data = []
-    
-    for date in sorted(daily_moods.keys()):
-        mood_list = daily_moods[date]
-        daily_average = sum(mood_list) / len(mood_list)
+        timestamp = row['timestamp']
+        mood = row['mood']
         
-        labels.append(str(date))
-        data.append(round(daily_average, 2))
+        if timestamp:
+            from datetime import datetime, timedelta
+            
+            # Convert to UTC-3 timezone
+            if isinstance(timestamp, str):
+                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            
+            # Convert to UTC-3 (subtract 3 hours from UTC)
+            utc_minus_3 = timestamp - timedelta(hours=3)
+            hour = utc_minus_3.hour
+            
+            hourly_data.append({
+                'hour': hour,
+                'mood_value': mood_values[mood]
+            })
     
     return jsonify({
-        'labels': labels,
-        'data': data
+        'hourly_data': hourly_data
     })
 
 @app.route('/export_pdf')

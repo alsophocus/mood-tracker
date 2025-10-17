@@ -781,22 +781,28 @@
             .then(response => response.json())
             .then(data => {
                 const ctx = document.getElementById('dailyChart').getContext('2d');
+                
+                // Convert hourly data to chart format
+                const chartData = data.hourly_data.map(item => ({
+                    x: item.hour,
+                    y: item.mood_value
+                }));
+                
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: data.labels,
                         datasets: [{
-                            label: 'Daily Mood Average',
-                            data: data.data,
+                            label: 'Mood by Hour',
+                            data: chartData,
                             borderColor: '#10b981',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             pointBackgroundColor: '#10b981',
                             pointBorderColor: '#10b981',
                             pointRadius: 4,
                             pointHoverRadius: 6,
-                            tension: 0.4,
+                            tension: 0.3,
                             borderWidth: 2,
-                            fill: true
+                            fill: false
                         }]
                     },
                     options: {
@@ -820,10 +826,16 @@
                                 }
                             },
                             x: {
+                                type: 'linear',
+                                min: 0,
+                                max: 23,
                                 grid: { color: 'rgba(148, 163, 184, 0.1)' },
                                 ticks: { 
                                     color: '#94a3b8',
-                                    maxTicksLimit: 10
+                                    stepSize: 2,
+                                    callback: function(value) {
+                                        return value.toString().padStart(2, '0') + ':00';
+                                    }
                                 }
                             }
                         }
