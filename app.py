@@ -111,7 +111,22 @@ def ensure_db_initialized():
             print("✅ Database initialized successfully")
         except Exception as e:
             print(f"⚠️ Database initialization failed: {e}")
-            raise
+            # Initialize SQLite as fallback
+            if not ACTUAL_USE_POSTGRES:
+                conn = sqlite3.connect('mood.db')
+                cursor = conn.cursor()
+                cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                                 (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+                cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                                 (id INTEGER PRIMARY KEY, user_id INTEGER, date TEXT, mood TEXT, notes TEXT,
+                                  FOREIGN KEY (user_id) REFERENCES users (id),
+                                  UNIQUE(user_id, date))''')
+                conn.commit()
+                conn.close()
+                DB_INITIALIZED = True
+                print("✅ SQLite fallback initialized")
+            else:
+                raise
 
 def get_db_connection():
     if ACTUAL_USE_POSTGRES:
@@ -266,6 +281,18 @@ def debug_env():
         'POSTGRES_AVAILABLE': POSTGRES_AVAILABLE,
         'PORT': os.environ.get('PORT', 'not_set'),
         'env_vars': list(os.environ.keys())
+    }
+
+@app.route('/debug-postgres')
+def debug_postgres():
+    return {
+        'DATABASE_URL': DATABASE_URL[:50] + "..." if DATABASE_URL and len(DATABASE_URL) > 50 else DATABASE_URL,
+        'DATABASE_URL_set': DATABASE_URL is not None,
+        'DATABASE_URL_length': len(DATABASE_URL) if DATABASE_URL else 0,
+        'POSTGRES_AVAILABLE': POSTGRES_AVAILABLE,
+        'ACTUAL_USE_POSTGRES': ACTUAL_USE_POSTGRES,
+        'DB_INITIALIZED': DB_INITIALIZED,
+        'psycopg_import_test': 'success' if POSTGRES_AVAILABLE else 'failed'
     }
 
 @app.route('/debug-error')
