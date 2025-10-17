@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["python311", "pip"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.test]
+cmds = [
+  "echo '🧪 Running test suite...'",
+  "python -m pytest tests/ --tb=short -q --disable-warnings",
+  "echo '✅ All tests passed!'"
+]
+
+[phases.build]
+cmds = ["echo '📦 Build complete - tests passed!'"]
+
+[start]
+cmd = "python app.py"

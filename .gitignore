@@ -3,6 +3,13 @@ venv/
 mood.db
 .env
 
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+*.cover
+.hypothesis/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
