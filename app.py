@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, redirect, send_file, jsonify
 import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import os
 from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -8,22 +11,38 @@ from collections import defaultdict
 
 app = Flask(__name__)
 
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL')
+USE_POSTGRES = DATABASE_URL is not None
+
+def get_db_connection():
+    if USE_POSTGRES:
+        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    else:
+        conn = sqlite3.connect('mood.db')
+        conn.row_factory = sqlite3.Row
+        return conn
+
 def init_db():
-    conn = sqlite3.connect('mood.db')
-    conn.execute('''CREATE TABLE IF NOT EXISTS moods 
-                    (id INTEGER PRIMARY KEY, date TEXT, mood TEXT, notes TEXT)''')
-    # Add notes column if it doesn't exist (for existing databases)
-    try:
-        conn.execute('ALTER TABLE moods ADD COLUMN notes TEXT')
-    except:
-        pass
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if USE_POSTGRES:
+        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                         (id SERIAL PRIMARY KEY, date DATE UNIQUE, mood TEXT, notes TEXT)''')
+    else:
+        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                         (id INTEGER PRIMARY KEY, date TEXT UNIQUE, mood TEXT, notes TEXT)''')
+    
     conn.commit()
     conn.close()
 
 @app.route('/')
 def index():
-    conn = sqlite3.connect('mood.db')
-    moods = conn.execute('SELECT date, mood, notes FROM moods ORDER BY date DESC').fetchall()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT date, mood, notes FROM moods ORDER BY date DESC')
+    moods = cursor.fetchall()
     
     # Calculate analytics
     analytics = calculate_analytics(conn)
@@ -37,36 +56,27 @@ def save_mood():
     notes = request.form.get('notes', '')
     date = datetime.now().strftime('%Y-%m-%d')
     
-    conn = sqlite3.connect('mood.db')
-    conn.execute('INSERT OR REPLACE INTO moods (date, mood, notes) VALUES (?, ?, ?)', (date, mood, notes))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if USE_POSTGRES:
+        cursor.execute('''INSERT INTO moods (date, mood, notes) VALUES (%s, %s, %s)
+                         ON CONFLICT (date) DO UPDATE SET mood = %s, notes = %s''',
+                      (date, mood, notes, mood, notes))
+    else:
+        cursor.execute('INSERT OR REPLACE INTO moods (date, mood, notes) VALUES (?, ?, ?)',
+                      (date, mood, notes))
+    
     conn.commit()
     conn.close()
     
     return redirect('/')
 
-@app.route('/export_pdf')
-def export_pdf():
-    conn = sqlite3.connect('mood.db')
-    moods = conn.execute('SELECT date, mood FROM moods ORDER BY date').fetchall()
-    conn.close()
-    
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-    
-    p.drawString(100, 750, "Mood Tracker Report")
-    y = 700
-    
-    for date, mood in moods:
-        p.drawString(100, y, f"{date}: {mood}")
-        y -= 20
-    
-    p.save()
-    buffer.seek(0)
-    
-    return send_file(buffer, as_attachment=True, download_name='mood_report.pdf', mimetype='application/pdf')
-
 def calculate_analytics(conn):
-    moods = conn.execute('SELECT date, mood FROM moods ORDER BY date').fetchall()
+    cursor = conn.cursor()
+    cursor.execute('SELECT date, mood FROM moods ORDER BY date')
+    moods = cursor.fetchall()
+    
     if not moods:
         return {'current_streak': 0, 'best_streak': 0, 'weekly_patterns': {}}
     
@@ -77,7 +87,8 @@ def calculate_analytics(conn):
     best_streak = 0
     temp_streak = 0
     
-    for date, mood in reversed(moods):  # Start from most recent
+    for row in reversed(list(moods)):  # Start from most recent
+        mood = row['mood'] if USE_POSTGRES else row[1]
         if mood_values[mood] >= 4:  # good or super good
             temp_streak += 1
             if current_streak == 0:  # First good day from recent
@@ -92,8 +103,10 @@ def calculate_analytics(conn):
     
     # Weekly patterns
     weekly_patterns = defaultdict(list)
-    for date, mood in moods:
-        day_of_week = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
+    for row in moods:
+        date_str = str(row['date']) if USE_POSTGRES else row[0]
+        mood = row['mood'] if USE_POSTGRES else row[1]
+        day_of_week = datetime.strptime(date_str, '%Y-%m-%d').strftime('%A')
         weekly_patterns[day_of_week].append(mood_values[mood])
     
     # Calculate average mood per day
@@ -109,15 +122,19 @@ def calculate_analytics(conn):
 
 @app.route('/mood_data')
 def mood_data():
-    conn = sqlite3.connect('mood.db')
-    moods = conn.execute('SELECT date, mood FROM moods ORDER BY date').fetchall()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT date, mood FROM moods ORDER BY date')
+    moods = cursor.fetchall()
     conn.close()
     
     mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
     monthly_data = defaultdict(list)
     
-    for date, mood in moods:
-        month = date[:7]  # YYYY-MM format
+    for row in moods:
+        date_str = str(row['date']) if USE_POSTGRES else row[0]
+        mood = row['mood'] if USE_POSTGRES else row[1]
+        month = date_str[:7]  # YYYY-MM format
         monthly_data[month].append(mood_values[mood])
     
     # Calculate average mood per month
@@ -127,6 +144,31 @@ def mood_data():
         chart_data.append({'month': month, 'mood': round(avg_mood, 1)})
     
     return jsonify(chart_data)
+
+@app.route('/export_pdf')
+def export_pdf():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT date, mood FROM moods ORDER BY date')
+    moods = cursor.fetchall()
+    conn.close()
+    
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    
+    p.drawString(100, 750, "Mood Tracker Report")
+    y = 700
+    
+    for row in moods:
+        date_str = str(row['date']) if USE_POSTGRES else row[0]
+        mood = row['mood'] if USE_POSTGRES else row[1]
+        p.drawString(100, y, f"{date_str}: {mood}")
+        y -= 20
+    
+    p.save()
+    buffer.seek(0)
+    
+    return send_file(buffer, as_attachment=True, download_name='mood_report.pdf', mimetype='application/pdf')
 
 if __name__ == '__main__':
     init_db()

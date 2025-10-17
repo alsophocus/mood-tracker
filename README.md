@@ -104,14 +104,38 @@ CREATE TABLE moods (
 
 ### Deploy to Render
 1. Fork this repository
-2. Connect your GitHub account to [Render](https://render.com)
-3. Create a new Web Service
-4. Connect your forked repository
-5. Render will automatically detect the configuration and deploy
+2. Go to [Render](https://render.com) and sign up/login
+3. **Create PostgreSQL Database:**
+   - Click "New" → "PostgreSQL"
+   - Name: `mood-tracker-db`
+   - Leave other settings as default
+   - Click "Create Database"
+   - Copy the "External Database URL"
+
+4. **Create Web Service:**
+   - Click "New" → "Web Service"
+   - Connect your GitHub repository
+   - Name: `mood-tracker`
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `python app.py`
+   
+5. **Add Environment Variable:**
+   - In your web service settings
+   - Add environment variable: `DATABASE_URL` = [paste your database URL]
+   - Deploy!
+
+### Local Development with PostgreSQL
+```bash
+# Set environment variable for local PostgreSQL (optional)
+export DATABASE_URL="postgresql://username:password@localhost/mood_tracker"
+
+# Or use SQLite (default for local development)
+python app.py  # Will automatically use SQLite if no DATABASE_URL
+```
 
 ### Environment Variables
+- `DATABASE_URL`: PostgreSQL connection string (required for production)
 - `PORT`: Automatically set by Render (default: 5000)
-- `PYTHON_VERSION`: Set to 3.9.16 in render.yaml
 
 ## 📈 Privacy & Data
 
