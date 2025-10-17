@@ -1100,8 +1100,13 @@ def health_check():
         }, 500
 
 if __name__ == '__main__':
-    # Skip database initialization completely on startup
-    print("🚀 Starting app without database initialization")
+    # Force database initialization on startup
+    print("🚀 Starting app and initializing database")
+    try:
+        init_db()
+        print(f"✅ Database initialized - PostgreSQL: {ACTUAL_USE_POSTGRES}")
+    except Exception as e:
+        print(f"⚠️ Database initialization failed: {e}")
     
     import os
     port = int(os.environ.get('PORT', 5000))
