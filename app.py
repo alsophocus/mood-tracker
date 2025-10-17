@@ -192,7 +192,7 @@ def test_db():
             'status': 'success',
             'method': 'internal',
             'database': 'postgresql',
-            'version': str(version[0]) if version else 'unknown'
+            'version': str(version['version']) if version else 'unknown'
         }
         
     except Exception as e:
