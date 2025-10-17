@@ -853,24 +853,31 @@ def monthly_trends():
     
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     
-    # Group by month
+    # Group by year and month within year
     from datetime import datetime
-    monthly_moods = defaultdict(list)
+    yearly_months = defaultdict(lambda: defaultdict(list))
     
     for row in moods:
         date = datetime.strptime(str(row['date']), '%Y-%m-%d')
-        year_month = f"{date.year}-{date.month:02d}"
-        monthly_moods[year_month].append(mood_values[row['mood']])
+        year = date.year
+        month_name = date.strftime('%b')  # Jan, Feb, Mar, etc.
+        
+        yearly_months[year][month_name].append(mood_values[row['mood']])
     
-    # Calculate monthly averages
+    # Calculate monthly averages within each year
     labels = []
     data = []
     
-    for month in sorted(monthly_moods.keys()):
-        mood_list = monthly_moods[month]
-        monthly_average = sum(mood_list) / len(mood_list)
-        labels.append(month)
-        data.append(round(monthly_average, 2))
+    month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+    for year in sorted(yearly_months.keys()):
+        for month in month_order:
+            if month in yearly_months[year]:
+                mood_list = yearly_months[year][month]
+                monthly_average = sum(mood_list) / len(mood_list)
+                labels.append(f"{year} {month}")
+                data.append(round(monthly_average, 2))
     
     return jsonify({
         'labels': labels,
