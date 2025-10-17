@@ -598,6 +598,15 @@ def index():
     conn.close()
     return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
+@app.route('/test-route')
+def test_route():
+    """Simple test route to verify app is running"""
+    return jsonify({
+        'status': 'working',
+        'message': 'App is running correctly',
+        'timestamp': datetime.now().isoformat()
+    })
+
 @app.route('/debug-form', methods=['POST'])
 @login_required
 def debug_form():
