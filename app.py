@@ -154,6 +154,8 @@ def oauth_login(provider):
                 flash('Google OAuth not configured')
                 return redirect(url_for('login'))
             redirect_uri = url_for('oauth_callback', provider='google', _external=True)
+            app.logger.info(f"Google OAuth redirect URI: {redirect_uri}")
+            print(f"DEBUG: Google OAuth redirect URI: {redirect_uri}")
             return google.authorize_redirect(redirect_uri)
         elif provider == 'github':
             if not os.environ.get('GITHUB_CLIENT_ID') or not os.environ.get('GITHUB_CLIENT_SECRET'):
@@ -445,6 +447,8 @@ def debug_oauth():
         'github_client_id_preview': os.environ.get('GITHUB_CLIENT_ID', 'NOT_SET')[:20] + '...' if os.environ.get('GITHUB_CLIENT_ID') else 'NOT_SET',
         'expected_google_redirect': url_for('oauth_callback', provider='google', _external=True),
         'expected_github_redirect': url_for('oauth_callback', provider='github', _external=True),
+        'current_host': request.host,
+        'current_scheme': request.scheme,
     }
     
     return jsonify(config_status)
