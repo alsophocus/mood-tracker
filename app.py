@@ -627,73 +627,31 @@ def debug_form():
 @app.route('/save_mood', methods=['POST'])
 @login_required
 def save_mood():
-    conn = None
     try:
-        # Check if user is authenticated
-        if not current_user.is_authenticated:
-            print("❌ User not authenticated")
-            flash('Authentication error. Please log in again.')
-            return redirect(url_for('login'))
-        
         mood = request.form.get('mood')
+        notes = request.form.get('notes', '')
+        
         if not mood:
-            print("❌ No mood selected")
             flash('Please select a mood before saving.')
             return redirect(url_for('index'))
-            
-        notes = request.form.get('notes', '')
-        date = datetime.now().strftime('%Y-%m-%d')
-        timestamp = datetime.now()
         
-        print(f"🔍 Attempting to save mood: {mood} for user {current_user.id}")
-        
+        # Simple database insert
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Get count before insert
-        cursor.execute('SELECT COUNT(*) as count FROM moods WHERE user_id = %s', (current_user.id,))
-        count_before = cursor.fetchone()['count']
-        
-        # Insert the mood
         cursor.execute('''
             INSERT INTO moods (user_id, date, mood, notes, timestamp) 
             VALUES (%s, %s, %s, %s, %s)
-        ''', (current_user.id, date, mood, notes, timestamp))
+        ''', (current_user.id, datetime.now().date(), mood, notes, datetime.now()))
         
         conn.commit()
-        
-        # Verify the data was actually saved
-        cursor.execute('SELECT COUNT(*) as count FROM moods WHERE user_id = %s', (current_user.id,))
-        count_after = cursor.fetchone()['count']
-        
-        # Check if the specific mood was saved
-        cursor.execute('''
-            SELECT id FROM moods 
-            WHERE user_id = %s AND date = %s AND mood = %s AND timestamp = %s
-        ''', (current_user.id, date, mood, timestamp))
-        saved_mood = cursor.fetchone()
-        
         conn.close()
         
-        if saved_mood and count_after > count_before:
-            print(f"✅ Mood successfully saved! ID: {saved_mood['id']}")
-            flash('Mood saved successfully!')
-        else:
-            print(f"❌ Mood not found in database after insert")
-            flash('Error updating data - mood was not saved.')
-            
+        flash('Mood saved successfully!')
         return redirect(url_for('index'))
         
     except Exception as e:
-        print(f"❌ Error saving mood: {e}")
-        if conn:
-            try:
-                conn.rollback()
-                conn.close()
-            except:
-                pass
-        import traceback
-        traceback.print_exc()
+        print(f"Error saving mood: {e}")
         flash('Error updating data - please try again.')
         return redirect(url_for('index'))
 
