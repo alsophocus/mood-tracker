@@ -642,17 +642,27 @@
             <div class="card-title">
                 <i class="fas fa-history"></i> Recent Moods
             </div>
-            {% for date, mood, notes in moods[:10] %}
+            {% for mood in moods %}
             <div class="mood-entry">
                 <div>
-                    <div class="mood-date">{{ date }}</div>
-                    <div class="mood-value">{{ mood|title }}</div>
-                    {% if notes %}
-                    <div class="mood-notes">{{ notes }}</div>
+                    <div class="mood-date">{{ mood.date }}</div>
+                    <div class="mood-value">{{ mood.mood|title }}</div>
+                    {% if mood.timestamp %}
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">
+                        Saved at {{ (mood.timestamp|utc_to_local).strftime('%H:%M') if mood.timestamp else 'Unknown time' }}
+                    </div>
+                    {% endif %}
+                    {% if mood.notes %}
+                    <div class="mood-notes">{{ mood.notes }}</div>
                     {% endif %}
                 </div>
             </div>
             {% endfor %}
+            {% if not moods %}
+            <div style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                No mood entries yet. Start tracking your mood above!
+            </div>
+            {% endif %}
         </div>
     </div>
 

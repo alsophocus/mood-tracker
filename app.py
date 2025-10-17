@@ -35,6 +35,15 @@ except ImportError:
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
+# Add timezone conversion filter
+@app.template_filter('utc_to_local')
+def utc_to_local(utc_dt):
+    if not utc_dt:
+        return None
+    from datetime import timedelta
+    # Convert UTC to UTC-3
+    return utc_dt - timedelta(hours=3)
+
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:OsFZqHiUQXvawJnFgrWowJctGiWdyznH@postgres-thp7.railway.internal:5432/railway')
 ACTUAL_USE_POSTGRES = False  # Will be set in init_db
@@ -572,16 +581,22 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    cursor.execute('SELECT date, mood, notes, timestamp FROM moods WHERE user_id = %s ORDER BY date DESC LIMIT 5', 
+                  (current_user.id,))
+    
+    recent_moods = cursor.fetchall()
+    
+    # Get all moods for analytics
     cursor.execute('SELECT date, mood, notes FROM moods WHERE user_id = %s ORDER BY date DESC', 
                   (current_user.id,))
     
-    moods = cursor.fetchall()
+    all_moods = cursor.fetchall()
     
     # Calculate analytics
-    analytics = calculate_analytics(moods)
+    analytics = calculate_analytics(all_moods)
     
     conn.close()
-    return render_template('index.html', moods=moods, analytics=analytics, user=current_user)
+    return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
 @app.route('/save_mood', methods=['POST'])
 @login_required
