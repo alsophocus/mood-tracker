@@ -1,7 +1,7 @@
 import pytest
 import tempfile
 import os
-from app import app, init_db, get_db_connection
+from app import app, init_db
 from flask_login import login_user
 import factory
 from datetime import datetime, timedelta
@@ -9,13 +9,14 @@ from datetime import datetime, timedelta
 @pytest.fixture
 def client():
     """Create test client with temporary database"""
-    db_fd, app.config['DATABASE'] = tempfile.mkstemp()
+    db_fd, db_path = tempfile.mkstemp()
     app.config['TESTING'] = True
     app.config['SECRET_KEY'] = 'test-secret-key'
     app.config['WTF_CSRF_ENABLED'] = False
     
-    # Use SQLite for testing
-    os.environ.pop('DATABASE_URL', None)
+    # Use SQLite for testing - remove DATABASE_URL
+    if 'DATABASE_URL' in os.environ:
+        del os.environ['DATABASE_URL']
     
     with app.test_client() as client:
         with app.app_context():
@@ -23,29 +24,25 @@ def client():
         yield client
     
     os.close(db_fd)
-    os.unlink(app.config['DATABASE'])
+    os.unlink(db_path)
 
 @pytest.fixture
-def authenticated_client(client, test_user):
-    """Client with authenticated user"""
+def authenticated_client(client):
+    """Client with authenticated user session"""
     with client.session_transaction() as sess:
-        sess['_user_id'] = str(test_user.id)
+        sess['_user_id'] = '1'
         sess['_fresh'] = True
     return client
 
-class UserFactory(factory.Factory):
-    class Meta:
-        model = dict
-    
-    id = factory.Sequence(lambda n: n)
-    email = factory.Faker('email')
-    name = factory.Faker('name')
-    provider = 'google'
-
 @pytest.fixture
 def test_user():
-    """Create test user"""
-    return UserFactory()
+    """Create test user data"""
+    return {
+        'id': 1,
+        'email': 'test@example.com',
+        'name': 'Test User',
+        'provider': 'google'
+    }
 
 @pytest.fixture
 def mock_oauth_response():
