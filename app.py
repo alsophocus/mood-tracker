@@ -127,14 +127,25 @@ def login():
 
 @app.route('/auth/<provider>')
 def oauth_login(provider):
-    if provider == 'google':
-        redirect_uri = url_for('oauth_callback', provider='google', _external=True)
-        return google.authorize_redirect(redirect_uri)
-    elif provider == 'github':
-        redirect_uri = url_for('oauth_callback', provider='github', _external=True)
-        return github.authorize_redirect(redirect_uri)
-    else:
-        flash('Invalid provider')
+    try:
+        if provider == 'google':
+            if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
+                flash('Google OAuth not configured')
+                return redirect(url_for('login'))
+            redirect_uri = url_for('oauth_callback', provider='google', _external=True)
+            return google.authorize_redirect(redirect_uri)
+        elif provider == 'github':
+            if not os.environ.get('GITHUB_CLIENT_ID') or not os.environ.get('GITHUB_CLIENT_SECRET'):
+                flash('GitHub OAuth not configured')
+                return redirect(url_for('login'))
+            redirect_uri = url_for('oauth_callback', provider='github', _external=True)
+            return github.authorize_redirect(redirect_uri)
+        else:
+            flash('Invalid OAuth provider')
+            return redirect(url_for('login'))
+    except Exception as e:
+        app.logger.error(f'OAuth login error for {provider}: {str(e)}')
+        flash(f'OAuth configuration error: {str(e)}')
         return redirect(url_for('login'))
 
 @app.route('/callback/<provider>')
@@ -395,9 +406,6 @@ def export_pdf():
 @app.route('/debug/oauth')
 def debug_oauth():
     """Debug route to check OAuth configuration"""
-    if not app.debug and not os.environ.get('FLASK_ENV') == 'development':
-        return "Debug route disabled in production", 404
-    
     config_status = {
         'google_client_id': bool(os.environ.get('GOOGLE_CLIENT_ID')),
         'google_client_secret': bool(os.environ.get('GOOGLE_CLIENT_SECRET')),
@@ -405,6 +413,10 @@ def debug_oauth():
         'github_client_secret': bool(os.environ.get('GITHUB_CLIENT_SECRET')),
         'secret_key': bool(app.secret_key),
         'base_url': request.base_url.replace('/debug/oauth', ''),
+        'google_client_id_preview': os.environ.get('GOOGLE_CLIENT_ID', 'NOT_SET')[:20] + '...' if os.environ.get('GOOGLE_CLIENT_ID') else 'NOT_SET',
+        'github_client_id_preview': os.environ.get('GITHUB_CLIENT_ID', 'NOT_SET')[:20] + '...' if os.environ.get('GITHUB_CLIENT_ID') else 'NOT_SET',
+        'expected_google_redirect': url_for('oauth_callback', provider='google', _external=True),
+        'expected_github_redirect': url_for('oauth_callback', provider='github', _external=True),
     }
     
     return jsonify(config_status)
