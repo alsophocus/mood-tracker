@@ -601,6 +601,7 @@ def index():
 @app.route('/save_mood', methods=['POST'])
 @login_required
 def save_mood():
+    conn = None
     try:
         # Check if user is authenticated
         if not current_user.is_authenticated:
@@ -643,6 +644,12 @@ def save_mood():
         
     except Exception as e:
         print(f"❌ Error saving mood: {e}")
+        if conn:
+            try:
+                conn.rollback()  # Rollback the failed transaction
+                conn.close()
+            except:
+                pass
         import traceback
         traceback.print_exc()
         flash('Error saving mood. Please try again.')
