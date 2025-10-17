@@ -275,36 +275,43 @@ def oauth_callback(provider):
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        if USE_POSTGRES:
-            cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
-        else:
-            cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
-        
-        user_data = cursor.fetchone()
-        
-        if user_data:
+        try:
             if USE_POSTGRES:
-                user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
+                cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
             else:
-                user = User(user_data[0], user_data[1], user_data[2], user_data[3])
-        else:
-            # Create new user
-            if USE_POSTGRES:
-                cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
-                              (email, name, provider))
-                user_id = cursor.fetchone()['id']
-            else:
-                cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                              (email, name, provider))
-                user_id = cursor.lastrowid
+                cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
             
-            conn.commit()
-            user = User(user_id, email, name, provider)
-        
-        conn.close()
-        login_user(user)
-        flash(f'Successfully logged in with {provider.title()}!')
-        return redirect(url_for('index'))
+            user_data = cursor.fetchone()
+            
+            if user_data:
+                if USE_POSTGRES:
+                    user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
+                else:
+                    user = User(user_data[0], user_data[1], user_data[2], user_data[3])
+            else:
+                # Create new user
+                if USE_POSTGRES:
+                    cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
+                                  (email, name, provider))
+                    user_id = cursor.fetchone()['id']
+                else:
+                    cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
+                                  (email, name, provider))
+                    user_id = cursor.lastrowid
+                
+                conn.commit()
+                user = User(user_id, email, name, provider)
+            
+            conn.close()
+            login_user(user)
+            flash(f'Successfully logged in with {provider.title()}!')
+            return redirect(url_for('index'))
+            
+        except Exception as db_error:
+            conn.close()
+            app.logger.error(f'Database error during {provider} login: {str(db_error)}')
+            flash(f'Database error: {str(db_error)}')
+            return redirect(url_for('login'))
         
     except Exception as e:
         app.logger.error(f'OAuth callback error for {provider}: {str(e)}')
