@@ -698,6 +698,26 @@ def test_oauth():
     """
     return html
 
+@app.route('/analytics-health')
+@login_required
+def analytics_health():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Test analytics queries
+        if ACTUAL_USE_POSTGRES:
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = %s', (current_user.id,))
+        else:
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = ?', (current_user.id,))
+        
+        mood_count = cursor.fetchone()[0] if not ACTUAL_USE_POSTGRES else cursor.fetchone()['count']
+        conn.close()
+        
+        return {'status': 'healthy', 'mood_count': mood_count}
+    except Exception as e:
+        return {'status': 'error', 'error': str(e)}, 500
+
 @app.route('/health')
 def health_check():
     """Health check endpoint to verify database connection"""

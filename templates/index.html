@@ -405,21 +405,31 @@
             const dbStatus = document.getElementById('db-status');
             const analyticsStatus = document.getElementById('analytics-status');
             
+            // Check database health
             try {
-                const response = await fetch('/health');
-                const data = await response.json();
+                const dbResponse = await fetch('/health');
+                const dbData = await dbResponse.json();
                 
-                if (data.status === 'healthy') {
+                if (dbData.status === 'healthy') {
                     dbStatus.className = 'status-icon status-connected';
-                    analyticsStatus.className = 'status-icon status-connected';
                 } else {
                     dbStatus.className = 'status-icon status-disconnected';
+                }
+            } catch (error) {
+                dbStatus.className = 'status-icon status-disconnected';
+            }
+            
+            // Check analytics health
+            try {
+                const analyticsResponse = await fetch('/analytics-health');
+                const analyticsData = await analyticsResponse.json();
+                
+                if (analyticsData.status === 'healthy') {
+                    analyticsStatus.className = 'status-icon status-connected';
+                } else {
                     analyticsStatus.className = 'status-icon status-disconnected';
                 }
-                    
             } catch (error) {
-                // Database/server not responding
-                dbStatus.className = 'status-icon status-disconnected';
                 analyticsStatus.className = 'status-icon status-disconnected';
             }
         }
