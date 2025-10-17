@@ -691,6 +691,16 @@ def daily_patterns():
 @app.route('/export_pdf')
 @login_required
 def export_pdf():
+    import matplotlib
+    matplotlib.use('Agg')  # Use non-interactive backend
+    import matplotlib.pyplot as plt
+    import tempfile
+    import os
+    from reportlab.lib.colors import HexColor, black, white
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak
+    from reportlab.lib.units import inch
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -704,28 +714,58 @@ def export_pdf():
     moods = cursor.fetchall()
     conn.close()
     
-    # Create PDF
+    # Create PDF buffer
     buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        textColor=HexColor('#1e293b'),
+        alignment=1  # Center
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor=HexColor('#3b82f6'),
+        borderWidth=1,
+        borderColor=HexColor('#e2e8f0'),
+        borderPadding=8,
+        backColor=HexColor('#f8fafc')
+    )
+    
+    body_style = ParagraphStyle(
+        'CustomBody',
+        parent=styles['Normal'],
+        fontSize=11,
+        spaceAfter=6,
+        textColor=HexColor('#374151')
+    )
+    
+    # Story (content) list
+    story = []
     
     # Title
-    p.setFont("Helvetica-Bold", 24)
-    p.drawString(50, height - 50, f"Mood Report - {current_user.name}")
-    p.setFont("Helvetica", 12)
-    p.drawString(50, height - 80, f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    story.append(Paragraph(f"🌈 Mood Tracker Report", title_style))
+    story.append(Paragraph(f"<b>User:</b> {current_user.name}<br/><b>Generated:</b> {datetime.now().strftime('%B %d, %Y at %H:%M')}", body_style))
+    story.append(Spacer(1, 20))
     
-    y = height - 120
-    
-    # Analytics Summary
+    # Analytics calculations
     mood_values = {'super sad': 1, 'sad': 2, 'neutral': 3, 'good': 4, 'super good': 5}
     
-    # Calculate analytics
-    current_streak = 0
-    temp_streak = 0
-    total_entries = len(moods)
-    
     if moods:
+        # Calculate analytics
+        current_streak = 0
+        temp_streak = 0
+        total_entries = len(moods)
+        
         # Calculate current streak
         for row in reversed(list(moods)):
             mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
@@ -735,18 +775,20 @@ def export_pdf():
                 break
         current_streak = temp_streak
         
-        # Weekly patterns
+        # Weekly and monthly patterns
         weekly_patterns = defaultdict(list)
         monthly_data = defaultdict(list)
+        daily_data = []
         
         for row in moods:
             date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
             mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
             day_of_week = datetime.strptime(date_str, '%Y-%m-%d').strftime('%A')
-            month = date_str[:7]  # YYYY-MM format
+            month = date_str[:7]
             
             weekly_patterns[day_of_week].append(mood_values[mood])
             monthly_data[month].append(mood_values[mood])
+            daily_data.append((date_str, mood_values[mood]))
         
         # Best day calculation
         best_day = "N/A"
@@ -756,91 +798,134 @@ def export_pdf():
             if avg > best_avg:
                 best_avg = avg
                 best_day = day
-    
-    # Summary section
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, y, "Summary")
-    y -= 30
-    
-    p.setFont("Helvetica", 12)
-    p.drawString(70, y, f"• Total Mood Entries: {total_entries}")
-    y -= 20
-    p.drawString(70, y, f"• Current Good Mood Streak: {current_streak} days")
-    y -= 20
-    if moods:
-        p.drawString(70, y, f"• Best Day of Week: {best_day}")
-        y -= 20
+        
         avg_mood = sum(mood_values[row['mood'] if ACTUAL_USE_POSTGRES else row[1]] for row in moods) / len(moods)
-        p.drawString(70, y, f"• Overall Average Mood: {avg_mood:.2f}/5.0")
-    y -= 40
-    
-    # Weekly Patterns section
-    if moods:
-        p.setFont("Helvetica-Bold", 16)
-        p.drawString(50, y, "Weekly Patterns")
-        y -= 30
         
-        p.setFont("Helvetica", 12)
-        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        for day in days:
-            if day in weekly_patterns:
-                avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
-                mood_labels = ['', 'Super Sad', 'Sad', 'Neutral', 'Good', 'Super Good']
-                closest_mood = mood_labels[round(avg)]
-                p.drawString(70, y, f"• {day}: {avg:.2f} ({closest_mood})")
-                y -= 20
-        y -= 20
-    
-    # Monthly Trends section
-    if moods and monthly_data:
-        p.setFont("Helvetica-Bold", 16)
-        p.drawString(50, y, "Monthly Trends")
-        y -= 30
+        # Summary section
+        story.append(Paragraph("📊 Summary", heading_style))
+        summary_text = f"""
+        <b>Total Mood Entries:</b> {total_entries}<br/>
+        <b>Current Good Mood Streak:</b> {current_streak} days<br/>
+        <b>Best Day of Week:</b> {best_day}<br/>
+        <b>Overall Average Mood:</b> {avg_mood:.2f}/5.0
+        """
+        story.append(Paragraph(summary_text, body_style))
+        story.append(Spacer(1, 20))
         
-        p.setFont("Helvetica", 12)
-        sorted_months = sorted(monthly_data.keys())[-6:]  # Last 6 months
-        for month in sorted_months:
-            avg = sum(monthly_data[month]) / len(monthly_data[month])
-            p.drawString(70, y, f"• {month}: {avg:.2f} average mood ({len(monthly_data[month])} entries)")
-            y -= 20
-            if y < 100:  # Start new page if needed
-                p.showPage()
-                y = height - 50
-        y -= 20
-    
-    # Mood History section
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, y, "Recent Mood History")
-    y -= 30
-    
-    p.setFont("Helvetica", 10)
-    for i, row in enumerate(moods[:20]):  # Last 20 entries
-        if y < 100:  # Start new page if needed
-            p.showPage()
-            y = height - 50
+        # Create charts
+        plt.style.use('default')
+        fig_size = (8, 4)
+        
+        # Weekly patterns chart
+        if weekly_patterns:
+            fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
+            days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            weekly_averages = []
             
-        date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
-        mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
-        notes = row['notes'] if ACTUAL_USE_POSTGRES else row[2]
+            for day in days:
+                if day in weekly_patterns:
+                    avg = sum(weekly_patterns[day]) / len(weekly_patterns[day])
+                    weekly_averages.append(avg)
+                else:
+                    weekly_averages.append(3)
+            
+            ax.plot(days, weekly_averages, marker='o', linewidth=3, markersize=8, 
+                   color='#f59e0b', markerfacecolor='#f59e0b', markeredgecolor='white', markeredgewidth=2)
+            ax.fill_between(days, weekly_averages, alpha=0.3, color='#f59e0b')
+            ax.set_ylim(1, 5)
+            ax.set_ylabel('Average Mood', fontsize=12, color='#374151')
+            ax.set_title('Weekly Patterns', fontsize=14, fontweight='bold', color='#1e293b', pad=20)
+            ax.grid(True, alpha=0.3)
+            ax.set_facecolor('#f8fafc')
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            
+            # Save chart
+            weekly_chart = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+            plt.savefig(weekly_chart.name, dpi=150, bbox_inches='tight', facecolor='white')
+            plt.close()
+            
+            story.append(Paragraph("📅 Weekly Patterns", heading_style))
+            story.append(Image(weekly_chart.name, width=6*inch, height=3*inch))
+            story.append(Spacer(1, 20))
         
-        p.drawString(50, y, f"{date_str}: {mood.title()}")
-        y -= 15
+        # Monthly trends chart
+        if monthly_data:
+            fig, ax = plt.subplots(figsize=fig_size, facecolor='white')
+            sorted_months = sorted(monthly_data.keys())[-12:]  # Last 12 months
+            monthly_averages = []
+            
+            for month in sorted_months:
+                avg = sum(monthly_data[month]) / len(monthly_data[month])
+                monthly_averages.append(avg)
+            
+            ax.plot(sorted_months, monthly_averages, marker='o', linewidth=3, markersize=8,
+                   color='#3b82f6', markerfacecolor='#3b82f6', markeredgecolor='white', markeredgewidth=2)
+            ax.fill_between(sorted_months, monthly_averages, alpha=0.3, color='#3b82f6')
+            ax.set_ylim(1, 5)
+            ax.set_ylabel('Average Mood', fontsize=12, color='#374151')
+            ax.set_title('Monthly Trends', fontsize=14, fontweight='bold', color='#1e293b', pad=20)
+            ax.grid(True, alpha=0.3)
+            ax.set_facecolor('#f8fafc')
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            
+            # Save chart
+            monthly_chart = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+            plt.savefig(monthly_chart.name, dpi=150, bbox_inches='tight', facecolor='white')
+            plt.close()
+            
+            story.append(Paragraph("📈 Monthly Trends", heading_style))
+            story.append(Image(monthly_chart.name, width=6*inch, height=3*inch))
+            story.append(Spacer(1, 20))
         
-        if notes:
-            # Wrap long notes
-            notes_text = notes[:80] + "..." if len(notes) > 80 else notes
-            p.drawString(70, y, f"Notes: {notes_text}")
-            y -= 15
-        y -= 5
+        # Recent mood history
+        story.append(Paragraph("📝 Recent Mood History", heading_style))
+        for i, row in enumerate(moods[:15]):  # Last 15 entries
+            date_str = str(row['date']) if ACTUAL_USE_POSTGRES else row[0]
+            mood = row['mood'] if ACTUAL_USE_POSTGRES else row[1]
+            notes = row['notes'] if ACTUAL_USE_POSTGRES else row[2]
+            
+            mood_emoji = {'super sad': '😢', 'sad': '😔', 'neutral': '😐', 'good': '😊', 'super good': '😄'}
+            entry_text = f"<b>{date_str}</b> {mood_emoji.get(mood, '😐')} {mood.title()}"
+            
+            if notes:
+                notes_text = notes[:100] + "..." if len(notes) > 100 else notes
+                entry_text += f"<br/><i>Notes: {notes_text}</i>"
+            
+            story.append(Paragraph(entry_text, body_style))
+            story.append(Spacer(1, 8))
     
-    # Add footer
-    p.setFont("Helvetica", 8)
-    p.drawString(50, 30, f"Generated by Mood Tracker - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    else:
+        story.append(Paragraph("No mood data available yet. Start tracking your moods to see analytics!", body_style))
     
-    p.save()
+    # Footer
+    story.append(Spacer(1, 30))
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=HexColor('#6b7280'),
+        alignment=1
+    )
+    story.append(Paragraph(f"Generated by Mood Tracker • {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", footer_style))
+    
+    # Build PDF
+    doc.build(story)
+    
+    # Clean up temporary files
+    try:
+        if 'weekly_chart' in locals():
+            os.unlink(weekly_chart.name)
+        if 'monthly_chart' in locals():
+            os.unlink(monthly_chart.name)
+    except:
+        pass
+    
     buffer.seek(0)
-    
-    return send_file(buffer, as_attachment=True, download_name=f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf', mimetype='application/pdf')
+    return send_file(buffer, as_attachment=True, 
+                    download_name=f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf', 
+                    mimetype='application/pdf')
     
     return send_file(buffer, as_attachment=True, download_name='mood_report.pdf', mimetype='application/pdf')
 
