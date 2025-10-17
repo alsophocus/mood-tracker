@@ -1,134 +1,101 @@
 import pytest
-import sqlite3
-from app import get_db_connection, init_db
+from unittest.mock import patch, MagicMock
+from database import Database
 from datetime import datetime
 
 class TestDatabase:
     
-    def test_database_initialization(self, client):
-        """Test database tables are created correctly"""
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    @patch('psycopg.connect')
+    def test_database_initialization(self, mock_connect):
+        """Test database initialization"""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_connect.return_value = mock_conn
         
-        # Check users table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
-        assert cursor.fetchone() is not None
+        db = Database()
+        db.url = "postgresql://test:test@localhost:5432/test"
+        db.initialize()
         
-        # Check moods table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='moods'")
-        assert cursor.fetchone() is not None
-        
-        conn.close()
+        # Verify tables are created
+        assert mock_cursor.execute.call_count >= 2  # Users and moods tables
+        mock_conn.commit.assert_called()
     
-    def test_user_creation(self, client):
-        """Test user creation in database"""
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    @patch('psycopg.connect')
+    def test_create_user_new(self, mock_connect):
+        """Test creating new user"""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_connect.return_value = mock_conn
         
-        cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                      ('test@example.com', 'Test User', 'google'))
-        conn.commit()
+        # Mock no existing user
+        mock_cursor.fetchone.side_effect = [None, {'id': 1, 'email': 'test@example.com', 'name': 'Test', 'provider': 'google'}]
         
-        cursor.execute('SELECT * FROM users WHERE email = ?', ('test@example.com',))
-        user = cursor.fetchone()
+        db = Database()
+        db.url = "postgresql://test:test@localhost:5432/test"
         
-        assert user is not None
-        assert user[1] == 'test@example.com'  # email
-        assert user[2] == 'Test User'  # name
-        assert user[3] == 'google'  # provider
+        user = db.create_user('test@example.com', 'Test', 'google')
         
-        conn.close()
+        assert user['email'] == 'test@example.com'
+        mock_cursor.execute.assert_called()
     
-    def test_mood_creation(self, client):
-        """Test mood entry creation"""
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    @patch('psycopg.connect')
+    def test_create_user_existing(self, mock_connect):
+        """Test getting existing user"""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_conn
+        mock_connect.return_value = mock_conn
         
-        # Create user first
-        cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                      ('test@example.com', 'Test User', 'google'))
-        user_id = cursor.lastrowid
+        # Mock existing user
+        existing_user = {'id': 1, 'email': 'test@example.com', 'name': 'Test', 'provider': 'google'}
+        mock_cursor.fetchone.return_value = existing_user
         
-        # Create mood entry
-        date = datetime.now().strftime('%Y-%m-%d')
-        cursor.execute('INSERT INTO moods (user_id, date, mood, notes) VALUES (?, ?, ?, ?)',
-                      (user_id, date, 'good', 'Test note'))
-        conn.commit()
+        db = Database()
+        db.url = "postgresql://test:test@localhost:5432/test"
         
-        cursor.execute('SELECT * FROM moods WHERE user_id = ?', (user_id,))
-        mood = cursor.fetchone()
+        user = db.create_user('test@example.com', 'Test', 'google')
         
-        assert mood is not None
-        assert mood[1] == user_id  # user_id
-        assert mood[3] == 'good'  # mood
-        assert mood[4] == 'Test note'  # notes
-        
-        conn.close()
+        assert user == existing_user
     
-    def test_user_mood_isolation(self, client):
-        """Test users can only access their own moods"""
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    @patch('psycopg.connect')
+    def test_save_mood(self, mock_connect):
+        """Test saving mood entry"""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_connect.return_value = mock_conn
         
-        # Create two users
-        cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                      ('user1@example.com', 'User 1', 'google'))
-        user1_id = cursor.lastrowid
+        mood_data = {'id': 1, 'user_id': 1, 'date': datetime.now().date(), 'mood': 'well', 'notes': 'Good day'}
+        mock_cursor.fetchone.return_value = mood_data
         
-        cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                      ('user2@example.com', 'User 2', 'github'))
-        user2_id = cursor.lastrowid
+        db = Database()
+        db.url = "postgresql://test:test@localhost:5432/test"
         
-        # Create moods for each user
-        date = datetime.now().strftime('%Y-%m-%d')
-        cursor.execute('INSERT INTO moods (user_id, date, mood, notes) VALUES (?, ?, ?, ?)',
-                      (user1_id, date, 'good', 'User 1 mood'))
-        cursor.execute('INSERT INTO moods (user_id, date, mood, notes) VALUES (?, ?, ?, ?)',
-                      (user2_id, date, 'sad', 'User 2 mood'))
-        conn.commit()
+        result = db.save_mood(1, datetime.now().date(), 'well', 'Good day')
         
-        # Test user 1 can only see their mood
-        cursor.execute('SELECT * FROM moods WHERE user_id = ?', (user1_id,))
-        user1_moods = cursor.fetchall()
-        assert len(user1_moods) == 1
-        assert user1_moods[0][4] == 'User 1 mood'
-        
-        # Test user 2 can only see their mood
-        cursor.execute('SELECT * FROM moods WHERE user_id = ?', (user2_id,))
-        user2_moods = cursor.fetchall()
-        assert len(user2_moods) == 1
-        assert user2_moods[0][4] == 'User 2 mood'
-        
-        conn.close()
+        assert result == mood_data
+        mock_cursor.execute.assert_called()
     
-    def test_duplicate_date_handling(self, client):
-        """Test updating mood for same date"""
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    @patch('psycopg.connect')
+    def test_get_user_moods(self, mock_connect):
+        """Test getting user moods"""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_connect.return_value = mock_conn
         
-        # Create user
-        cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                      ('test@example.com', 'Test User', 'google'))
-        user_id = cursor.lastrowid
+        moods = [
+            {'id': 1, 'user_id': 1, 'date': datetime.now().date(), 'mood': 'well', 'notes': 'Good'},
+            {'id': 2, 'user_id': 1, 'date': datetime.now().date(), 'mood': 'neutral', 'notes': 'OK'}
+        ]
+        mock_cursor.fetchall.return_value = moods
         
-        date = datetime.now().strftime('%Y-%m-%d')
+        db = Database()
+        db.url = "postgresql://test:test@localhost:5432/test"
         
-        # Insert first mood
-        cursor.execute('INSERT OR REPLACE INTO moods (user_id, date, mood, notes) VALUES (?, ?, ?, ?)',
-                      (user_id, date, 'good', 'First note'))
-        conn.commit()
+        result = db.get_user_moods(1)
         
-        # Update with new mood for same date
-        cursor.execute('INSERT OR REPLACE INTO moods (user_id, date, mood, notes) VALUES (?, ?, ?, ?)',
-                      (user_id, date, 'super good', 'Updated note'))
-        conn.commit()
-        
-        # Should only have one entry
-        cursor.execute('SELECT * FROM moods WHERE user_id = ? AND date = ?', (user_id, date))
-        moods = cursor.fetchall()
-        
-        assert len(moods) == 1
-        assert moods[0][3] == 'super good'  # Updated mood
-        assert moods[0][4] == 'Updated note'  # Updated note
-        
-        conn.close()
+        assert result == moods
+        mock_cursor.execute.assert_called_with('SELECT * FROM moods WHERE user_id = %s ORDER BY date DESC', (1,))

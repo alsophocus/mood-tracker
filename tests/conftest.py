@@ -1,64 +1,71 @@
 import pytest
 import tempfile
 import os
-from app import app, init_db
-from flask_login import login_user
-import factory
-from datetime import datetime, timedelta
+from unittest.mock import patch, MagicMock
+from app import create_app
+from database import Database
+from auth import User
 
 @pytest.fixture
-def client():
-    """Create test client with temporary database"""
-    db_fd, db_path = tempfile.mkstemp()
-    app.config['TESTING'] = True
-    app.config['SECRET_KEY'] = 'test-secret-key'
-    app.config['WTF_CSRF_ENABLED'] = False
+def app():
+    """Create test app with in-memory database"""
+    # Mock database URL for testing
+    test_db_url = "postgresql://test:test@localhost:5432/test_db"
     
-    # Use SQLite for testing - remove DATABASE_URL
-    if 'DATABASE_URL' in os.environ:
-        del os.environ['DATABASE_URL']
-    
-    with app.test_client() as client:
-        with app.app_context():
-            init_db()
-        yield client
-    
-    os.close(db_fd)
-    os.unlink(db_path)
+    with patch.dict(os.environ, {
+        'DATABASE_URL': test_db_url,
+        'SECRET_KEY': 'test-secret-key',
+        'GOOGLE_CLIENT_ID': 'test-google-id',
+        'GOOGLE_CLIENT_SECRET': 'test-google-secret',
+        'FLASK_DEBUG': 'true'
+    }):
+        app = create_app()
+        app.config['TESTING'] = True
+        yield app
 
 @pytest.fixture
-def authenticated_client(client):
-    """Client with authenticated user session"""
+def client(app):
+    """Create test client"""
+    return app.test_client()
+
+@pytest.fixture
+def mock_db():
+    """Mock database for testing"""
+    with patch('database.db') as mock:
+        mock.get_connection = MagicMock()
+        mock.initialize = MagicMock()
+        mock.create_user = MagicMock()
+        mock.get_user = MagicMock()
+        mock.save_mood = MagicMock()
+        mock.get_user_moods = MagicMock()
+        yield mock
+
+@pytest.fixture
+def test_user():
+    """Create test user"""
+    return User(1, 'test@example.com', 'Test User', 'google')
+
+@pytest.fixture
+def authenticated_client(client, test_user):
+    """Client with authenticated user"""
     with client.session_transaction() as sess:
-        sess['_user_id'] = '1'
+        sess['_user_id'] = str(test_user.id)
         sess['_fresh'] = True
     return client
 
 @pytest.fixture
-def test_user():
-    """Create test user data"""
-    return {
-        'id': 1,
-        'email': 'test@example.com',
-        'name': 'Test User',
-        'provider': 'google'
-    }
-
-@pytest.fixture
-def mock_oauth_response():
-    """Mock OAuth provider response"""
-    return {
-        'userinfo': {
-            'email': 'test@example.com',
-            'name': 'Test User'
-        }
-    }
-
-@pytest.fixture
 def sample_moods():
-    """Sample mood data for testing"""
+    """Sample mood data"""
+    from datetime import datetime, timedelta
     base_date = datetime.now().date()
     return [
-        {'date': base_date - timedelta(days=i), 'mood': mood, 'notes': f'Note {i}'}
-        for i, mood in enumerate(['super good', 'good', 'neutral', 'sad', 'super sad'])
+        {
+            'id': i,
+            'user_id': 1,
+            'date': base_date - timedelta(days=i),
+            'mood': mood,
+            'notes': f'Note {i}',
+            'timestamp': datetime.now()
+        }
+        for i, mood in enumerate(['very well', 'well', 'neutral', 'bad', 'very bad'])
     ]
