@@ -156,10 +156,22 @@ def oauth_login(provider):
             if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
                 flash('Google OAuth not configured')
                 return redirect(url_for('login'))
+            
+            # Manual Google OAuth - bypass Authlib
+            import urllib.parse
             redirect_uri = url_for('oauth_callback', provider='google', _external=True, _scheme='https')
-            app.logger.info(f"Google OAuth redirect URI: {redirect_uri}")
-            print(f"DEBUG: Google OAuth redirect URI: {redirect_uri}")
-            return google.authorize_redirect(redirect_uri)
+            
+            params = {
+                'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
+                'redirect_uri': redirect_uri,
+                'scope': 'openid email profile',
+                'response_type': 'code',
+                'access_type': 'offline'
+            }
+            
+            auth_url = 'https://accounts.google.com/o/oauth2/auth?' + urllib.parse.urlencode(params)
+            return redirect(auth_url)
+            
         elif provider == 'github':
             if not os.environ.get('GITHUB_CLIENT_ID') or not os.environ.get('GITHUB_CLIENT_SECRET'):
                 flash('GitHub OAuth not configured')
@@ -178,27 +190,52 @@ def oauth_login(provider):
 def oauth_callback(provider):
     try:
         if provider == 'google':
+            # Manual Google OAuth callback - bypass Authlib
             try:
-                token = google.authorize_access_token()
-                if not token or 'access_token' not in token:
-                    flash('Failed to get access token from Google')
+                code = request.args.get('code')
+                if not code:
+                    flash('No authorization code received from Google')
                     return redirect(url_for('login'))
                 
-                # Get user info directly from Google's userinfo endpoint
+                # Exchange code for access token
                 import requests
-                headers = {'Authorization': f'Bearer {token["access_token"]}'}
-                resp = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', headers=headers)
+                redirect_uri = url_for('oauth_callback', provider='google', _external=True, _scheme='https')
                 
-                if resp.status_code != 200:
+                token_data = {
+                    'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
+                    'client_secret': os.environ.get('GOOGLE_CLIENT_SECRET'),
+                    'code': code,
+                    'grant_type': 'authorization_code',
+                    'redirect_uri': redirect_uri
+                }
+                
+                token_response = requests.post('https://oauth2.googleapis.com/token', data=token_data)
+                
+                if token_response.status_code != 200:
+                    flash('Failed to exchange code for access token')
+                    return redirect(url_for('login'))
+                
+                token_json = token_response.json()
+                access_token = token_json.get('access_token')
+                
+                if not access_token:
+                    flash('No access token received from Google')
+                    return redirect(url_for('login'))
+                
+                # Get user info
+                headers = {'Authorization': f'Bearer {access_token}'}
+                user_response = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', headers=headers)
+                
+                if user_response.status_code != 200:
                     flash('Failed to get user information from Google')
                     return redirect(url_for('login'))
                 
-                user_info = resp.json()
+                user_info = user_response.json()
                 email = user_info.get('email')
                 name = user_info.get('name')
                 
             except Exception as e:
-                app.logger.error(f'Google OAuth error: {str(e)}')
+                app.logger.error(f'Manual Google OAuth error: {str(e)}')
                 flash(f'Google authentication failed: {str(e)}')
                 return redirect(url_for('login'))
             
