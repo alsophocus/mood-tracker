@@ -37,7 +37,11 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-producti
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-USE_POSTGRES = DATABASE_URL is not None and POSTGRES_AVAILABLE
+# Only use PostgreSQL if we have a valid DATABASE_URL and psycopg2 is available
+USE_POSTGRES = (DATABASE_URL is not None and 
+                POSTGRES_AVAILABLE and 
+                DATABASE_URL.startswith('postgresql://') and
+                'port' not in DATABASE_URL or DATABASE_URL.count(':') >= 2)
 
 # OAuth configuration
 oauth = OAuth(app)
@@ -98,7 +102,15 @@ def load_user(user_id):
 
 def get_db_connection():
     if USE_POSTGRES:
-        return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        try:
+            return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        except Exception as e:
+            print(f"PostgreSQL connection failed: {e}")
+            print("Falling back to SQLite...")
+            # Fall back to SQLite if PostgreSQL fails
+            conn = sqlite3.connect('mood.db')
+            conn.row_factory = sqlite3.Row
+            return conn
     else:
         conn = sqlite3.connect('mood.db')
         conn.row_factory = sqlite3.Row
