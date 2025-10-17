@@ -54,7 +54,10 @@ google = oauth.register(
     access_token_url='https://oauth2.googleapis.com/token',
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     api_base_url='https://www.googleapis.com/oauth2/v2/',
-    client_kwargs={'scope': 'openid email profile'},
+    client_kwargs={
+        'scope': 'openid email profile',
+        'token_endpoint_auth_method': 'client_secret_post'
+    },
 )
 
 # GitHub OAuth  
@@ -175,13 +178,13 @@ def oauth_login(provider):
 def oauth_callback(provider):
     try:
         if provider == 'google':
-            token = google.authorize_access_token()
-            if not token:
-                flash('Failed to get access token from Google')
-                return redirect(url_for('login'))
-            
-            # Get user info directly from Google's userinfo endpoint
             try:
+                token = google.authorize_access_token()
+                if not token or 'access_token' not in token:
+                    flash('Failed to get access token from Google')
+                    return redirect(url_for('login'))
+                
+                # Get user info directly from Google's userinfo endpoint
                 import requests
                 headers = {'Authorization': f'Bearer {token["access_token"]}'}
                 resp = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', headers=headers)
@@ -193,8 +196,10 @@ def oauth_callback(provider):
                 user_info = resp.json()
                 email = user_info.get('email')
                 name = user_info.get('name')
+                
             except Exception as e:
-                flash(f'Error getting user info from Google: {str(e)}')
+                app.logger.error(f'Google OAuth error: {str(e)}')
+                flash(f'Google authentication failed: {str(e)}')
                 return redirect(url_for('login'))
             
         elif provider == 'github':
