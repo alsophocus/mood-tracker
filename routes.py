@@ -85,14 +85,36 @@ def health_check():
         return {
             'status': 'healthy',
             'database': f"PostgreSQL: {version}",
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'database_url_set': bool(db.url),
+            'database_initialized': db._initialized
         }
     except Exception as e:
         return {
             'status': 'error',
             'error': str(e),
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'database_url_set': bool(db.url),
+            'database_initialized': db._initialized
         }, 500
+
+@main_bp.route('/debug')
+def debug_info():
+    """Debug information endpoint"""
+    import os
+    return {
+        'environment_vars': {
+            'DATABASE_URL': 'SET' if os.environ.get('DATABASE_URL') else 'NOT SET',
+            'GOOGLE_CLIENT_ID': 'SET' if os.environ.get('GOOGLE_CLIENT_ID') else 'NOT SET',
+            'SECRET_KEY': 'SET' if os.environ.get('SECRET_KEY') else 'NOT SET',
+            'PORT': os.environ.get('PORT', 'NOT SET')
+        },
+        'config': {
+            'database_url_configured': bool(db.url),
+            'database_initialized': db._initialized
+        },
+        'timestamp': datetime.now().isoformat()
+    }
 
 @main_bp.route('/analytics-health')
 @login_required

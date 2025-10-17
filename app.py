@@ -16,16 +16,25 @@ def create_app():
     try:
         Config.validate()
     except ValueError as e:
-        print(f"Configuration error: {e}")
-        raise
+        print(f"❌ Configuration error: {e}")
+        # In production, we might want to continue with limited functionality
+        if not Config.DATABASE_URL:
+            raise  # Can't continue without database
     
-    # Initialize database
+    # Initialize database (with fallback for debugging)
     try:
         db.initialize()
         print("✅ Database initialized successfully")
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
-        raise
+        print(f"   DATABASE_URL: {Config.DATABASE_URL[:50] if Config.DATABASE_URL else 'NOT SET'}...")
+        
+        # In deployment, we might want to continue without database for debugging
+        import os
+        if os.environ.get('SKIP_DB_INIT') == 'true':
+            print("⚠️ Skipping database initialization (SKIP_DB_INIT=true)")
+        else:
+            raise
     
     # Initialize authentication
     init_auth(app)
@@ -48,7 +57,10 @@ def create_app():
     
     @app.errorhandler(500)
     def internal_error(error):
-        return {'error': 'Internal server error'}, 500
+        print(f"Internal server error: {error}")
+        import traceback
+        traceback.print_exc()
+        return {'error': 'Internal server error', 'details': str(error)}, 500
     
     return app
 

@@ -26,39 +26,46 @@ class Database:
         """Initialize database schema"""
         if self._initialized:
             return
+        
+        if not self.url:
+            raise ValueError("DATABASE_URL is required but not set")
             
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            
-            # Users table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id SERIAL PRIMARY KEY,
-                    email TEXT UNIQUE NOT NULL,
-                    name TEXT,
-                    provider TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
-            
-            # Moods table
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS moods (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                    date DATE NOT NULL,
-                    mood TEXT NOT NULL,
-                    notes TEXT,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE(user_id, date)
-                )
-            ''')
-            
-            # Indexes for performance
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_moods_user_date ON moods(user_id, date)')
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_moods_timestamp ON moods(timestamp)')
-            
-        self._initialized = True
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Users table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS users (
+                        id SERIAL PRIMARY KEY,
+                        email TEXT UNIQUE NOT NULL,
+                        name TEXT,
+                        provider TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                
+                # Moods table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS moods (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                        date DATE NOT NULL,
+                        mood TEXT NOT NULL,
+                        notes TEXT,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(user_id, date)
+                    )
+                ''')
+                
+                # Indexes for performance
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_moods_user_date ON moods(user_id, date)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_moods_timestamp ON moods(timestamp)')
+                
+            self._initialized = True
+        except Exception as e:
+            print(f"Database initialization error: {e}")
+            raise
     
     def create_user(self, email, name, provider):
         """Create or get user"""

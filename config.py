@@ -20,7 +20,18 @@ class Config:
     @classmethod
     def validate(cls):
         """Validate required configuration"""
-        required = ['DATABASE_URL', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
+        required = ['DATABASE_URL']
         missing = [key for key in required if not getattr(cls, key)]
         if missing:
             raise ValueError(f"Missing required config: {', '.join(missing)}")
+        
+        # Warn about missing OAuth but don't fail
+        oauth_missing = []
+        if not cls.GOOGLE_CLIENT_ID:
+            oauth_missing.append('GOOGLE_CLIENT_ID')
+        if not cls.GOOGLE_CLIENT_SECRET:
+            oauth_missing.append('GOOGLE_CLIENT_SECRET')
+        
+        if oauth_missing:
+            print(f"⚠️ Warning: OAuth not configured: {', '.join(oauth_missing)}")
+            print("   Authentication will not work without OAuth credentials")
