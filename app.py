@@ -763,7 +763,7 @@ def daily_patterns():
     moods = cursor.fetchall()
     conn.close()
     
-    # Convert each mood entry to hourly data points
+    # Convert each mood entry to precise hourly data points
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     hourly_data = []
     
@@ -780,10 +780,12 @@ def daily_patterns():
             
             # Convert to UTC-3 (subtract 3 hours from UTC)
             utc_minus_3 = timestamp - timedelta(hours=3)
-            hour = utc_minus_3.hour
+            
+            # Calculate precise time as decimal hours (includes minutes and seconds)
+            precise_hour = utc_minus_3.hour + (utc_minus_3.minute / 60.0) + (utc_minus_3.second / 3600.0)
             
             hourly_data.append({
-                'hour': hour,
+                'hour': round(precise_hour, 3),  # Precise to seconds
                 'mood_value': mood_values[mood]
             })
     

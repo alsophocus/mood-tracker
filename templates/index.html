@@ -802,24 +802,28 @@
             .then(data => {
                 const ctx = document.getElementById('dailyChart').getContext('2d');
                 
+                // Sort data by hour to ensure proper line connection
+                const sortedData = data.hourly_data.sort((a, b) => a.hour - b.hour);
+                
                 // Convert hourly data to chart format
-                const chartData = data.hourly_data.map(item => ({
+                const chartData = sortedData.map(item => ({
                     x: item.hour,
                     y: item.mood_value
                 }));
                 
                 new Chart(ctx, {
-                    type: 'line',
+                    type: 'scatter',
                     data: {
                         datasets: [{
                             label: 'Mood by Hour',
                             data: chartData,
                             borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            backgroundColor: '#10b981',
                             pointBackgroundColor: '#10b981',
                             pointBorderColor: '#10b981',
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            showLine: true,
                             tension: 0.3,
                             borderWidth: 2,
                             fill: false
