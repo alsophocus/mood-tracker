@@ -769,7 +769,7 @@ def daily_patterns():
     moods = cursor.fetchall()
     conn.close()
     
-    # Group by hour of day using actual timestamps
+    # Group by hour of day using UTC-3 timezone
     mood_values = {'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4, 'slightly well': 5, 'well': 6, 'very well': 7}
     hourly_patterns = defaultdict(list)
     
@@ -778,13 +778,16 @@ def daily_patterns():
         mood = row['mood']
         
         if timestamp:
-            # Convert to local time and extract hour
+            from datetime import datetime, timedelta
+            
+            # Convert to UTC-3 timezone
             if isinstance(timestamp, str):
-                from datetime import datetime
                 timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             
-            # Extract hour (0-23) from timestamp
-            hour = timestamp.hour
+            # Convert to UTC-3 (subtract 3 hours from UTC)
+            utc_minus_3 = timestamp - timedelta(hours=3)
+            hour = utc_minus_3.hour
+            
             hourly_patterns[hour].append(mood_values[mood])
     
     # Calculate average mood for each hour
