@@ -37,8 +37,20 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-producti
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-# Force SQLite for now since PostgreSQL connection is problematic
-USE_POSTGRES = False  # Temporarily disabled
+# Re-enable PostgreSQL with better validation
+USE_POSTGRES = (DATABASE_URL is not None and 
+                POSTGRES_AVAILABLE and 
+                DATABASE_URL.startswith('postgresql://'))
+
+print(f"=== Database Configuration ===")
+print(f"DATABASE_URL present: {bool(DATABASE_URL)}")
+print(f"PostgreSQL available: {POSTGRES_AVAILABLE}")
+print(f"Using PostgreSQL: {USE_POSTGRES}")
+if DATABASE_URL:
+    # Hide password but show structure
+    safe_url = DATABASE_URL.split('@')[0].split(':')[:-1] + ['***@'] + DATABASE_URL.split('@')[1:]
+    print(f"DATABASE_URL format: {''.join(safe_url) if len(DATABASE_URL.split('@')) > 1 else 'Invalid format'}")
+print("===============================")
 
 # OAuth configuration
 oauth = OAuth(app)
@@ -103,15 +115,24 @@ def load_user(user_id):
 def get_db_connection():
     if USE_POSTGRES:
         try:
-            return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+            # Parse and validate DATABASE_URL
+            if not DATABASE_URL or not DATABASE_URL.startswith('postgresql://'):
+                raise ValueError("Invalid DATABASE_URL format")
+            
+            print(f"Attempting PostgreSQL connection...")
+            conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+            print("✅ PostgreSQL connection successful")
+            return conn
+            
         except Exception as e:
-            print(f"PostgreSQL connection failed: {e}")
-            print("Falling back to SQLite...")
+            print(f"❌ PostgreSQL connection failed: {e}")
+            print("🔄 Falling back to SQLite...")
             # Fall back to SQLite if PostgreSQL fails
             conn = sqlite3.connect('mood.db')
             conn.row_factory = sqlite3.Row
             return conn
     else:
+        print("📁 Using SQLite database")
         conn = sqlite3.connect('mood.db')
         conn.row_factory = sqlite3.Row
         return conn
@@ -120,27 +141,39 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    if USE_POSTGRES:
-        # Create users table
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
-                         (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
-        # Create moods table with user_id
-        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
-                         (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
-                          date DATE, mood TEXT, notes TEXT,
-                          UNIQUE(user_id, date))''')
-    else:
-        # Create users table
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
-                         (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
-        # Create moods table with user_id
-        cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
-                         (id INTEGER PRIMARY KEY, user_id INTEGER, date TEXT, mood TEXT, notes TEXT,
-                          FOREIGN KEY (user_id) REFERENCES users (id),
-                          UNIQUE(user_id, date))''')
-    
-    conn.commit()
-    conn.close()
+    try:
+        # Detect if we're actually using PostgreSQL by testing the connection
+        cursor.execute("SELECT version()")
+        version_result = cursor.fetchone()
+        is_postgres = 'PostgreSQL' in str(version_result)
+        
+        print(f"Database type detected: {'PostgreSQL' if is_postgres else 'SQLite'}")
+        
+        if is_postgres:
+            # PostgreSQL schema
+            cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                             (id SERIAL PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+            cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                             (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), 
+                              date DATE, mood TEXT, notes TEXT,
+                              UNIQUE(user_id, date))''')
+        else:
+            # SQLite schema
+            cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+                             (id INTEGER PRIMARY KEY, email TEXT UNIQUE, name TEXT, provider TEXT)''')
+            cursor.execute('''CREATE TABLE IF NOT EXISTS moods 
+                             (id INTEGER PRIMARY KEY, user_id INTEGER, date TEXT, mood TEXT, notes TEXT,
+                              FOREIGN KEY (user_id) REFERENCES users (id),
+                              UNIQUE(user_id, date))''')
+        
+        conn.commit()
+        print("✅ Database tables initialized successfully")
+        
+    except Exception as e:
+        print(f"❌ Database initialization error: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
 
 @app.route('/login')
 def login():
@@ -319,21 +352,39 @@ def oauth_callback(provider):
             flash(f'Could not get email from {provider}')
             return redirect(url_for('login'))
         
-        # Create or get user - using SQLite syntax only
+        # Create or get user - detect database type dynamically
         conn = get_db_connection()
         cursor = conn.cursor()
         
         try:
-            cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+            # Test if we're using PostgreSQL by checking if we can use RETURNING
+            cursor.execute("SELECT version()")
+            version_result = cursor.fetchone()
+            is_postgres = 'PostgreSQL' in str(version_result)
+            
+            if is_postgres:
+                cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
+            else:
+                cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+            
             user_data = cursor.fetchone()
             
             if user_data:
-                user = User(user_data[0], user_data[1], user_data[2], user_data[3])
+                if is_postgres:
+                    user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
+                else:
+                    user = User(user_data[0], user_data[1], user_data[2], user_data[3])
             else:
                 # Create new user
-                cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
-                              (email, name, provider))
-                user_id = cursor.lastrowid
+                if is_postgres:
+                    cursor.execute('INSERT INTO users (email, name, provider) VALUES (%s, %s, %s) RETURNING id',
+                                  (email, name, provider))
+                    user_id = cursor.fetchone()['id']
+                else:
+                    cursor.execute('INSERT INTO users (email, name, provider) VALUES (?, ?, ?)',
+                                  (email, name, provider))
+                    user_id = cursor.lastrowid
+                
                 conn.commit()
                 user = User(user_id, email, name, provider)
             
