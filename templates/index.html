@@ -2305,6 +2305,27 @@
                                 size: 12
                             }
                         }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(103, 80, 164, 0.8)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                const moodLabels = {
+                                    1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                    4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
+                                };
+                                const moodLabel = moodLabels[Math.round(value)] || 'Unknown';
+                                return `${moodLabel} (${value.toFixed(2)})`;
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -2631,7 +2652,63 @@
             yPosition += 20;
             
             // Export charts with proper aspect ratio
-            const charts = ['dailyChart', 'weeklyChart', 'weeklyTrendChart', 'monthlyTrendChart'];
+            const charts = ['weeklyChart', 'weeklyTrendChart', 'monthlyTrendChart'];
+            
+            // First, generate and add the Average Mood chart
+            if (window.dailyChart) {
+                // Load average mood data temporarily for PDF
+                const response = await fetch('/hourly_average_mood');
+                const avgData = await response.json();
+                
+                // Temporarily update the chart with average data
+                const originalLabels = window.dailyChart.data.labels;
+                const originalData = window.dailyChart.data.datasets[0].data;
+                const originalLabel = window.dailyChart.data.datasets[0].label;
+                
+                window.dailyChart.data.labels = avgData.labels;
+                window.dailyChart.data.datasets[0].data = avgData.data;
+                window.dailyChart.data.datasets[0].label = 'Average Mood Per Hour (All Time)';
+                window.dailyChart.update();
+                
+                // Wait for chart to update, then capture
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                const canvas = window.dailyChart.canvas;
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                const aspectRatio = canvas.width / canvas.height;
+                tempCanvas.width = 800;
+                tempCanvas.height = 800 / aspectRatio;
+                
+                tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+                const imgData = tempCanvas.toDataURL('image/png');
+                
+                // Material Design 3 Card for chart
+                pdf.setFillColor(...colors.surfaceContainer);
+                pdf.roundedRect(15, yPosition - 5, 180, 85, 6, 6, 'F');
+                
+                pdf.setTextColor(...colors.onSurface);
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Average Mood Per Hour (All Time)', 20, yPosition + 8);
+                
+                const chartWidth = 170;
+                const chartHeight = 60;
+                pdf.addImage(imgData, 'PNG', 20, yPosition + 12, chartWidth, chartHeight);
+                yPosition += 95;
+                
+                // Restore original chart data
+                window.dailyChart.data.labels = originalLabels;
+                window.dailyChart.data.datasets[0].data = originalData;
+                window.dailyChart.data.datasets[0].label = originalLabel;
+                window.dailyChart.update();
+                
+                if (yPosition > 220) {
+                    pdf.addPage();
+                    yPosition = 20;
+                }
+            }
             
             for (const chartId of charts) {
                 const chart = window[chartId];
