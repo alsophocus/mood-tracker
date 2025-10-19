@@ -2938,7 +2938,12 @@
                             showSnackbar('Mood saved successfully!');
                             
                             // Refresh charts and data without page reload
-                            loadDailyPatterns();
+                            const today = new Date().toISOString().split('T')[0];
+                            loadDailyPatterns(today);
+                            loadCurrentWeek();
+                            loadCurrentMonthTrends();
+                            loadCurrentYearTrends();
+                            loadAverageMoodData();
                             refreshRecentMoods();
                         } else {
                             showSnackbar('Error saving mood - please try again.');
