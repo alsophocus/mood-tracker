@@ -672,7 +672,7 @@
             </div>
             <div class="date-selector">
                 <input type="date" id="dailyDatePicker" class="date-input">
-                <button onclick="loadDailyPatterns()" class="btn-primary">Load Day</button>
+                <button onclick="loadDailyPatterns(document.getElementById('dailyDatePicker').value)" class="btn-primary">Load Day</button>
                 <button onclick="loadDailyPatterns(null)" class="btn-secondary">All Days</button>
             </div>
             <div class="chart-container">

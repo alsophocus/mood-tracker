@@ -91,7 +91,13 @@ class MoodAnalytics:
     
     def get_daily_patterns(self):
         """Get mood patterns by time of day"""
-        time_data = []
+        # Group moods by time periods
+        time_periods = {
+            'Morning (6-12)': [],
+            'Afternoon (12-18)': [],
+            'Evening (18-24)': [],
+            'Night (0-6)': []
+        }
         
         for mood_entry in self.moods:
             timestamp = mood_entry.get('timestamp')
@@ -106,15 +112,34 @@ class MoodAnalytics:
             # Convert to UTC-3
             from datetime import timedelta
             utc_minus_3 = timestamp - timedelta(hours=3)
-            precise_time = utc_minus_3.hour + (utc_minus_3.minute / 60.0)
+            hour = utc_minus_3.hour
             
-            time_data.append({
-                'time': round(precise_time, 2),
-                'mood_value': mood_value,
-                'timestamp': utc_minus_3.isoformat()
-            })
+            # Categorize by time period
+            if 6 <= hour < 12:
+                time_periods['Morning (6-12)'].append(mood_value)
+            elif 12 <= hour < 18:
+                time_periods['Afternoon (12-18)'].append(mood_value)
+            elif 18 <= hour < 24:
+                time_periods['Evening (18-24)'].append(mood_value)
+            else:
+                time_periods['Night (0-6)'].append(mood_value)
         
-        return {'time_data': time_data}
+        # Calculate averages
+        labels = []
+        data = []
+        
+        for period, moods in time_periods.items():
+            labels.append(period)
+            if moods:
+                data.append(round(sum(moods) / len(moods), 2))
+            else:
+                data.append(0)
+        
+        return {
+            'labels': labels,
+            'data': data,
+            'period': 'Daily Patterns'
+        }
     
     def get_summary(self):
         """Get complete analytics summary"""
@@ -163,8 +188,7 @@ class MoodAnalytics:
         # If no data for the date, return empty structure
         if not filtered_moods:
             result = {
-                'time_data': [],
-                'labels': ['Morning', 'Afternoon', 'Evening', 'Night'],
+                'labels': ['Morning (6-12)', 'Afternoon (12-18)', 'Evening (18-24)', 'Night (0-6)'],
                 'data': [0, 0, 0, 0],
                 'period': f"No data for {selected_date}"
             }
