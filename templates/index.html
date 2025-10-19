@@ -2585,68 +2585,91 @@
             // Material Design 3 Colors
             const colors = {
                 primary: [103, 80, 164],
+                primaryContainer: [234, 221, 255],
                 surface: [255, 251, 254],
+                surfaceContainer: [247, 243, 249],
                 onSurface: [28, 27, 31],
+                onSurfaceVariant: [73, 69, 79],
                 outline: [121, 116, 126]
             };
             
             let yPosition = 20;
             
-            // Header with Material Design 3 styling
+            // Material Design 3 Header with rounded corners effect
             pdf.setFillColor(...colors.primary);
-            pdf.rect(0, 0, 210, 40, 'F');
+            pdf.roundedRect(10, 10, 190, 35, 8, 8, 'F');
             
             pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(24);
+            pdf.setFontSize(20);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('Mood Tracker Report', 20, 25);
+            pdf.text('Mood Tracker Report', 20, 30);
             
             // Get actual user name from backend data
             const userName = '{{ user.username if user and user.username else "User" }}';
             
-            pdf.setFontSize(14);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(`User: ${userName}`, 20, 35);
-            
-            yPosition = 60;
-            
-            // Report date and time
-            pdf.setTextColor(...colors.onSurface);
             pdf.setFontSize(12);
-            const now = new Date();
-            pdf.text(`Generated on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 20, yPosition);
-            yPosition += 20;
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`${userName}`, 20, 40);
             
-            // Section: Charts
+            yPosition = 65;
+            
+            // Material Design 3 Card for report info
+            pdf.setFillColor(...colors.surfaceContainer);
+            pdf.roundedRect(15, yPosition - 5, 180, 20, 4, 4, 'F');
+            
+            pdf.setTextColor(...colors.onSurfaceVariant);
+            pdf.setFontSize(11);
+            const now = new Date();
+            pdf.text(`Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 20, yPosition + 5);
+            yPosition += 30;
+            
+            // Section: Charts with Material Design 3 styling
+            pdf.setTextColor(...colors.onSurface);
             pdf.setFontSize(16);
             pdf.setFont('helvetica', 'bold');
             pdf.text('Analytics Overview', 20, yPosition);
-            yPosition += 15;
+            yPosition += 20;
             
-            // Export charts as images with better sizing
+            // Export charts with proper aspect ratio
             const charts = ['dailyChart', 'weeklyChart', 'weeklyTrendChart', 'monthlyTrendChart'];
             
             for (const chartId of charts) {
                 const chart = window[chartId];
                 if (chart) {
                     const canvas = chart.canvas;
-                    const imgData = canvas.toDataURL('image/png');
                     
-                    // Chart title
+                    // Create a temporary canvas with proper dimensions to avoid stretching
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Set proper dimensions maintaining aspect ratio
+                    const aspectRatio = canvas.width / canvas.height;
+                    tempCanvas.width = 800; // Fixed width
+                    tempCanvas.height = 800 / aspectRatio; // Maintain aspect ratio
+                    
+                    // Draw the chart on temp canvas with proper scaling
+                    tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+                    const imgData = tempCanvas.toDataURL('image/png');
+                    
+                    // Material Design 3 Card for chart
+                    pdf.setFillColor(...colors.surfaceContainer);
+                    pdf.roundedRect(15, yPosition - 5, 180, 85, 6, 6, 'F');
+                    
+                    // Chart title with Material Design 3 typography
+                    pdf.setTextColor(...colors.onSurface);
                     pdf.setFontSize(14);
                     pdf.setFont('helvetica', 'bold');
                     const chartTitle = chart.data.datasets[0].label || chartId;
-                    pdf.text(chartTitle, 20, yPosition);
-                    yPosition += 10;
+                    pdf.text(chartTitle, 20, yPosition + 8);
                     
-                    // Add chart image with proper aspect ratio
+                    // Add chart image with proper sizing
                     const chartWidth = 170;
-                    const chartHeight = 70; // Reduced height to prevent stretching
-                    pdf.addImage(imgData, 'PNG', 20, yPosition, chartWidth, chartHeight);
-                    yPosition += chartHeight + 15;
+                    const chartHeight = 60; // Further reduced to prevent stretching
+                    pdf.addImage(imgData, 'PNG', 20, yPosition + 12, chartWidth, chartHeight);
+                    yPosition += 95;
                     
                     // Add new page if needed
-                    if (yPosition > 240) {
+                    if (yPosition > 220) {
                         pdf.addPage();
                         yPosition = 20;
                     }
@@ -2657,49 +2680,64 @@
             pdf.addPage();
             yPosition = 20;
             
-            // Section: Mood History
+            // Material Design 3 Section Header
+            pdf.setFillColor(...colors.primaryContainer);
+            pdf.roundedRect(15, yPosition - 5, 180, 20, 4, 4, 'F');
+            
+            pdf.setTextColor(...colors.onSurface);
             pdf.setFontSize(16);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('Recent Mood Entries', 20, yPosition);
-            yPosition += 15;
+            pdf.text('Recent Mood Entries', 20, yPosition + 7);
+            yPosition += 25;
             
-            // Get mood history from the page
+            // Get mood history with Material Design 3 cards
             const historyItems = document.querySelectorAll('.history-item');
             historyItems.forEach((item, index) => {
-                if (index < 20) { // Limit to 20 entries
+                if (index < 15) { // Limit to 15 entries for better layout
                     const date = item.querySelector('.history-date')?.textContent || '';
                     const mood = item.querySelector('.history-mood')?.textContent || '';
                     const notes = item.querySelector('.history-notes')?.textContent || '';
                     
-                    pdf.setFontSize(12);
+                    // Material Design 3 Card for each entry
+                    const cardHeight = notes ? 25 : 15;
+                    pdf.setFillColor(...colors.surfaceContainer);
+                    pdf.roundedRect(15, yPosition - 2, 180, cardHeight, 3, 3, 'F');
+                    
+                    pdf.setTextColor(...colors.onSurface);
+                    pdf.setFontSize(11);
                     pdf.setFont('helvetica', 'bold');
-                    pdf.text(`${date} - ${mood}`, 20, yPosition);
-                    yPosition += 8;
+                    pdf.text(`${date} - ${mood}`, 20, yPosition + 5);
                     
                     if (notes) {
                         pdf.setFont('helvetica', 'normal');
-                        pdf.setFontSize(10);
+                        pdf.setFontSize(9);
+                        pdf.setTextColor(...colors.onSurfaceVariant);
                         const splitNotes = pdf.splitTextToSize(notes, 170);
-                        pdf.text(splitNotes, 20, yPosition);
-                        yPosition += splitNotes.length * 5;
+                        pdf.text(splitNotes, 20, yPosition + 12);
+                        yPosition += 8 + (splitNotes.length * 4);
                     }
                     
-                    yPosition += 5;
+                    yPosition += cardHeight + 5;
                     
-                    if (yPosition > 270) {
+                    if (yPosition > 260) {
                         pdf.addPage();
                         yPosition = 20;
                     }
                 }
             });
             
-            // Footer
+            // Material Design 3 Footer
             const pageCount = pdf.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 pdf.setPage(i);
-                pdf.setFontSize(10);
+                pdf.setFontSize(9);
                 pdf.setTextColor(...colors.outline);
                 pdf.text(`Page ${i} of ${pageCount}`, 180, 285);
+                
+                // Add subtle footer line
+                pdf.setDrawColor(...colors.outline);
+                pdf.setLineWidth(0.2);
+                pdf.line(15, 280, 195, 280);
             }
             
             // Save the PDF with date and time in filename
