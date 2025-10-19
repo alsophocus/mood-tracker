@@ -1114,19 +1114,25 @@
             // Initialize Daily Chart
             const dailyCtx = document.getElementById('dailyChart');
             if (dailyCtx) {
+                const hourLabels = [];
+                for (let i = 0; i < 24; i++) {
+                    hourLabels.push(`${i.toString().padStart(2, '0')}:00`);
+                }
+                
                 window.dailyChart = new Chart(dailyCtx.getContext('2d'), {
                     type: 'line',
                     data: {
-                        labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+                        labels: hourLabels,
                         datasets: [{
                             label: 'Loading...',
-                            data: [0, 0, 0, 0],
+                            data: new Array(24).fill(null),
                             borderColor: 'rgba(59, 130, 246, 1)',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             tension: 0.4,
                             borderWidth: 2,
                             pointRadius: 4,
-                            pointHoverRadius: 6
+                            pointHoverRadius: 6,
+                            spanGaps: true
                         }]
                     },
                     options: {
@@ -1150,6 +1156,11 @@
                                         };
                                         return labels[value] || value;
                                     }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxTicksLimit: 12
                                 }
                             }
                         }

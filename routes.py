@@ -117,8 +117,8 @@ def daily_patterns():
     # Ensure we always return a valid structure
     if not result.get('labels') or not result.get('data'):
         result = {
-            'labels': ['Morning (6-12)', 'Afternoon (12-18)', 'Evening (18-24)', 'Night (0-6)'],
-            'data': [0, 0, 0, 0],
+            'labels': [f"{hour:02d}:00" for hour in range(24)],
+            'data': [None] * 24,
             'period': 'No data available'
         }
     

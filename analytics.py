@@ -90,14 +90,9 @@ class MoodAnalytics:
         return chart_data
     
     def get_daily_patterns(self):
-        """Get mood patterns by time of day"""
-        # Group moods by time periods
-        time_periods = {
-            'Morning (6-12)': [],
-            'Afternoon (12-18)': [],
-            'Evening (18-24)': [],
-            'Night (0-6)': []
-        }
+        """Get mood patterns by hour of day"""
+        # Initialize hourly data (0-23 hours)
+        hourly_moods = {hour: [] for hour in range(24)}
         
         for mood_entry in self.moods:
             timestamp = mood_entry.get('timestamp')
@@ -114,31 +109,22 @@ class MoodAnalytics:
             utc_minus_3 = timestamp - timedelta(hours=3)
             hour = utc_minus_3.hour
             
-            # Categorize by time period
-            if 6 <= hour < 12:
-                time_periods['Morning (6-12)'].append(mood_value)
-            elif 12 <= hour < 18:
-                time_periods['Afternoon (12-18)'].append(mood_value)
-            elif 18 <= hour < 24:
-                time_periods['Evening (18-24)'].append(mood_value)
-            else:
-                time_periods['Night (0-6)'].append(mood_value)
+            hourly_moods[hour].append(mood_value)
         
-        # Calculate averages
-        labels = []
+        # Create labels and data for all 24 hours
+        labels = [f"{hour:02d}:00" for hour in range(24)]
         data = []
         
-        for period, moods in time_periods.items():
-            labels.append(period)
-            if moods:
-                data.append(round(sum(moods) / len(moods), 2))
+        for hour in range(24):
+            if hourly_moods[hour]:
+                data.append(round(sum(hourly_moods[hour]) / len(hourly_moods[hour]), 2))
             else:
-                data.append(0)
+                data.append(None)  # No data for this hour
         
         return {
             'labels': labels,
             'data': data,
-            'period': 'Daily Patterns'
+            'period': 'Daily Patterns by Hour'
         }
     
     def get_summary(self):
@@ -188,8 +174,8 @@ class MoodAnalytics:
         # If no data for the date, return empty structure
         if not filtered_moods:
             result = {
-                'labels': ['Morning (6-12)', 'Afternoon (12-18)', 'Evening (18-24)', 'Night (0-6)'],
-                'data': [0, 0, 0, 0],
+                'labels': [f"{hour:02d}:00" for hour in range(24)],
+                'data': [None] * 24,
                 'period': f"No data for {selected_date}"
             }
         
