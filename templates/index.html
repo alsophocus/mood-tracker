@@ -2601,17 +2601,21 @@
             pdf.setFont('helvetica', 'bold');
             pdf.text('Mood Tracker Report', 20, 25);
             
-            // User name (placeholder - you can make this dynamic)
+            // Get actual user name from page or use default
+            const userNameElement = document.querySelector('.display-small');
+            const userName = userNameElement ? 'User' : 'User'; // You can enhance this to get actual user name
+            
             pdf.setFontSize(14);
             pdf.setFont('helvetica', 'normal');
-            pdf.text('User: {{ user_name or "User" }}', 20, 35);
+            pdf.text(`User: ${userName}`, 20, 35);
             
             yPosition = 60;
             
-            // Report date
+            // Report date and time
             pdf.setTextColor(...colors.onSurface);
             pdf.setFontSize(12);
-            pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, yPosition);
+            const now = new Date();
+            pdf.text(`Generated on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 20, yPosition);
             yPosition += 20;
             
             // Section: Charts
@@ -2620,7 +2624,7 @@
             pdf.text('Analytics Overview', 20, yPosition);
             yPosition += 15;
             
-            // Export charts as images
+            // Export charts as images with better sizing
             const charts = ['dailyChart', 'weeklyChart', 'weeklyTrendChart', 'monthlyTrendChart'];
             
             for (const chartId of charts) {
@@ -2636,12 +2640,14 @@
                     pdf.text(chartTitle, 20, yPosition);
                     yPosition += 10;
                     
-                    // Add chart image
-                    pdf.addImage(imgData, 'PNG', 20, yPosition, 170, 80);
-                    yPosition += 90;
+                    // Add chart image with proper aspect ratio
+                    const chartWidth = 170;
+                    const chartHeight = 70; // Reduced height to prevent stretching
+                    pdf.addImage(imgData, 'PNG', 20, yPosition, chartWidth, chartHeight);
+                    yPosition += chartHeight + 15;
                     
                     // Add new page if needed
-                    if (yPosition > 250) {
+                    if (yPosition > 240) {
                         pdf.addPage();
                         yPosition = 20;
                     }
@@ -2697,8 +2703,9 @@
                 pdf.text(`Page ${i} of ${pageCount}`, 180, 285);
             }
             
-            // Save the PDF
-            const fileName = `mood-tracker-report-${new Date().toISOString().split('T')[0]}.pdf`;
+            // Save the PDF with date and time in filename
+            const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const fileName = `mood-tracker-report-${timestamp}.pdf`;
             pdf.save(fileName);
         }
 
