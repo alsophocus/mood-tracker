@@ -883,25 +883,30 @@
         // Daily Patterns Functions
         function loadDailyPatterns(selectedDate) {
             const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
+            console.log('Loading daily patterns from:', url);
             
             fetch(url)
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Daily patterns response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Daily patterns data:', data);
                     if (window.dailyChart) {
                         window.dailyChart.destroy();
                     }
                     
                     const ctx = document.getElementById('dailyChart').getContext('2d');
                     window.dailyChart = new Chart(ctx, {
-                        type: 'bar',
+                        type: 'line',
                         data: {
                             labels: data.labels,
                             datasets: [{
                                 label: data.period || 'Daily Patterns',
                                 data: data.data,
-                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
                                 borderColor: 'rgba(59, 130, 246, 1)',
-                                borderWidth: 1
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4
                             }]
                         },
                         options: {
@@ -931,10 +936,15 @@
             }
             
             const url = `/weekly_patterns?year=${year}&month=${month}&week=${week}`;
+            console.log('Loading weekly patterns from:', url);
             
             fetch(url)
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Weekly patterns response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Weekly patterns data:', data);
                     if (window.weeklyChart) {
                         window.weeklyChart.destroy();
                     }
