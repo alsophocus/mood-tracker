@@ -47,12 +47,21 @@ def save_mood():
     mood = request.form.get('mood')
     notes = request.form.get('notes', '')
     
-    print(f"DEBUG: Received mood save request - mood: {mood}, notes: {notes}, user: {current_user.id}")
+    print(f"DEBUG: Received mood save request - mood: {mood}, notes: {notes}")
+    
+    # Check if user is authenticated
+    if not current_user or not hasattr(current_user, 'id'):
+        print("DEBUG: User not authenticated or missing ID")
+        return jsonify({'error': 'User not authenticated'}), 401
+    
+    print(f"DEBUG: User ID: {current_user.id}")
     
     if not mood:
+        print("DEBUG: No mood selected")
         return jsonify({'error': 'Please select a mood before saving.'}), 400
     
     try:
+        print(f"DEBUG: Attempting to save mood for user {current_user.id}")
         result = db.save_mood(current_user.id, datetime.now().date(), mood, notes)
         print(f"DEBUG: Mood saved successfully - result: {result}")
         
@@ -66,7 +75,9 @@ def save_mood():
             
     except Exception as e:
         print(f"DEBUG: Error saving mood - {e}")
-        return jsonify({'error': 'Error saving mood - please try again.'}), 500
+        import traceback
+        print(f"DEBUG: Traceback - {traceback.format_exc()}")
+        return jsonify({'error': f'Error saving mood: {str(e)}'}), 500
 
 @main_bp.route('/recent_moods')
 @login_required
