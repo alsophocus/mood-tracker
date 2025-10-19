@@ -1151,18 +1151,18 @@
 
         .md-calendar-grid {
             padding: 8px;
+            display: grid;
+            grid-template-columns: repeat(7, 40px);
+            justify-content: center;
         }
 
         .md-calendar-weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0;
-            margin-bottom: 0;
+            display: contents;
         }
 
         .md-calendar-weekday {
             width: 40px;
-            height: 40px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1173,9 +1173,7 @@
         }
 
         .md-calendar-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0;
+            display: contents;
         }
 
         .md-calendar-day {
@@ -1282,8 +1280,17 @@
 
         /* Daily Patterns specific alignment */
         .controls-container:has(.md-date-picker) {
-            grid-template-columns: 1fr 1fr 2fr;
-            align-items: end;
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .controls-container:has(.md-date-picker) .md-select-container {
+            flex: 1;
+        }
+
+        .controls-container:has(.md-date-picker) .md-date-picker {
+            flex: 2;
         }
 
         .md-date-picker {
