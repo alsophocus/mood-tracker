@@ -124,7 +124,7 @@ class MoodAnalytics:
         return {
             'labels': labels,
             'data': data,
-            'period': 'Daily Patterns by Hour'
+            'period': 'Average Mood by Hour (All Days)'
         }
     
     def get_summary(self):
