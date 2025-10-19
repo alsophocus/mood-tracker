@@ -248,6 +248,18 @@ def debug_info():
         'timestamp': datetime.now().isoformat()
     }
 
+@main_bp.route('/test-db')
+def test_database():
+    """Test database operations"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT COUNT(*) as count FROM moods')
+            result = cursor.fetchone()
+            return {'mood_count': result['count'], 'status': 'success'}
+    except Exception as e:
+        return {'error': str(e), 'status': 'error'}, 500
+
 @main_bp.route('/reset-database-confirm-delete-all-data')
 def reset_database():
     """Reset database - DELETE ALL MOOD DATA"""
