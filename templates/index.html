@@ -2430,17 +2430,17 @@
         }
 
         function loadAverageMoodData() {
-            fetch('/average_mood_data')
+            fetch('/hourly_average_mood')
                 .then(response => response.json())
                 .then(data => {
                     if (window.dailyChart) {
                         window.dailyChart.data.labels = data.labels || [];
                         window.dailyChart.data.datasets[0].data = data.data || [];
-                        window.dailyChart.data.datasets[0].label = 'Average Mood Per Day (All Time)';
+                        window.dailyChart.data.datasets[0].label = 'Average Mood Per Hour (All Time)';
                         window.dailyChart.update();
                     }
                 })
-                .catch(error => console.error('Error loading average mood data:', error));
+                .catch(error => console.error('Error loading hourly average mood data:', error));
         }
 
         // Data loading functions
