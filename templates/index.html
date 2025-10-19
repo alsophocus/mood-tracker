@@ -2605,7 +2605,7 @@
             pdf.text('Mood Tracker Report', 20, 30);
             
             // Get actual user name from backend data
-            const userName = '{{ user.username if user and user.username else "User" }}';
+            const userName = '{{ user.name if user and user.name else "User" }}';
             
             pdf.setFontSize(12);
             pdf.setFont('helvetica', 'normal');
