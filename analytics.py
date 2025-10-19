@@ -336,3 +336,29 @@ class MoodAnalytics:
             'period': f"Monthly Mood Averages for {year}",
             'year': year
         }
+    
+    def get_hourly_averages(self):
+        """Get average mood per hour across all user data"""
+        from collections import defaultdict
+        
+        hourly_totals = defaultdict(list)
+        
+        # Group moods by hour
+        for mood in self.moods:
+            if hasattr(mood, 'timestamp') and mood.timestamp:
+                hour = mood.timestamp.hour
+                hourly_totals[hour].append(mood.mood_value)
+        
+        # Calculate averages for each hour
+        hourly_averages = {}
+        for hour in range(24):
+            if hour in hourly_totals and hourly_totals[hour]:
+                hourly_averages[hour] = sum(hourly_totals[hour]) / len(hourly_totals[hour])
+            else:
+                hourly_averages[hour] = 0
+        
+        return {
+            'labels': [f"{hour:02d}:00" for hour in range(24)],
+            'data': [round(hourly_averages[hour], 2) for hour in range(24)],
+            'period': 'Average Mood Per Hour (All Time)'
+        }

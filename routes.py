@@ -174,6 +174,15 @@ def daily_patterns():
     
     return jsonify(result)
 
+@main_bp.route('/hourly_average_mood')
+@login_required
+def hourly_average_mood():
+    """Get average mood per hour across all user data"""
+    moods = db.get_user_moods(current_user.id)
+    analytics = MoodAnalytics(moods)
+    result = analytics.get_hourly_averages()
+    return jsonify(result)
+
 @main_bp.route('/export_pdf')
 @login_required
 def export_pdf():
