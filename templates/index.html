@@ -1156,16 +1156,20 @@
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 0;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .md-calendar-weekday {
             text-align: center;
-            padding: 12px 4px;
+            padding: 8px 2px;
             font-family: var(--md-sys-typescale-label-small-font);
             font-size: var(--md-sys-typescale-label-small-size);
             font-weight: var(--md-sys-typescale-label-small-weight);
             color: var(--md-sys-color-on-surface-variant);
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .md-calendar-days {
@@ -1175,7 +1179,8 @@
         }
 
         .md-calendar-day {
-            aspect-ratio: 1;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1540,16 +1545,12 @@
                 <div class="controls-container">
                     <div class="md-select-container">
                         <select id="yearSelect" class="md-select" value="">
-                            <option value="">Year</option>
                         </select>
-                        <label class="md-select-label">Year</label>
                         <i class="fas fa-chevron-down md-select-icon"></i>
                     </div>
                     <div class="md-select-container">
                         <select id="monthSelect" class="md-select" value="">
-                            <option value="">Month</option>
                         </select>
-                        <label class="md-select-label">Month</label>
                         <i class="fas fa-chevron-down md-select-icon"></i>
                     </div>
                     <div class="md-select-container">
@@ -1576,6 +1577,16 @@
                 </div>
                 
                 <div class="controls-container">
+                    <div class="md-select-container">
+                        <select id="dailyYearSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="dailyMonthSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
                     <div class="md-date-picker">
                         <div class="md-date-field">
                             <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
@@ -1630,16 +1641,12 @@
                 <div class="controls-container">
                     <div class="md-select-container">
                         <select id="trendsYearSelect" class="md-select" value="">
-                            <option value="">Year</option>
                         </select>
-                        <label class="md-select-label">Year</label>
                         <i class="fas fa-chevron-down md-select-icon"></i>
                     </div>
                     <div class="md-select-container">
                         <select id="trendsMonthSelect" class="md-select" value="">
-                            <option value="">Month</option>
                         </select>
-                        <label class="md-select-label">Month</label>
                         <i class="fas fa-chevron-down md-select-icon"></i>
                     </div>
                 </div>
@@ -1661,9 +1668,7 @@
                 <div class="controls-container">
                     <div class="md-select-container">
                         <select id="monthlyYearSelect" class="md-select" value="">
-                            <option value="">Year</option>
                         </select>
-                        <label class="md-select-label">Year</label>
                         <i class="fas fa-chevron-down md-select-icon"></i>
                     </div>
                 </div>
@@ -2057,6 +2062,20 @@
                 
                 // Auto-load data when selectors change
                 select.addEventListener('change', function() {
+                    // Daily Patterns auto-load
+                    if (select.id === 'dailyYearSelect' || select.id === 'dailyMonthSelect') {
+                        const year = document.getElementById('dailyYearSelect').value;
+                        const month = document.getElementById('dailyMonthSelect').value;
+                        
+                        if (year && month) {
+                            // Update date picker to show selected month/year
+                            if (window.dailyDatePicker) {
+                                window.dailyDatePicker.currentDate = new Date(year, month - 1, 1);
+                                window.dailyDatePicker.renderCalendar();
+                            }
+                        }
+                    }
+                    
                     // Weekly Patterns auto-load
                     if (select.id === 'yearSelect' || select.id === 'monthSelect' || select.id === 'weekSelect') {
                         const year = document.getElementById('yearSelect').value;
@@ -2115,7 +2134,9 @@
                 week: document.getElementById('weekSelect'),
                 trendsYear: document.getElementById('trendsYearSelect'),
                 trendsMonth: document.getElementById('trendsMonthSelect'),
-                monthlyYear: document.getElementById('monthlyYearSelect')
+                monthlyYear: document.getElementById('monthlyYearSelect'),
+                dailyYear: document.getElementById('dailyYearSelect'),
+                dailyMonth: document.getElementById('dailyMonthSelect')
             };
             
             const currentYear = new Date().getFullYear();
@@ -2124,7 +2145,7 @@
                           'July', 'August', 'September', 'October', 'November', 'December'];
             
             // Populate years
-            [selectors.year, selectors.trendsYear, selectors.monthlyYear].forEach(select => {
+            [selectors.year, selectors.trendsYear, selectors.monthlyYear, selectors.dailyYear].forEach(select => {
                 if (select) {
                     // Clear existing options
                     select.innerHTML = '';
@@ -2139,7 +2160,7 @@
             });
             
             // Populate months
-            [selectors.month, selectors.trendsMonth].forEach(select => {
+            [selectors.month, selectors.trendsMonth, selectors.dailyMonth].forEach(select => {
                 if (select) {
                     // Clear existing options
                     select.innerHTML = '';
