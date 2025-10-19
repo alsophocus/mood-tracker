@@ -964,30 +964,115 @@
             position: relative;
         }
 
-        /* Material Design 3 Controls */
-        .controls-container {
-            display: flex;
-            gap: 8px;
+        /* Material Design 3 Select Components */
+        .md-select-container {
+            position: relative;
             margin-bottom: 16px;
-            flex-wrap: wrap;
-            align-items: center;
         }
 
         .md-select {
-            padding: 12px 16px;
+            width: 100%;
+            padding: 16px 48px 16px 16px;
             border: 1px solid var(--md-sys-color-outline);
             border-radius: var(--md-sys-shape-corner-extra-small);
             background-color: var(--md-sys-color-surface);
             color: var(--md-sys-color-on-surface);
-            font-size: 14px;
-            min-width: 120px;
+            font-size: 16px;
             font-family: 'Roboto', sans-serif;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            appearance: none;
+            cursor: pointer;
+            min-height: 56px;
         }
 
         .md-select:focus {
             outline: none;
             border-color: var(--md-sys-color-primary);
             border-width: 2px;
+            box-shadow: 0 0 0 8px rgba(103, 80, 164, 0.1);
+        }
+
+        .md-select:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+            transform: translateY(-1px);
+        }
+
+        .md-select-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            pointer-events: none;
+            background-color: var(--md-sys-color-surface);
+            padding: 0 4px;
+            transform-origin: left center;
+        }
+
+        .md-select:focus + .md-select-label,
+        .md-select:not([value=""]) + .md-select-label,
+        .md-select.has-value + .md-select-label {
+            top: -8px;
+            font-size: 12px;
+            color: var(--md-sys-color-primary);
+            transform: scale(0.9);
+        }
+
+        .md-select-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 20px;
+            pointer-events: none;
+            transition: transform var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .md-select:focus + .md-select-label + .md-select-icon {
+            transform: translateY(-50%) rotate(180deg);
+            color: var(--md-sys-color-primary);
+        }
+
+        /* Material Design 3 Date Input */
+        .md-date-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            min-height: 56px;
+        }
+
+        .md-date-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            box-shadow: 0 0 0 8px rgba(103, 80, 164, 0.1);
+        }
+
+        .md-date-input:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+            transform: translateY(-1px);
+        }
+
+        /* Material Design 3 Controls Container */
+        .controls-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            align-items: end;
+        }
+
+        .controls-container .md-button {
+            height: 56px;
+            align-self: end;
         }
 
         /* Material Design 3 History */
@@ -1245,15 +1330,27 @@
                 </div>
                 
                 <div class="controls-container">
-                    <select id="yearSelect" class="md-select">
-                        <option value="">Year</option>
-                    </select>
-                    <select id="monthSelect" class="md-select">
-                        <option value="">Month</option>
-                    </select>
-                    <select id="weekSelect" class="md-select">
-                        <option value="">Week</option>
-                    </select>
+                    <div class="md-select-container">
+                        <select id="yearSelect" class="md-select" value="">
+                            <option value="">Year</option>
+                        </select>
+                        <label class="md-select-label">Year</label>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="monthSelect" class="md-select" value="">
+                            <option value="">Month</option>
+                        </select>
+                        <label class="md-select-label">Month</label>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="weekSelect" class="md-select" value="">
+                            <option value="">Week</option>
+                        </select>
+                        <label class="md-select-label">Week</label>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
                     <button onclick="loadWeeklyPatterns()" class="md-button md-button-filled">
                         <i class="fas fa-search"></i>
                         <span>Load Week</span>
@@ -1279,7 +1376,7 @@
                 </div>
                 
                 <div class="controls-container">
-                    <input type="date" id="dailyDatePicker" class="md-select">
+                    <input type="date" id="dailyDatePicker" class="md-date-input">
                     <button onclick="loadDailyPatterns(document.getElementById('dailyDatePicker').value)" class="md-button md-button-filled">
                         <i class="fas fa-search"></i>
                         <span>Load Day</span>
@@ -1305,12 +1402,20 @@
                 </div>
                 
                 <div class="controls-container">
-                    <select id="trendsYearSelect" class="md-select">
-                        <option value="">Year</option>
-                    </select>
-                    <select id="trendsMonthSelect" class="md-select">
-                        <option value="">Month</option>
-                    </select>
+                    <div class="md-select-container">
+                        <select id="trendsYearSelect" class="md-select" value="">
+                            <option value="">Year</option>
+                        </select>
+                        <label class="md-select-label">Year</label>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="trendsMonthSelect" class="md-select" value="">
+                            <option value="">Month</option>
+                        </select>
+                        <label class="md-select-label">Month</label>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
                     <button onclick="loadWeeklyTrends()" class="md-button md-button-filled">
                         <i class="fas fa-search"></i>
                         <span>Load Month</span>
@@ -1336,9 +1441,13 @@
                 </div>
                 
                 <div class="controls-container">
-                    <select id="monthlyYearSelect" class="md-select">
-                        <option value="">Year</option>
-                    </select>
+                    <div class="md-select-container">
+                        <select id="monthlyYearSelect" class="md-select" value="">
+                            <option value="">Year</option>
+                        </select>
+                        <label class="md-select-label">Year</label>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
                     <button onclick="loadMonthlyTrends()" class="md-button md-button-filled">
                         <i class="fas fa-search"></i>
                         <span>Load Year</span>
@@ -1555,7 +1664,28 @@
             }
         }
 
-        // Initialize dropdowns
+        // Initialize Material Design 3 select components
+        function initializeMaterialSelects() {
+            document.querySelectorAll('.md-select').forEach(select => {
+                // Handle floating label state
+                function updateLabel() {
+                    const label = select.nextElementSibling;
+                    if (select.value && select.value !== '') {
+                        select.classList.add('has-value');
+                    } else {
+                        select.classList.remove('has-value');
+                    }
+                }
+                
+                select.addEventListener('change', updateLabel);
+                select.addEventListener('blur', updateLabel);
+                
+                // Initial state
+                updateLabel();
+            });
+        }
+
+        // Initialize dropdowns with Material Design 3 enhancements
         function initializeDropdowns() {
             const selectors = {
                 year: document.getElementById('yearSelect'),
@@ -1927,6 +2057,7 @@
         // Initialize everything when DOM loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeTheme();
+            initializeMaterialSelects();
             initializeDropdowns();
             initializeCharts();
             
