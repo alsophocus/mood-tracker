@@ -368,7 +368,7 @@ class MoodAnalytics:
                 avg = round(sum(hourly_totals[hour]) / len(hourly_totals[hour]), 2)
                 data.append(avg)
             else:
-                data.append(0)
+                data.append(4)  # Neutral mood when no data available
         
         return {
             'labels': [f"{hour:02d}:00" for hour in range(24)],
