@@ -4,662 +4,583 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood Tracker</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Apple HIG Inspired Design System */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f2f2f7;
+            --bg-elevated: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #3c3c43;
+            --text-tertiary: #3c3c4399;
+            --accent-blue: #007aff;
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --fill-secondary: #78788028;
+            --separator: #3c3c4349;
+            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --radius-medium: 12px;
+            --radius-large: 16px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1c1c1e;
+            --bg-elevated: #1c1c1e;
+            --text-primary: #ffffff;
+            --text-secondary: #ebebf5;
+            --text-tertiary: #ebebf599;
+            --accent-blue: #0a84ff;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --fill-secondary: #78788033;
+            --separator: #54545899;
+            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        :root {
-            --primary: #0f172a;
-            --secondary: #1e293b;
-            --accent: #3b82f6;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --bg: #020617;
-            --card: #0f172a;
-        }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.47;
+            font-size: 17px;
+            transition: all 0.3s ease;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem;
+            padding: var(--spacing-md);
         }
-        
-        /* Header */
+
         .header {
-            background: var(--primary);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 0;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--separator);
+            padding: var(--spacing-md) 0;
             position: sticky;
             top: 0;
             z-index: 100;
         }
-        
+
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
         }
-        
+
         .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        .user-info {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            font-size: 0.875rem;
-            color: var(--text-muted);
+            gap: var(--spacing-sm);
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--accent-blue);
         }
-        
-        .btn {
-            background: var(--accent);
-            color: white;
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .toggle-switch {
+            width: 51px;
+            height: 31px;
+            background: var(--fill-secondary);
+            border-radius: 16px;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 27px;
+            height: 27px;
+            background: var(--bg-primary);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+        }
+
+        [data-theme="dark"] .toggle-switch {
+            background: var(--accent-blue);
+        }
+
+        [data-theme="dark"] .toggle-switch::before {
+            transform: translateX(20px);
+        }
+
+        .card {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-large);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--separator);
+            margin-bottom: var(--spacing-lg);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-icon {
+            color: var(--accent-blue);
+            font-size: 18px;
+        }
+
+        .btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: 12px 20px;
+            border-radius: var(--radius-medium);
+            font-size: 17px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 44px;
         }
-        
-        .btn:hover {
-            background: #2563eb;
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.8;
             transform: translateY(-1px);
         }
-        
-        .btn-danger {
-            background: var(--danger);
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        /* Date Selectors */
-        .date-selector {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .date-input {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-        
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
+
         .btn-secondary {
-            background: #6b7280;
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
+            background: var(--fill-secondary);
+            color: var(--text-primary);
         }
-        
-        /* Grid Layout */
+
         .grid {
             display: grid;
-            gap: 1.5rem;
-            margin-top: 2rem;
+            gap: var(--spacing-md);
         }
-        
-        .grid-cols-1 { grid-template-columns: 1fr; }
-        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-        
-        /* Cards */
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            transition: all 0.2s;
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         }
-        
-        .card:hover {
-            border-color: var(--accent);
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .mood-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            background: var(--fill-secondary);
+            border: 2px solid transparent;
+            border-radius: var(--radius-medium);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 80px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .mood-btn:hover {
             transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
         }
-        
-        .card-title {
-            font-size: 1.125rem;
+
+        .mood-btn.selected {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .mood-icon {
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-size: 17px;
             font-weight: 600;
-            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-medium);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 17px;
+            transition: all 0.2s ease;
+            min-height: 44px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--fill-secondary);
+            border-radius: var(--radius-medium);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .status-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            color: var(--text);
+            gap: var(--spacing-sm);
+            font-size: 15px;
+            color: var(--text-secondary);
         }
-        
-        .card-title i {
-            color: var(--accent);
-        }
-        
-        /* Status Icons */
-        .status-icon {
-            width: 12px;
-            height: 12px;
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            display: inline-block;
+            background: var(--accent-green);
         }
-        
-        .status-connected { background-color: var(--success); }
-        .status-disconnected { background-color: var(--danger); }
-        .status-checking { 
-            background-color: var(--warning);
+
+        .status-dot.checking {
+            background: #ff9500;
             animation: pulse 2s infinite;
         }
-        
+
+        .status-dot.error {
+            background: var(--accent-red);
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
-        /* Status Bar */
-        .status-bar {
-            display: flex;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--secondary);
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-        }
-        
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        /* Mood Form */
-        .mood-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .mood-buttons {
+
+        .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
         }
-        
-        .mood-btn {
-            padding: 0.75rem 0.25rem;
-            border: 2px solid var(--border);
-            background: var(--secondary);
-            color: var(--text);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.75rem;
-            font-weight: 500;
+
+        .metric-card {
             text-align: center;
+            padding: var(--spacing-lg);
+            background: var(--fill-secondary);
+            border-radius: var(--radius-medium);
         }
-        
-        .mood-btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .mood-btn[data-mood="very bad"] {
-            background: #fef2f2;
-            border-color: #fca5a5;
-            color: #991b1b;
-        }
-        
-        .mood-btn[data-mood="very bad"]:hover {
-            background: #fee2e2;
-            border-color: #f87171;
-        }
-        
-        .mood-btn[data-mood="very bad"].selected {
-            background: #fca5a5;
-            border-color: #f87171;
-            color: white;
-        }
-        
-        .mood-btn[data-mood="bad"] {
-            background: #fef3c7;
-            border-color: #fbbf24;
-            color: #92400e;
-        }
-        
-        .mood-btn[data-mood="bad"]:hover {
-            background: #fde68a;
-            border-color: #f59e0b;
-        }
-        
-        .mood-btn[data-mood="bad"].selected {
-            background: #fbbf24;
-            border-color: #f59e0b;
-            color: white;
-        }
-        
-        .mood-btn[data-mood="slightly bad"] {
-            background: #fef7cd;
-            border-color: #fcd34d;
-            color: #a16207;
-        }
-        
-        .mood-btn[data-mood="slightly bad"]:hover {
-            background: #fef3c7;
-            border-color: #fbbf24;
-        }
-        
-        .mood-btn[data-mood="slightly bad"].selected {
-            background: #fcd34d;
-            border-color: #fbbf24;
-            color: white;
-        }
-        
-        .mood-btn[data-mood="neutral"] {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-            color: #374151;
-        }
-        
-        .mood-btn[data-mood="neutral"]:hover {
-            background: #e5e7eb;
-            border-color: #6b7280;
-        }
-        
-        .mood-btn[data-mood="neutral"].selected {
-            background: #9ca3af;
-            border-color: #6b7280;
-            color: white;
-        }
-        
-        .mood-btn[data-mood="slightly well"] {
-            background: #f0fdf4;
-            border-color: #86efac;
-            color: #166534;
-        }
-        
-        .mood-btn[data-mood="slightly well"]:hover {
-            background: #dcfce7;
-            border-color: #4ade80;
-        }
-        
-        .mood-btn[data-mood="slightly well"].selected {
-            background: #86efac;
-            border-color: #4ade80;
-            color: white;
-        }
-        
-        .mood-btn[data-mood="well"] {
-            background: #ecfdf5;
-            border-color: #6ee7b7;
-            color: #065f46;
-        }
-        
-        .mood-btn[data-mood="well"]:hover {
-            background: #d1fae5;
-            border-color: #34d399;
-        }
-        
-        .mood-btn[data-mood="well"].selected {
-            background: #6ee7b7;
-            border-color: #34d399;
-            color: white;
-        }
-        
-        .mood-btn[data-mood="very well"] {
-            background: #eff6ff;
-            border-color: #93c5fd;
-            color: #1e40af;
-        }
-        
-        .mood-btn[data-mood="very well"]:hover {
-            background: #dbeafe;
-            border-color: #60a5fa;
-        }
-        
-        .mood-btn[data-mood="very well"].selected {
-            background: #93c5fd;
-            border-color: #60a5fa;
-            color: white;
-        }
-        
-        /* Form Elements */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .form-label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-muted);
-        }
-        
-        .form-input {
-            background: var(--secondary);
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            color: var(--text);
-            font-size: 0.875rem;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        /* Analytics */
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .metric {
-            text-align: center;
-            padding: 1.5rem;
-            background: var(--secondary);
-            border-radius: 0.5rem;
-            border: 1px solid var(--border);
-        }
-        
+
         .metric-value {
-            font-size: 2rem;
+            font-size: 32px;
             font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
         }
-        
+
         .metric-label {
-            font-size: 0.875rem;
-            color: var(--text-muted);
+            font-size: 13px;
+            color: var(--text-tertiary);
+            font-weight: 500;
         }
-        
-        /* Weekly Patterns */
-        .weekly-patterns {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 0.75rem;
-        }
-        
-        .day-pattern {
-            text-align: center;
-            padding: 1rem 0.5rem;
-            background: var(--secondary);
-            border-radius: 0.375rem;
-            border: 1px solid var(--border);
-        }
-        
-        .day-name {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-        
-        .day-mood {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        
-        /* Chart Container */
+
         .chart-container {
-            background: var(--secondary);
-            border-radius: 0.5rem;
-            padding: 1rem;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-medium);
+            padding: var(--spacing-md);
             height: 300px;
             position: relative;
+            border: 1px solid var(--separator);
         }
-        
-        /* Mood History */
+
+        .date-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .date-select {
+            padding: 8px 12px;
+            border: 1px solid var(--separator);
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 15px;
+            min-width: 120px;
+        }
+
         .mood-entry {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 1rem;
-            background: var(--secondary);
-            border-radius: 0.375rem;
-            border: 1px solid var(--border);
-            margin-bottom: 0.75rem;
+            padding: var(--spacing-md);
+            background: var(--fill-secondary);
+            border-radius: var(--radius-medium);
+            margin-bottom: var(--spacing-sm);
         }
-        
+
         .mood-date {
             font-weight: 600;
-            color: var(--accent);
-            font-size: 0.875rem;
+            color: var(--accent-blue);
+            font-size: 15px;
+            margin-bottom: 4px;
         }
-        
+
         .mood-value {
             font-weight: 500;
+            color: var(--text-primary);
             text-transform: capitalize;
         }
-        
+
         .mood-notes {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
+            font-size: 15px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
         }
-        
-        /* Responsive Design */
+
         @media (max-width: 768px) {
             .container {
-                padding: 0.75rem;
+                padding: var(--spacing-sm);
             }
             
-            .header-content {
-                flex-direction: column;
-                text-align: center;
+            .mood-grid {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             }
             
-            .grid-cols-2,
-            .grid-cols-3 {
-                grid-template-columns: 1fr;
-            }
-            
-            .analytics-grid {
+            .metrics-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .mood-buttons {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .weekly-patterns {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .status-bar {
+            .date-controls {
                 flex-direction: column;
-                gap: 0.5rem;
+                align-items: stretch;
             }
             
-            .chart-container {
-                height: 250px;
-            }
-            
-            .mood-entry {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .analytics-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .weekly-patterns {
-                grid-template-columns: 1fr;
-            }
-            
-            .mood-buttons {
-                grid-template-columns: 1fr;
+            .date-select, .btn {
+                width: 100%;
             }
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-heart"></i> Mood Tracker
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-heart card-icon"></i>
+                <span>Mood Tracker</span>
+            </div>
+            <div class="header-actions">
+                <div class="theme-toggle">
+                    <i class="fas fa-sun" style="font-size: 14px; color: var(--text-tertiary);"></i>
+                    <button class="toggle-switch" onclick="toggleTheme(); return false;"></button>
+                    <i class="fas fa-moon" style="font-size: 14px; color: var(--text-tertiary);"></i>
                 </div>
-                <div class="user-info">
-                    <span>Welcome, {{ user.name }}</span>
-                    <a href="/logout" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <span style="color: var(--text-secondary); font-size: 15px;">Welcome, {{ user.name }}</span>
+                    <a href="/logout" class="btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
                     </a>
                 </div>
             </div>
         </div>
-    </div>
+    </header>
 
     <div class="container">
         <!-- System Status -->
-        <div class="card">
-            <div class="card-title">
-                <i class="fas fa-server"></i> System Status
+        <div class="status-bar">
+            <div class="status-item">
+                <i class="fas fa-database"></i>
+                <span>Database</span>
+                <div id="db-status" class="status-dot checking"></div>
             </div>
-            <div class="status-bar">
-                <div class="status-item">
-                    <i class="fas fa-database"></i>
-                    <span>Database</span>
-                    <div id="db-status" class="status-icon status-checking"></div>
-                </div>
-                <div class="status-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Analytics</span>
-                    <div id="analytics-status" class="status-icon status-checking"></div>
-                </div>
+            <div class="status-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+                <div id="analytics-status" class="status-dot checking"></div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2">
-            <!-- Mood Entry -->
+        <div class="grid grid-2">
+            <!-- Mood Entry Card -->
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-smile"></i> How are you feeling today?
+                <div class="card-header">
+                    <i class="fas fa-heart card-icon"></i>
+                    <h2 class="card-title">How are you feeling today?</h2>
                 </div>
+                
                 <form class="mood-form" action="/save_mood" method="post">
-                    <div class="mood-buttons">
-                        <button type="button" class="mood-btn" data-mood="very bad">😭 Very Bad</button>
-                        <button type="button" class="mood-btn" data-mood="bad">😢 Bad</button>
-                        <button type="button" class="mood-btn" data-mood="slightly bad">😔 Slightly Bad</button>
-                        <button type="button" class="mood-btn" data-mood="neutral">😐 Neutral</button>
-                        <button type="button" class="mood-btn" data-mood="slightly well">🙂 Slightly Well</button>
-                        <button type="button" class="mood-btn" data-mood="well">😊 Well</button>
-                        <button type="button" class="mood-btn" data-mood="very well">😄 Very Well</button>
+                    <div class="mood-grid">
+                        <button type="button" class="mood-btn" data-mood="very bad">
+                            <i class="fas fa-face-frown-open mood-icon" style="color: var(--accent-red);"></i>
+                            <span>Very Bad</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="bad">
+                            <i class="fas fa-face-frown mood-icon" style="color: #ff9500;"></i>
+                            <span>Bad</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="slightly bad">
+                            <i class="fas fa-face-meh mood-icon" style="color: #ffcc00;"></i>
+                            <span>Slightly Bad</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="neutral">
+                            <i class="fas fa-face-meh-blank mood-icon" style="color: var(--text-tertiary);"></i>
+                            <span>Neutral</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="slightly well">
+                            <i class="fas fa-face-smile mood-icon" style="color: var(--accent-green);"></i>
+                            <span>Slightly Well</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="well">
+                            <i class="fas fa-face-smile-beam mood-icon" style="color: var(--accent-blue);"></i>
+                            <span>Well</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="very well">
+                            <i class="fas fa-face-grin-stars mood-icon" style="color: #af52de;"></i>
+                            <span>Very Well</span>
+                        </button>
                     </div>
+                    
                     <input type="hidden" name="mood" id="selected-mood" required>
                     
                     <div class="form-group">
-                        <label class="form-label">Notes (optional)</label>
+                        <label class="form-label">
+                            <i class="fas fa-comment"></i> Notes (optional)
+                        </label>
                         <textarea name="notes" class="form-input" rows="3" placeholder="What's on your mind?"></textarea>
                     </div>
                     
-                    <button type="submit" class="btn">
-                        <i class="fas fa-save"></i> Save Mood
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span>Save Mood</span>
                     </button>
                 </form>
             </div>
 
-            <!-- Analytics -->
+            <!-- Analytics Card -->
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-chart-bar"></i> Analytics
+                <div class="card-header">
+                    <i class="fas fa-chart-bar card-icon"></i>
+                    <h2 class="card-title">Analytics</h2>
                 </div>
-                <div class="analytics-grid">
-                    <div class="metric">
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
                         <div class="metric-value">{{ analytics.daily_average }}</div>
                         <div class="metric-label">Daily Average</div>
                     </div>
-                    <div class="metric">
+                    <div class="metric-card">
                         <div class="metric-value">{{ analytics.good_days_average }}</div>
                         <div class="metric-label">Good Days Avg</div>
                     </div>
-                    <div class="metric">
+                    <div class="metric-card">
                         <div class="metric-value">{{ analytics.bad_days_average }}</div>
                         <div class="metric-label">Bad Days Avg</div>
                     </div>
-                    <div class="metric">
+                    <div class="metric-card">
                         <div class="metric-value">{{ analytics.total_entries }}</div>
                         <div class="metric-label">Total Days</div>
                     </div>
                 </div>
                 
-                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
-                    <strong>What are daily averages?</strong><br>
-                    • <strong>Daily Average:</strong> Average mood across all your days<br>
-                    • <strong>Good Days:</strong> Average of days with 5+ mood (Slightly Well or better)<br>
-                    • <strong>Bad Days:</strong> Average of days with 3- mood (Slightly Bad or worse)<br>
-                    • <strong>Total Days:</strong> Number of days you've tracked your mood
-                </div>
-                <a href="/export_pdf" class="btn">
-                    <i class="fas fa-download"></i> Export PDF
+                <a href="/export_pdf" class="btn btn-secondary">
+                    <i class="fas fa-download"></i>
+                    <span>Export PDF</span>
                 </a>
             </div>
         </div>
 
         <!-- Weekly Patterns -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-calendar-week"></i> Weekly Patterns
+            <div class="card-header">
+                <i class="fas fa-calendar-week card-icon"></i>
+                <h2 class="card-title">Weekly Patterns</h2>
             </div>
-            <div class="date-selector">
-                <select id="yearSelect" class="date-input">
+            
+            <div class="date-controls">
+                <select id="yearSelect" class="date-select">
                     <option value="">Year</option>
                 </select>
-                <select id="monthSelect" class="date-input">
+                <select id="monthSelect" class="date-select">
                     <option value="">Month</option>
                 </select>
-                <select id="weekSelect" class="date-input">
+                <select id="weekSelect" class="date-select">
                     <option value="">Week</option>
                 </select>
-                <button onclick="loadWeeklyPatterns()" class="btn-primary">Load Week</button>
-                <button onclick="loadCurrentWeek()" class="btn-secondary">Current Week</button>
+                <button onclick="loadWeeklyPatterns()" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    <span>Load Week</span>
+                </button>
+                <button onclick="loadCurrentWeek()" class="btn btn-secondary">
+                    <i class="fas fa-calendar-day"></i>
+                    <span>Current Week</span>
+                </button>
             </div>
+            
             <div class="chart-container">
                 <canvas id="weeklyChart"></canvas>
             </div>
@@ -667,14 +588,23 @@
         
         <!-- Daily Patterns -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-clock"></i> Daily Patterns
+            <div class="card-header">
+                <i class="fas fa-clock card-icon"></i>
+                <h2 class="card-title">Daily Patterns</h2>
             </div>
-            <div class="date-selector">
-                <input type="date" id="dailyDatePicker" class="date-input">
-                <button onclick="loadDailyPatterns(document.getElementById('dailyDatePicker').value)" class="btn-primary">Load Day</button>
-                <button onclick="loadDailyPatterns(null)" class="btn-secondary">Hourly Average</button>
+            
+            <div class="date-controls">
+                <input type="date" id="dailyDatePicker" class="date-select">
+                <button onclick="loadDailyPatterns(document.getElementById('dailyDatePicker').value)" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    <span>Load Day</span>
+                </button>
+                <button onclick="loadDailyPatterns(null)" class="btn btn-secondary">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Hourly Average</span>
+                </button>
             </div>
+            
             <div class="chart-container">
                 <canvas id="dailyChart"></canvas>
             </div>
@@ -682,19 +612,28 @@
         
         <!-- Weekly Trends -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-chart-bar"></i> Weekly Trends
+            <div class="card-header">
+                <i class="fas fa-chart-bar card-icon"></i>
+                <h2 class="card-title">Weekly Trends</h2>
             </div>
-            <div class="date-selector">
-                <select id="trendsYearSelect" class="date-input">
+            
+            <div class="date-controls">
+                <select id="trendsYearSelect" class="date-select">
                     <option value="">Year</option>
                 </select>
-                <select id="trendsMonthSelect" class="date-input">
+                <select id="trendsMonthSelect" class="date-select">
                     <option value="">Month</option>
                 </select>
-                <button onclick="loadWeeklyTrends()" class="btn-primary">Load Month</button>
-                <button onclick="loadCurrentMonthTrends()" class="btn-secondary">Current Month</button>
+                <button onclick="loadWeeklyTrends()" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    <span>Load Month</span>
+                </button>
+                <button onclick="loadCurrentMonthTrends()" class="btn btn-secondary">
+                    <i class="fas fa-calendar"></i>
+                    <span>Current Month</span>
+                </button>
             </div>
+            
             <div class="chart-container">
                 <canvas id="weeklyTrendChart"></canvas>
             </div>
@@ -702,16 +641,25 @@
         
         <!-- Monthly Trends -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-chart-bar"></i> Monthly Trends
+            <div class="card-header">
+                <i class="fas fa-chart-area card-icon"></i>
+                <h2 class="card-title">Monthly Trends</h2>
             </div>
-            <div class="date-selector">
-                <select id="monthlyYearSelect" class="date-input">
+            
+            <div class="date-controls">
+                <select id="monthlyYearSelect" class="date-select">
                     <option value="">Year</option>
                 </select>
-                <button onclick="loadMonthlyTrends()" class="btn-primary">Load Year</button>
-                <button onclick="loadCurrentYearTrends()" class="btn-secondary">Current Year</button>
+                <button onclick="loadMonthlyTrends()" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    <span>Load Year</span>
+                </button>
+                <button onclick="loadCurrentYearTrends()" class="btn btn-secondary">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Current Year</span>
+                </button>
             </div>
+            
             <div class="chart-container">
                 <canvas id="monthlyTrendChart"></canvas>
             </div>
@@ -719,49 +667,49 @@
         
         <!-- Mood History -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-history"></i> Recent Moods
+            <div class="card-header">
+                <i class="fas fa-history card-icon"></i>
+                <h2 class="card-title">Recent Moods</h2>
             </div>
+            
             {% for mood in moods %}
             <div class="mood-entry">
                 <div>
                     <div class="mood-date">{{ mood.date }}</div>
                     <div class="mood-value">{{ mood.mood|title }}</div>
-                    {% if mood.timestamp %}
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">
-                        Saved at {{ (mood.timestamp|utc_to_local).strftime('%H:%M') if mood.timestamp else 'Unknown time' }}
-                    </div>
-                    {% endif %}
                     {% if mood.notes %}
                     <div class="mood-notes">{{ mood.notes }}</div>
                     {% endif %}
                 </div>
+                {% if mood.timestamp %}
+                <div style="font-size: 13px; color: var(--text-tertiary);">
+                    {{ (mood.timestamp|utc_to_local).strftime('%H:%M') if mood.timestamp else 'Unknown time' }}
+                </div>
+                {% endif %}
             </div>
             {% endfor %}
+            
             {% if not moods %}
-            <div style="color: var(--text-muted); text-align: center; padding: 2rem;">
-                No mood entries yet. Start tracking your mood above!
+            <div style="color: var(--text-tertiary); text-align: center; padding: 48px;">
+                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <div>No mood entries yet. Start tracking your mood above!</div>
             </div>
             {% endif %}
         </div>
     </div>
-
     <script>
         // Mood selection
         document.querySelectorAll('.mood-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                console.log('🔍 Mood button clicked:', this.dataset.mood);
                 document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
                 this.classList.add('selected');
                 document.getElementById('selected-mood').value = this.dataset.mood;
-                console.log('🔍 Hidden input value set to:', document.getElementById('selected-mood').value);
             });
         });
 
-        // Add form submission debugging
+        // Form validation
         document.querySelector('.mood-form').addEventListener('submit', function(e) {
             const selectedMood = document.getElementById('selected-mood').value;
-            console.log('🔍 Form submitting with mood:', selectedMood);
             if (!selectedMood) {
                 e.preventDefault();
                 alert('Please select a mood before saving!');
@@ -769,308 +717,41 @@
             }
         });
 
-        // System status check
+        // Theme toggle
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        // System status
         async function checkSystemStatus() {
             const dbStatus = document.getElementById('db-status');
             const analyticsStatus = document.getElementById('analytics-status');
             
-            // Check database health
             try {
                 const dbResponse = await fetch('/health');
                 const dbData = await dbResponse.json();
-                
-                if (dbData.status === 'healthy') {
-                    dbStatus.className = 'status-icon status-connected';
-                } else {
-                    dbStatus.className = 'status-icon status-disconnected';
-                }
+                dbStatus.className = dbData.status === 'healthy' ? 'status-dot' : 'status-dot error';
             } catch (error) {
-                dbStatus.className = 'status-icon status-disconnected';
+                dbStatus.className = 'status-dot error';
             }
             
-            // Check analytics health
             try {
                 const analyticsResponse = await fetch('/analytics-health');
                 const analyticsData = await analyticsResponse.json();
-                
-                if (analyticsData.status === 'healthy') {
-                    analyticsStatus.className = 'status-icon status-connected';
-                } else {
-                    analyticsStatus.className = 'status-icon status-disconnected';
-                }
+                analyticsStatus.className = analyticsData.status === 'healthy' ? 'status-dot' : 'status-dot error';
             } catch (error) {
-                analyticsStatus.className = 'status-icon status-disconnected';
+                analyticsStatus.className = 'status-dot error';
             }
-        }
-
-        // Daily Patterns Functions
-        function loadDailyPatterns(selectedDate) {
-            const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
-            console.log('Loading daily patterns from:', url);
-            
-            fetch(url)
-                .then(response => {
-                    console.log('Daily patterns response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Daily patterns data:', data);
-                    
-                    if (window.dailyChart) {
-                        // Update existing chart
-                        window.dailyChart.data.labels = data.labels || ['Morning', 'Afternoon', 'Evening', 'Night'];
-                        window.dailyChart.data.datasets[0].data = data.data || [0, 0, 0, 0];
-                        window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
-                        window.dailyChart.update();
-                        console.log('Daily chart updated');
-                    } else {
-                        console.error('Daily chart not initialized');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading daily patterns:', error);
-                    if (window.dailyChart) {
-                        window.dailyChart.data.datasets[0].label = 'Error loading data';
-                        window.dailyChart.update();
-                    }
-                });
-        }
-
-        // Weekly Patterns Functions
-        function loadWeeklyPatterns() {
-            const year = document.getElementById('yearSelect').value;
-            const month = document.getElementById('monthSelect').value;
-            const week = document.getElementById('weekSelect').value;
-            
-            if (!year || !month || !week) {
-                alert('Please select Year, Month, and Week');
-                return;
-            }
-            
-            const url = `/weekly_patterns?year=${year}&month=${month}&week=${week}`;
-            console.log('Loading weekly patterns from:', url);
-            
-            fetch(url)
-                .then(response => {
-                    console.log('Weekly patterns response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Weekly patterns data:', data);
-                    
-                    if (window.weeklyChart) {
-                        // Update existing chart
-                        window.weeklyChart.data.labels = data.days || data.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                        window.weeklyChart.data.datasets[0].data = data.data || [0, 0, 0, 0, 0, 0, 0];
-                        window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
-                        window.weeklyChart.update();
-                        console.log('Weekly chart updated');
-                    } else {
-                        console.error('Weekly chart not initialized');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading weekly patterns:', error);
-                    if (window.weeklyChart) {
-                        window.weeklyChart.data.datasets[0].label = 'Error loading data';
-                        window.weeklyChart.update();
-                    }
-                });
-        }
-
-        function loadCurrentWeek() {
-            console.log('Loading current week patterns...');
-            
-            fetch('/weekly_patterns')
-                .then(response => {
-                    console.log('Current week response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Current week data:', data);
-                    
-                    if (window.weeklyChart) {
-                        // Update existing chart
-                        window.weeklyChart.data.labels = data.days || data.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                        window.weeklyChart.data.datasets[0].data = data.data || [0, 0, 0, 0, 0, 0, 0];
-                        window.weeklyChart.data.datasets[0].label = 'Current Week';
-                        window.weeklyChart.update();
-                        console.log('Weekly chart updated for current week');
-                    } else {
-                        console.error('Weekly chart not initialized');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading current week:', error);
-                    if (window.weeklyChart) {
-                        window.weeklyChart.data.datasets[0].label = 'Error loading current week';
-                        window.weeklyChart.update();
-                    }
-                });
-        }
-
-        // Weekly Trends Functions
-        function loadWeeklyTrends() {
-            const year = document.getElementById('trendsYearSelect').value;
-            const month = document.getElementById('trendsMonthSelect').value;
-            
-            if (!year || !month) {
-                alert('Please select Year and Month');
-                return;
-            }
-            
-            const url = `/weekly_trends?year=${year}&month=${month}`;
-            console.log('Loading weekly trends from:', url);
-            
-            fetch(url)
-                .then(response => {
-                    console.log('Weekly trends response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Weekly trends data:', data);
-                    
-                    if (window.weeklyTrendChart) {
-                        // Update existing chart
-                        window.weeklyTrendChart.data.labels = data.labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-                        window.weeklyTrendChart.data.datasets[0].data = data.data || [0, 0, 0, 0];
-                        window.weeklyTrendChart.data.datasets[0].label = data.period || 'Weekly Trends';
-                        window.weeklyTrendChart.update();
-                        console.log('Weekly trends chart updated');
-                    } else {
-                        console.error('Weekly trends chart not initialized');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading weekly trends:', error);
-                    if (window.weeklyTrendChart) {
-                        window.weeklyTrendChart.data.datasets[0].label = 'Error loading data';
-                        window.weeklyTrendChart.update();
-                    }
-                });
-        }
-        
-        function loadCurrentMonthTrends() {
-            console.log('Loading current month trends...');
-            
-            fetch('/weekly_trends')
-                .then(response => {
-                    console.log('Current month trends response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Current month trends data:', data);
-                    
-                    if (window.weeklyTrendChart) {
-                        // Update existing chart
-                        window.weeklyTrendChart.data.labels = data.labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-                        window.weeklyTrendChart.data.datasets[0].data = data.data || [0, 0, 0, 0];
-                        window.weeklyTrendChart.data.datasets[0].label = data.period || 'Current Month Trends';
-                        window.weeklyTrendChart.update();
-                        console.log('Weekly trends chart updated for current month');
-                    } else {
-                        console.error('Weekly trends chart not initialized');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading current month trends:', error);
-                    if (window.weeklyTrendChart) {
-                        window.weeklyTrendChart.data.datasets[0].label = 'Error loading current month';
-                        window.weeklyTrendChart.update();
-                    }
-                });
-        }
-
-        // Monthly Trends Functions
-        function loadMonthlyTrends() {
-            const year = document.getElementById('monthlyYearSelect').value;
-            
-            if (!year) {
-                alert('Please select a Year');
-                return;
-            }
-            
-            const url = `/monthly_trends?year=${year}`;
-            console.log('Loading monthly trends from:', url);
-            
-            fetch(url)
-                .then(response => {
-                    console.log('Monthly trends response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Monthly trends data:', data);
-                    
-                    if (window.monthlyTrendChart) {
-                        // Update existing chart
-                        window.monthlyTrendChart.data.labels = data.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        window.monthlyTrendChart.data.datasets[0].data = data.data || new Array(12).fill(0);
-                        window.monthlyTrendChart.data.datasets[0].label = data.period || 'Monthly Trends';
-                        window.monthlyTrendChart.update();
-                        console.log('Monthly trends chart updated');
-                    } else {
-                        console.error('Monthly trends chart not initialized');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading monthly trends:', error);
-                    if (window.monthlyTrendChart) {
-                        window.monthlyTrendChart.data.datasets[0].label = 'Error loading data';
-                        window.monthlyTrendChart.update();
-                    }
-                });
-        }
-        
-        function loadCurrentYearTrends() {
-            console.log('Loading current year trends...');
-            
-            fetch('/monthly_trends')
-                .then(response => {
-                    console.log('Current year trends response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Current year trends data:', data);
-                    
-                    if (window.monthlyTrendChart) {
-                        // Update existing chart
-                        window.monthlyTrendChart.data.labels = data.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        window.monthlyTrendChart.data.datasets[0].data = data.data || new Array(12).fill(0);
-                        window.monthlyTrendChart.data.datasets[0].label = data.period || 'Current Year Trends';
-                        window.monthlyTrendChart.update();
-                        console.log('Monthly trends chart updated for current year');
-                    } else {
-                        console.error('Monthly trends chart not initialized');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading current year trends:', error);
-                    if (window.monthlyTrendChart) {
-                        window.monthlyTrendChart.data.datasets[0].label = 'Error loading current year';
-                        window.monthlyTrendChart.update();
-                    }
-                });
         }
 
         // Initialize dropdowns
@@ -1078,89 +759,89 @@
             const yearSelect = document.getElementById('yearSelect');
             const monthSelect = document.getElementById('monthSelect');
             const weekSelect = document.getElementById('weekSelect');
-            
-            // Initialize trends dropdowns
             const trendsYearSelect = document.getElementById('trendsYearSelect');
             const trendsMonthSelect = document.getElementById('trendsMonthSelect');
             const monthlyYearSelect = document.getElementById('monthlyYearSelect');
             
-            // Populate years (current year ± 2)
             const currentYear = new Date().getFullYear();
-            for (let year = currentYear - 2; year <= currentYear + 2; year++) {
-                // Weekly patterns year
-                const option1 = document.createElement('option');
-                option1.value = year;
-                option1.textContent = year;
-                if (year === currentYear) option1.selected = true;
-                yearSelect.appendChild(option1);
-                
-                // Weekly trends year
-                const option2 = document.createElement('option');
-                option2.value = year;
-                option2.textContent = year;
-                if (year === currentYear) option2.selected = true;
-                trendsYearSelect.appendChild(option2);
-                
-                // Monthly trends year
-                const option3 = document.createElement('option');
-                option3.value = year;
-                option3.textContent = year;
-                if (year === currentYear) option3.selected = true;
-                monthlyYearSelect.appendChild(option3);
-            }
-            
-            // Populate months
+            const currentMonth = new Date().getMonth() + 1;
             const months = ['January', 'February', 'March', 'April', 'May', 'June',
                           'July', 'August', 'September', 'October', 'November', 'December'];
-            const currentMonth = new Date().getMonth() + 1;
             
-            months.forEach((month, index) => {
-                // Weekly patterns month
-                const option1 = document.createElement('option');
-                option1.value = index + 1;
-                option1.textContent = month;
-                if (index + 1 === currentMonth) option1.selected = true;
-                monthSelect.appendChild(option1);
+            // Weekly patterns selectors
+            if (yearSelect && monthSelect && weekSelect) {
+                for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === currentYear) option.selected = true;
+                    yearSelect.appendChild(option);
+                }
                 
-                // Weekly trends month
-                const option2 = document.createElement('option');
-                option2.value = index + 1;
-                option2.textContent = month;
-                if (index + 1 === currentMonth) option2.selected = true;
-                trendsMonthSelect.appendChild(option2);
-            });
+                months.forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = index + 1;
+                    option.textContent = month;
+                    if (index + 1 === currentMonth) option.selected = true;
+                    monthSelect.appendChild(option);
+                });
+                
+                yearSelect.addEventListener('change', updateWeekOptions);
+                monthSelect.addEventListener('change', updateWeekOptions);
+                updateWeekOptions();
+            }
             
-            // Add event listeners to update weeks when year/month changes
-            yearSelect.addEventListener('change', updateWeekOptions);
-            monthSelect.addEventListener('change', updateWeekOptions);
+            // Trends selectors
+            if (trendsYearSelect && trendsMonthSelect) {
+                for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === currentYear) option.selected = true;
+                    trendsYearSelect.appendChild(option);
+                }
+                
+                months.forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = index + 1;
+                    option.textContent = month;
+                    if (index + 1 === currentMonth) option.selected = true;
+                    trendsMonthSelect.appendChild(option);
+                });
+            }
             
-            // Initialize weeks for current month/year
-            updateWeekOptions();
+            if (monthlyYearSelect) {
+                for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === currentYear) option.selected = true;
+                    monthlyYearSelect.appendChild(option);
+                }
+            }
         }
-        
+
         function updateWeekOptions() {
             const yearSelect = document.getElementById('yearSelect');
             const monthSelect = document.getElementById('monthSelect');
             const weekSelect = document.getElementById('weekSelect');
             
+            if (!yearSelect || !monthSelect || !weekSelect) return;
+            
             const year = parseInt(yearSelect.value);
             const month = parseInt(monthSelect.value);
             
-            // Clear existing options
             weekSelect.innerHTML = '<option value="">Week</option>';
             
             if (!year || !month) return;
             
-            // Calculate how many weeks exist in this month
             const firstDay = new Date(year, month - 1, 1);
             const lastDay = new Date(year, month, 0);
-            const firstWeekday = firstDay.getDay(); // 0=Sunday, 1=Monday, etc.
+            const firstWeekday = firstDay.getDay();
             
-            // Calculate first Monday of the month
             const daysToFirstMonday = (8 - firstWeekday) % 7;
             const firstMonday = new Date(year, month - 1, 1 + daysToFirstMonday);
             
-            // Calculate how many weeks fit in this month
             let weekCount = 1;
             let currentWeekStart = new Date(firstMonday);
             
@@ -1168,58 +849,28 @@
                 const option = document.createElement('option');
                 option.value = weekCount;
                 
-                // Calculate week end date
                 const weekEnd = new Date(currentWeekStart);
                 weekEnd.setDate(weekEnd.getDate() + 6);
                 
-                // Ensure week end doesn't go past month end
                 const actualWeekEnd = weekEnd > lastDay ? lastDay : weekEnd;
                 
                 option.textContent = `Week ${weekCount} (${currentWeekStart.getDate()}-${actualWeekEnd.getDate()})`;
                 weekSelect.appendChild(option);
                 
-                // Move to next week
                 currentWeekStart.setDate(currentWeekStart.getDate() + 7);
                 weekCount++;
                 
-                // Safety check to prevent infinite loop
                 if (weekCount > 6) break;
             }
             
-            // Select first week by default
             if (weekSelect.children.length > 1) {
                 weekSelect.children[1].selected = true;
             }
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing charts...');
-            
-            try {
-                initializeDropdowns();
-                console.log('Dropdowns initialized');
-                
-                // Initialize empty charts first
-                initializeEmptyCharts();
-                
-                // Then load data
-                setTimeout(() => {
-                    loadDailyPatterns(null); // Load all days initially
-                    loadCurrentWeek(); // Load current week initially
-                    loadCurrentMonthTrends(); // Load current month trends initially
-                    loadCurrentYearTrends(); // Load current year trends initially
-                }, 100);
-                
-            } catch (error) {
-                console.error('Error during initialization:', error);
-            }
-        });
-        
-        function initializeEmptyCharts() {
-            console.log('Initializing empty charts...');
-            
-            // Initialize Daily Chart
+        // Chart initialization
+        function initializeCharts() {
+            // Daily Chart
             const dailyCtx = document.getElementById('dailyChart');
             if (dailyCtx) {
                 const hourLabels = [];
@@ -1234,12 +885,11 @@
                         datasets: [{
                             label: 'Loading...',
                             data: new Array(24).fill(null),
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderColor: '#007aff',
+                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
                             tension: 0.4,
                             borderWidth: 2,
                             pointRadius: 4,
-                            pointHoverRadius: 6,
                             spanGaps: true
                         }]
                     },
@@ -1254,30 +904,19 @@
                                     stepSize: 1,
                                     callback: function(value) {
                                         const labels = {
-                                            1: 'Very Bad',
-                                            2: 'Bad', 
-                                            3: 'Slightly Bad',
-                                            4: 'Neutral',
-                                            5: 'Slightly Well',
-                                            6: 'Well',
-                                            7: 'Very Well'
+                                            1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
                                         };
                                         return labels[value] || value;
                                     }
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    maxTicksLimit: 12
                                 }
                             }
                         }
                     }
                 });
-                console.log('Daily chart initialized');
             }
             
-            // Initialize Weekly Chart
+            // Weekly Chart
             const weeklyCtx = document.getElementById('weeklyChart');
             if (weeklyCtx) {
                 window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
@@ -1287,12 +926,11 @@
                         datasets: [{
                             label: 'Loading...',
                             data: [0, 0, 0, 0, 0, 0, 0],
-                            borderColor: 'rgba(34, 197, 94, 1)',
-                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            borderColor: '#34c759',
+                            backgroundColor: 'rgba(52, 199, 89, 0.1)',
                             tension: 0.4,
                             borderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
+                            pointRadius: 4
                         }]
                     },
                     options: {
@@ -1306,13 +944,8 @@
                                     stepSize: 1,
                                     callback: function(value) {
                                         const labels = {
-                                            1: 'Very Bad',
-                                            2: 'Bad', 
-                                            3: 'Slightly Bad',
-                                            4: 'Neutral',
-                                            5: 'Slightly Well',
-                                            6: 'Well',
-                                            7: 'Very Well'
+                                            1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
                                         };
                                         return labels[value] || value;
                                     }
@@ -1321,10 +954,9 @@
                         }
                     }
                 });
-                console.log('Weekly chart initialized');
             }
             
-            // Initialize Weekly Trends Chart
+            // Weekly Trends Chart
             const weeklyTrendCtx = document.getElementById('weeklyTrendChart');
             if (weeklyTrendCtx) {
                 window.weeklyTrendChart = new Chart(weeklyTrendCtx.getContext('2d'), {
@@ -1334,28 +966,14 @@
                         datasets: [{
                             label: 'Loading...',
                             data: [0, 0, 0, 0],
-                            backgroundColor: 'rgba(168, 85, 247, 0.6)',
-                            borderColor: 'rgba(168, 85, 247, 1)',
+                            backgroundColor: 'rgba(175, 82, 222, 0.6)',
+                            borderColor: '#af52de',
                             borderWidth: 2
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            datalabels: {
-                                anchor: 'center',
-                                align: 'center',
-                                color: 'white',
-                                font: {
-                                    weight: 'bold',
-                                    size: 12
-                                },
-                                formatter: function(value) {
-                                    return value > 0 ? value.toFixed(1) : '';
-                                }
-                            }
-                        },
                         scales: {
                             y: {
                                 min: 0,
@@ -1364,49 +982,19 @@
                                     stepSize: 1,
                                     callback: function(value) {
                                         const labels = {
-                                            0: '0',
-                                            1: 'Very Bad',
-                                            2: 'Bad', 
-                                            3: 'Slightly Bad',
-                                            4: 'Neutral',
-                                            5: 'Slightly Well',
-                                            6: 'Well',
-                                            7: 'Very Well'
+                                            0: '0', 1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
                                         };
                                         return labels[value] || value;
                                     }
                                 }
                             }
                         }
-                    },
-                    plugins: [{
-                        afterDatasetsDraw: function(chart) {
-                            const ctx = chart.ctx;
-                            chart.data.datasets.forEach((dataset, i) => {
-                                const meta = chart.getDatasetMeta(i);
-                                meta.data.forEach((bar, index) => {
-                                    const data = dataset.data[index];
-                                    if (data > 0) {
-                                        ctx.fillStyle = 'white';
-                                        ctx.font = 'bold 12px Arial';
-                                        ctx.textAlign = 'center';
-                                        ctx.textBaseline = 'middle';
-                                        
-                                        // Calculate center of bar
-                                        const centerX = bar.x;
-                                        const centerY = bar.y + (bar.height / 2);
-                                        
-                                        ctx.fillText(data.toFixed(1), centerX, centerY);
-                                    }
-                                });
-                            });
-                        }
-                    }]
+                    }
                 });
-                console.log('Weekly trends chart initialized');
             }
             
-            // Initialize Monthly Trends Chart
+            // Monthly Trends Chart
             const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
             if (monthlyTrendCtx) {
                 window.monthlyTrendChart = new Chart(monthlyTrendCtx.getContext('2d'), {
@@ -1416,8 +1004,8 @@
                         datasets: [{
                             label: 'Loading...',
                             data: new Array(12).fill(0),
-                            backgroundColor: 'rgba(34, 197, 94, 0.6)',
-                            borderColor: 'rgba(34, 197, 94, 1)',
+                            backgroundColor: 'rgba(52, 199, 89, 0.6)',
+                            borderColor: '#34c759',
                             borderWidth: 2
                         }]
                     },
@@ -1432,54 +1020,159 @@
                                     stepSize: 1,
                                     callback: function(value) {
                                         const labels = {
-                                            0: '0',
-                                            1: 'Very Bad',
-                                            2: 'Bad', 
-                                            3: 'Slightly Bad',
-                                            4: 'Neutral',
-                                            5: 'Slightly Well',
-                                            6: 'Well',
-                                            7: 'Very Well'
+                                            0: '0', 1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
                                         };
                                         return labels[value] || value;
                                     }
                                 }
                             }
                         }
-                    },
-                    plugins: [{
-                        afterDatasetsDraw: function(chart) {
-                            const ctx = chart.ctx;
-                            chart.data.datasets.forEach((dataset, i) => {
-                                const meta = chart.getDatasetMeta(i);
-                                meta.data.forEach((bar, index) => {
-                                    const data = dataset.data[index];
-                                    if (data > 0) {
-                                        ctx.fillStyle = 'white';
-                                        ctx.font = 'bold 12px Arial';
-                                        ctx.textAlign = 'center';
-                                        ctx.textBaseline = 'middle';
-                                        
-                                        // Calculate center of bar
-                                        const centerX = bar.x;
-                                        const centerY = bar.y + (bar.height / 2);
-                                        
-                                        ctx.fillText(data.toFixed(1), centerX, centerY);
-                                    }
-                                });
-                            });
-                        }
-                    }]
+                    }
                 });
-                console.log('Monthly trends chart initialized');
             }
         }
 
-        // Check system status on load
-        checkSystemStatus();
-        
-        // Refresh status every 10 seconds for real-time monitoring
-        setInterval(checkSystemStatus, 10000);
+        // Data loading functions
+        function loadDailyPatterns(selectedDate) {
+            const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.dailyChart) {
+                        window.dailyChart.data.labels = data.labels || [];
+                        window.dailyChart.data.datasets[0].data = data.data || [];
+                        window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
+                        window.dailyChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading daily patterns:', error));
+        }
+
+        function loadWeeklyPatterns() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const week = document.getElementById('weekSelect').value;
+            
+            if (!year || !month || !week) {
+                alert('Please select Year, Month, and Week');
+                return;
+            }
+            
+            fetch(`/weekly_patterns?year=${year}&month=${month}&week=${week}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.labels = data.days || data.labels || [];
+                        window.weeklyChart.data.datasets[0].data = data.data || [];
+                        window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+                        window.weeklyChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading weekly patterns:', error));
+        }
+
+        function loadCurrentWeek() {
+            fetch('/weekly_patterns')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.labels = data.days || data.labels || [];
+                        window.weeklyChart.data.datasets[0].data = data.data || [];
+                        window.weeklyChart.data.datasets[0].label = 'Current Week';
+                        window.weeklyChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading current week:', error));
+        }
+
+        function loadWeeklyTrends() {
+            const year = document.getElementById('trendsYearSelect').value;
+            const month = document.getElementById('trendsMonthSelect').value;
+            
+            if (!year || !month) {
+                alert('Please select Year and Month');
+                return;
+            }
+            
+            fetch(`/weekly_trends?year=${year}&month=${month}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyTrendChart) {
+                        window.weeklyTrendChart.data.labels = data.labels || [];
+                        window.weeklyTrendChart.data.datasets[0].data = data.data || [];
+                        window.weeklyTrendChart.data.datasets[0].label = data.period || 'Weekly Trends';
+                        window.weeklyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading weekly trends:', error));
+        }
+
+        function loadCurrentMonthTrends() {
+            fetch('/weekly_trends')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyTrendChart) {
+                        window.weeklyTrendChart.data.labels = data.labels || [];
+                        window.weeklyTrendChart.data.datasets[0].data = data.data || [];
+                        window.weeklyTrendChart.data.datasets[0].label = 'Current Month Trends';
+                        window.weeklyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading current month trends:', error));
+        }
+
+        function loadMonthlyTrends() {
+            const year = document.getElementById('monthlyYearSelect').value;
+            
+            if (!year) {
+                alert('Please select a Year');
+                return;
+            }
+            
+            fetch(`/monthly_trends?year=${year}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.monthlyTrendChart) {
+                        window.monthlyTrendChart.data.labels = data.labels || [];
+                        window.monthlyTrendChart.data.datasets[0].data = data.data || [];
+                        window.monthlyTrendChart.data.datasets[0].label = data.period || 'Monthly Trends';
+                        window.monthlyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading monthly trends:', error));
+        }
+
+        function loadCurrentYearTrends() {
+            fetch('/monthly_trends')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.monthlyTrendChart) {
+                        window.monthlyTrendChart.data.labels = data.labels || [];
+                        window.monthlyTrendChart.data.datasets[0].data = data.data || [];
+                        window.monthlyTrendChart.data.datasets[0].label = 'Current Year Trends';
+                        window.monthlyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading current year trends:', error));
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            initializeDropdowns();
+            initializeCharts();
+            
+            setTimeout(() => {
+                loadDailyPatterns(null);
+                loadCurrentWeek();
+                loadCurrentMonthTrends();
+                loadCurrentYearTrends();
+            }, 500);
+            
+            checkSystemStatus();
+            setInterval(checkSystemStatus, 10000);
+        });
     </script>
 </body>
 </html>
