@@ -5,117 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Apple Design Fundamentals - Colors & Materials */
+        /* Material Design 3 (Material You) Design System */
         :root {
-            /* Apple System Colors - Light Mode */
-            --system-background: #ffffff;
-            --secondary-system-background: #f2f2f7;
-            --tertiary-system-background: #ffffff;
-            --system-grouped-background: #f2f2f7;
-            --secondary-system-grouped-background: #ffffff;
-            --tertiary-system-grouped-background: #f2f2f7;
+            /* Material Design 3 Color System - Light Theme */
+            --md-sys-color-primary: #6750a4;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #eaddff;
+            --md-sys-color-on-primary-container: #21005d;
             
-            /* Apple Label Colors */
-            --label: #000000;
-            --secondary-label: rgba(60, 60, 67, 0.6);
-            --tertiary-label: rgba(60, 60, 67, 0.3);
-            --quaternary-label: rgba(60, 60, 67, 0.18);
+            --md-sys-color-secondary: #625b71;
+            --md-sys-color-on-secondary: #ffffff;
+            --md-sys-color-secondary-container: #e8def8;
+            --md-sys-color-on-secondary-container: #1d192b;
             
-            /* Apple Fill Colors */
-            --system-fill: rgba(120, 120, 128, 0.2);
-            --secondary-system-fill: rgba(120, 120, 128, 0.16);
-            --tertiary-system-fill: rgba(118, 118, 128, 0.12);
-            --quaternary-system-fill: rgba(116, 116, 128, 0.08);
+            --md-sys-color-tertiary: #7d5260;
+            --md-sys-color-on-tertiary: #ffffff;
+            --md-sys-color-tertiary-container: #ffd8e4;
+            --md-sys-color-on-tertiary-container: #31111d;
             
-            /* Apple Separator Colors */
-            --separator: rgba(60, 60, 67, 0.29);
-            --opaque-separator: #c6c6c8;
+            --md-sys-color-error: #ba1a1a;
+            --md-sys-color-on-error: #ffffff;
+            --md-sys-color-error-container: #ffdad6;
+            --md-sys-color-on-error-container: #410002;
             
-            /* Apple System Colors */
-            --system-blue: #007aff;
-            --system-green: #34c759;
-            --system-indigo: #5856d6;
-            --system-orange: #ff9500;
-            --system-pink: #ff2d92;
-            --system-purple: #af52de;
-            --system-red: #ff3b30;
-            --system-teal: #5ac8fa;
-            --system-yellow: #ffcc00;
-            --system-gray: #8e8e93;
-            --system-gray2: #aeaeb2;
-            --system-gray3: #c7c7cc;
-            --system-gray4: #d1d1d6;
-            --system-gray5: #e5e5ea;
-            --system-gray6: #f2f2f7;
+            --md-sys-color-background: #fffbfe;
+            --md-sys-color-on-background: #1c1b1f;
+            --md-sys-color-surface: #fffbfe;
+            --md-sys-color-on-surface: #1c1b1f;
+            --md-sys-color-surface-variant: #e7e0ec;
+            --md-sys-color-on-surface-variant: #49454f;
+            --md-sys-color-outline: #79747e;
+            --md-sys-color-outline-variant: #cab6cf;
             
-            /* Apple Materials */
-            --material-regular: rgba(255, 255, 255, 0.8);
-            --material-thick: rgba(255, 255, 255, 0.9);
-            --material-thin: rgba(255, 255, 255, 0.6);
-            --material-ultra-thin: rgba(255, 255, 255, 0.4);
+            --md-sys-color-surface-container-lowest: #ffffff;
+            --md-sys-color-surface-container-low: #f7f2fa;
+            --md-sys-color-surface-container: #f3edf7;
+            --md-sys-color-surface-container-high: #ece6f0;
+            --md-sys-color-surface-container-highest: #e6e0e9;
             
-            /* Apple Shadows */
-            --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.12);
-            --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.15);
-            --shadow-3: 0 8px 25px rgba(0, 0, 0, 0.15);
-            --shadow-4: 0 16px 40px rgba(0, 0, 0, 0.2);
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #f4eff4;
+            --md-sys-color-inverse-primary: #d0bcff;
+            
+            /* Material Design 3 Elevation */
+            --md-sys-elevation-level0: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level1: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level3: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level4: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level5: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
+            
+            /* Material Design 3 Shape */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            
+            /* Material Design 3 State Layers */
+            --md-sys-state-hover-opacity: 0.08;
+            --md-sys-state-focus-opacity: 0.12;
+            --md-sys-state-pressed-opacity: 0.12;
+            --md-sys-state-dragged-opacity: 0.16;
         }
 
         [data-theme="dark"] {
-            /* Apple System Colors - Dark Mode */
-            --system-background: #000000;
-            --secondary-system-background: #1c1c1e;
-            --tertiary-system-background: #2c2c2e;
-            --system-grouped-background: #000000;
-            --secondary-system-grouped-background: #1c1c1e;
-            --tertiary-system-grouped-background: #2c2c2e;
+            /* Material Design 3 Color System - Dark Theme */
+            --md-sys-color-primary: #d0bcff;
+            --md-sys-color-on-primary: #381e72;
+            --md-sys-color-primary-container: #4f378b;
+            --md-sys-color-on-primary-container: #eaddff;
             
-            /* Apple Label Colors - Dark */
-            --label: #ffffff;
-            --secondary-label: rgba(235, 235, 245, 0.6);
-            --tertiary-label: rgba(235, 235, 245, 0.3);
-            --quaternary-label: rgba(235, 235, 245, 0.18);
+            --md-sys-color-secondary: #ccc2dc;
+            --md-sys-color-on-secondary: #332d41;
+            --md-sys-color-secondary-container: #4a4458;
+            --md-sys-color-on-secondary-container: #e8def8;
             
-            /* Apple Fill Colors - Dark */
-            --system-fill: rgba(120, 120, 128, 0.36);
-            --secondary-system-fill: rgba(120, 120, 128, 0.32);
-            --tertiary-system-fill: rgba(118, 118, 128, 0.24);
-            --quaternary-system-fill: rgba(116, 116, 128, 0.18);
+            --md-sys-color-tertiary: #efb8c8;
+            --md-sys-color-on-tertiary: #492532;
+            --md-sys-color-tertiary-container: #633b48;
+            --md-sys-color-on-tertiary-container: #ffd8e4;
             
-            /* Apple Separator Colors - Dark */
-            --separator: rgba(84, 84, 88, 0.6);
-            --opaque-separator: #38383a;
+            --md-sys-color-error: #ffb4ab;
+            --md-sys-color-on-error: #690005;
+            --md-sys-color-error-container: #93000a;
+            --md-sys-color-on-error-container: #ffdad6;
             
-            /* Apple System Colors - Dark */
-            --system-blue: #0a84ff;
-            --system-green: #30d158;
-            --system-indigo: #5e5ce6;
-            --system-orange: #ff9f0a;
-            --system-pink: #ff375f;
-            --system-purple: #bf5af2;
-            --system-red: #ff453a;
-            --system-teal: #64d2ff;
-            --system-yellow: #ffd60a;
-            --system-gray: #8e8e93;
-            --system-gray2: #636366;
-            --system-gray3: #48484a;
-            --system-gray4: #3a3a3c;
-            --system-gray5: #2c2c2e;
-            --system-gray6: #1c1c1e;
+            --md-sys-color-background: #10090d;
+            --md-sys-color-on-background: #e6e0e9;
+            --md-sys-color-surface: #10090d;
+            --md-sys-color-on-surface: #e6e0e9;
+            --md-sys-color-surface-variant: #49454f;
+            --md-sys-color-on-surface-variant: #cab6cf;
+            --md-sys-color-outline: #938f99;
+            --md-sys-color-outline-variant: #49454f;
             
-            /* Apple Materials - Dark */
-            --material-regular: rgba(28, 28, 30, 0.8);
-            --material-thick: rgba(28, 28, 30, 0.9);
-            --material-thin: rgba(28, 28, 30, 0.6);
-            --material-ultra-thin: rgba(28, 28, 30, 0.4);
+            --md-sys-color-surface-container-lowest: #0b0509;
+            --md-sys-color-surface-container-low: #1c1b1f;
+            --md-sys-color-surface-container: #201f23;
+            --md-sys-color-surface-container-high: #2b2930;
+            --md-sys-color-surface-container-highest: #36343b;
             
-            /* Apple Shadows - Dark */
-            --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.3);
-            --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.4);
-            --shadow-3: 0 8px 25px rgba(0, 0, 0, 0.5);
-            --shadow-4: 0 16px 40px rgba(0, 0, 0, 0.6);
+            --md-sys-color-inverse-surface: #e6e0e9;
+            --md-sys-color-inverse-on-surface: #313033;
+            --md-sys-color-inverse-primary: #6750a4;
         }
 
         * {
@@ -125,403 +122,448 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
-            background: var(--system-grouped-background);
-            color: var(--label);
-            line-height: 1.47058823529412;
-            font-size: 17px;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            line-height: 1.5;
+            font-size: 16px;
             font-weight: 400;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Apple Typography Scale */
-        .large-title {
-            font-size: 34px;
-            font-weight: 700;
-            line-height: 1.20588235294118;
-            letter-spacing: 0.374px;
-        }
-
-        .title-1 {
-            font-size: 28px;
-            font-weight: 700;
-            line-height: 1.25;
-            letter-spacing: 0.364px;
-        }
-
-        .title-2 {
-            font-size: 22px;
-            font-weight: 700;
-            line-height: 1.27272727272727;
-            letter-spacing: 0.352px;
-        }
-
-        .title-3 {
-            font-size: 20px;
-            font-weight: 600;
-            line-height: 1.25;
-            letter-spacing: 0.38px;
-        }
-
-        .headline {
-            font-size: 17px;
-            font-weight: 600;
-            line-height: 1.29411764705882;
-            letter-spacing: -0.408px;
-        }
-
-        .body {
-            font-size: 17px;
+        /* Material Design 3 Typography Scale */
+        .display-large {
+            font-size: 57px;
             font-weight: 400;
-            line-height: 1.47058823529412;
-            letter-spacing: -0.408px;
+            line-height: 64px;
+            letter-spacing: -0.25px;
         }
 
-        .callout {
-            font-size: 16px;
+        .display-medium {
+            font-size: 45px;
             font-weight: 400;
-            line-height: 1.3125;
-            letter-spacing: -0.32px;
-        }
-
-        .subheadline {
-            font-size: 15px;
-            font-weight: 400;
-            line-height: 1.33333333333333;
-            letter-spacing: -0.24px;
-        }
-
-        .footnote {
-            font-size: 13px;
-            font-weight: 400;
-            line-height: 1.38461538461538;
-            letter-spacing: -0.078px;
-        }
-
-        .caption-1 {
-            font-size: 12px;
-            font-weight: 400;
-            line-height: 1.33333333333333;
+            line-height: 52px;
             letter-spacing: 0px;
         }
 
-        .caption-2 {
-            font-size: 11px;
+        .display-small {
+            font-size: 36px;
             font-weight: 400;
-            line-height: 1.27272727272727;
-            letter-spacing: 0.066px;
+            line-height: 44px;
+            letter-spacing: 0px;
         }
 
-        /* Apple Layout System - 8pt Grid */
+        .headline-large {
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+        }
+
+        .headline-medium {
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+        }
+
+        .headline-small {
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 32px;
+            letter-spacing: 0px;
+        }
+
+        .title-large {
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+        }
+
+        .title-medium {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 24px;
+            letter-spacing: 0.15px;
+        }
+
+        .title-small {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+        }
+
+        .body-large {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .body-medium {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+            letter-spacing: 0.25px;
+        }
+
+        .body-small {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 16px;
+            letter-spacing: 0.4px;
+        }
+
+        .label-large {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+        }
+
+        .label-medium {
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .label-small {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Material Design 3 Layout */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 16px; /* 2 * 8pt */
+            padding: 16px;
         }
 
         .section {
-            margin-bottom: 32px; /* 4 * 8pt */
+            margin-bottom: 24px;
         }
 
-        /* Apple Materials & Vibrancy */
-        .material-regular {
-            background: var(--material-regular);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .material-thick {
-            background: var(--material-thick);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-        }
-
-        .material-thin {
-            background: var(--material-thin);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-        }
-
-        /* Apple Header with Vibrancy */
-        .header {
-            background: var(--material-thick);
-            border-bottom: 0.5px solid var(--separator);
-            padding: 16px 0; /* 2 * 8pt */
+        /* Material Design 3 Top App Bar */
+        .top-app-bar {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            padding: 8px 16px;
             position: sticky;
             top: 0;
             z-index: 1000;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--md-sys-elevation-level2);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
         }
 
-        .header-content {
+        .top-app-bar-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 16px; /* 2 * 8pt */
+            min-height: 64px;
         }
 
-        .logo {
+        .app-bar-title {
             display: flex;
             align-items: center;
-            gap: 8px; /* 1 * 8pt */
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--system-blue);
+            gap: 12px;
+            color: var(--md-sys-color-primary);
         }
 
-        .header-actions {
+        .app-bar-actions {
             display: flex;
             align-items: center;
-            gap: 16px; /* 2 * 8pt */
+            gap: 16px;
         }
 
-        /* Apple Toggle Switch */
+        /* Material Design 3 Theme Toggle */
         .theme-toggle {
             display: flex;
             align-items: center;
-            gap: 8px; /* 1 * 8pt */
+            gap: 8px;
         }
 
-        .toggle-switch {
-            width: 51px;
-            height: 31px;
-            background: var(--tertiary-system-fill);
-            border-radius: 15.5px;
-            border: none;
+        .theme-switch {
+            width: 52px;
+            height: 32px;
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: 16px;
+            border: 2px solid var(--md-sys-color-outline);
             cursor: pointer;
             position: relative;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .toggle-switch::before {
+        .theme-switch::before {
             content: '';
             position: absolute;
             top: 2px;
             left: 2px;
-            width: 27px;
-            height: 27px;
-            background: var(--system-background);
+            width: 24px;
+            height: 24px;
+            background-color: var(--md-sys-color-outline);
             border-radius: 50%;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-1);
         }
 
-        [data-theme="dark"] .toggle-switch {
-            background: var(--system-blue);
+        [data-theme="dark"] .theme-switch {
+            background-color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
         }
 
-        [data-theme="dark"] .toggle-switch::before {
+        [data-theme="dark"] .theme-switch::before {
             transform: translateX(20px);
+            background-color: var(--md-sys-color-on-primary);
         }
 
-        .toggle-icon {
-            font-size: 14px;
-            color: var(--tertiary-label);
-            transition: color 0.3s ease;
+        .theme-icon {
+            font-size: 20px;
+            color: var(--md-sys-color-on-surface-variant);
         }
 
-        /* Apple Cards with Proper Materials */
-        .card {
-            background: var(--secondary-system-grouped-background);
-            border-radius: 16px; /* 2 * 8pt */
-            padding: 24px; /* 3 * 8pt */
-            box-shadow: var(--shadow-1);
-            border: 0.5px solid var(--separator);
-            margin-bottom: 24px; /* 3 * 8pt */
+        /* Material Design 3 Cards */
+        .md-card {
+            background-color: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--md-sys-elevation-level1);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-2);
+        .md-card:hover {
+            box-shadow: var(--md-sys-elevation-level2);
         }
 
-        .card-header {
+        .md-card-header {
             display: flex;
             align-items: center;
-            gap: 8px; /* 1 * 8pt */
-            margin-bottom: 24px; /* 3 * 8pt */
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--label);
+        .md-card-title {
+            color: var(--md-sys-color-on-surface);
         }
 
-        .card-icon {
-            color: var(--system-blue);
-            font-size: 18px;
+        .md-card-icon {
+            color: var(--md-sys-color-primary);
+            font-size: 24px;
         }
 
-        /* Apple Grid System */
-        .grid {
+        /* Material Design 3 Grid */
+        .md-grid {
             display: grid;
-            gap: 16px; /* 2 * 8pt */
+            gap: 16px;
         }
 
-        .grid-2 {
+        .md-grid-2 {
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         }
 
-        /* Apple Buttons with Proper Touch Targets */
-        .btn {
+        /* Material Design 3 Buttons */
+        .md-button {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px; /* 1 * 8pt */
-            padding: 12px 20px;
-            border-radius: 12px; /* 1.5 * 8pt */
-            font-size: 17px;
-            font-weight: 600;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
             text-decoration: none;
             border: none;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 44px; /* Apple minimum touch target */
-            min-width: 44px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 40px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-primary {
-            background: var(--system-blue);
-            color: white;
-            box-shadow: var(--shadow-1);
+        .md-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: currentColor;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-primary:hover {
-            background: var(--system-blue);
-            opacity: 0.8;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-2);
+        .md-button:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
         }
 
-        .btn-secondary {
-            background: var(--secondary-system-fill);
-            color: var(--label);
+        .md-button:focus::before {
+            opacity: var(--md-sys-state-focus-opacity);
         }
 
-        .btn-secondary:hover {
-            background: var(--system-fill);
+        .md-button:active::before {
+            opacity: var(--md-sys-state-pressed-opacity);
         }
 
-        /* Apple Mood Grid with 8pt spacing */
+        .md-button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .md-button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .md-button-text {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+        }
+
+        /* Material Design 3 Mood Selection */
         .mood-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); /* 11 * 8pt */
-            gap: 8px; /* 1 * 8pt */
-            margin-bottom: 24px; /* 3 * 8pt */
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
-        .mood-btn {
+        .mood-card {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px; /* 1 * 8pt */
-            padding: 16px; /* 2 * 8pt */
-            background: var(--secondary-system-fill);
-            border: 1px solid var(--quaternary-system-fill);
-            border-radius: 16px; /* 2 * 8pt */
+            gap: 8px;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-large);
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 88px; /* 11 * 8pt */
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--secondary-label);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .mood-btn:hover {
-            background: var(--tertiary-system-fill);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-1);
+        .mood-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--md-sys-color-primary);
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .mood-btn.selected {
-            background: var(--system-blue);
-            color: white;
-            border-color: var(--system-blue);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-2);
+        .mood-card:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
+        }
+
+        .mood-card.selected {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-color: var(--md-sys-color-primary);
         }
 
         .mood-icon {
-            font-size: 28px; /* 3.5 * 8pt */
+            font-size: 32px;
+            z-index: 1;
         }
 
-        /* Apple Form Elements */
-        .form-group {
-            margin-bottom: 24px; /* 3 * 8pt */
+        .mood-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 1;
         }
 
-        .form-label {
-            display: block;
-            margin-bottom: 8px; /* 1 * 8pt */
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--label);
+        /* Material Design 3 Form Elements */
+        .md-text-field {
+            position: relative;
+            margin-bottom: 16px;
         }
 
-        .form-input {
+        .md-text-field-input {
             width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--separator);
-            border-radius: 12px; /* 1.5 * 8pt */
-            background: var(--secondary-system-grouped-background);
-            color: var(--label);
-            font-size: 17px;
-            transition: all 0.2s ease;
-            min-height: 44px; /* Apple minimum touch target */
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Roboto', sans-serif;
         }
 
-        .form-input:focus {
+        .md-text-field-input:focus {
             outline: none;
-            border-color: var(--system-blue);
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
         }
 
-        .form-input::placeholder {
-            color: var(--tertiary-label);
+        .md-text-field-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            background-color: var(--md-sys-color-surface);
+            padding: 0 4px;
         }
 
-        /* Apple Status System */
-        .status-bar {
+        .md-text-field-input:focus + .md-text-field-label,
+        .md-text-field-input:not(:placeholder-shown) + .md-text-field-label {
+            top: -8px;
+            font-size: 12px;
+            color: var(--md-sys-color-primary);
+        }
+
+        /* Material Design 3 Status Indicators */
+        .status-container {
             display: flex;
-            gap: 24px; /* 3 * 8pt */
-            padding: 16px; /* 2 * 8pt */
-            background: var(--secondary-system-fill);
-            border-radius: 12px; /* 1.5 * 8pt */
-            margin-bottom: 24px; /* 3 * 8pt */
+            gap: 16px;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 16px;
         }
 
         .status-item {
             display: flex;
             align-items: center;
-            gap: 8px; /* 1 * 8pt */
-            font-size: 15px;
-            color: var(--secondary-label);
-            font-weight: 500;
+            gap: 8px;
+            color: var(--md-sys-color-on-surface-variant);
         }
 
-        .status-dot {
-            width: 8px; /* 1 * 8pt */
-            height: 8px; /* 1 * 8pt */
+        .status-indicator {
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: var(--system-green);
+            background-color: var(--md-sys-color-tertiary);
         }
 
-        .status-dot.checking {
-            background: var(--system-orange);
+        .status-indicator.healthy {
+            background-color: #4caf50;
+        }
+
+        .status-indicator.error {
+            background-color: var(--md-sys-color-error);
+        }
+
+        .status-indicator.checking {
+            background-color: #ff9800;
             animation: pulse 2s infinite;
-        }
-
-        .status-dot.error {
-            background: var(--system-red);
         }
 
         @keyframes pulse {
@@ -529,151 +571,130 @@
             50% { opacity: 0.5; }
         }
 
-        /* Apple Metrics Grid */
+        /* Material Design 3 Metrics */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* 15 * 8pt */
-            gap: 16px; /* 2 * 8pt */
-            margin-bottom: 24px; /* 3 * 8pt */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .metric-card {
             text-align: center;
-            padding: 20px 16px; /* 2.5 * 8pt, 2 * 8pt */
-            background: var(--tertiary-system-fill);
-            border-radius: 12px; /* 1.5 * 8pt */
-            border: 0.5px solid var(--separator);
+            padding: 20px 16px;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border-radius: var(--md-sys-shape-corner-medium);
         }
 
         .metric-value {
-            font-size: 32px; /* 4 * 8pt */
-            font-weight: 700;
-            color: var(--system-blue);
-            margin-bottom: 4px; /* 0.5 * 8pt */
-            line-height: 1.125;
+            font-size: 32px;
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 4px;
         }
 
         .metric-label {
-            font-size: 13px;
-            color: var(--tertiary-label);
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
             font-weight: 500;
-            line-height: 1.38461538461538;
         }
 
-        /* Apple Chart Container */
+        /* Material Design 3 Chart Container */
         .chart-container {
-            background: var(--secondary-system-grouped-background);
-            border-radius: 12px; /* 1.5 * 8pt */
-            padding: 16px; /* 2 * 8pt */
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-medium);
+            padding: 16px;
             height: 300px;
             position: relative;
-            border: 0.5px solid var(--separator);
         }
 
-        /* Apple Date Controls */
-        .date-controls {
+        /* Material Design 3 Controls */
+        .controls-container {
             display: flex;
-            gap: 8px; /* 1 * 8pt */
-            margin-bottom: 24px; /* 3 * 8pt */
+            gap: 8px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
             align-items: center;
         }
 
-        .date-select {
-            padding: 8px 12px; /* 1 * 8pt, 1.5 * 8pt */
-            border: 1px solid var(--separator);
-            border-radius: 8px; /* 1 * 8pt */
-            background: var(--secondary-system-grouped-background);
-            color: var(--label);
-            font-size: 15px;
-            min-width: 120px; /* 15 * 8pt */
-            min-height: 36px; /* 4.5 * 8pt */
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+        .md-select {
+            padding: 12px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px;
+            min-width: 120px;
+            font-family: 'Roboto', sans-serif;
         }
 
-        .date-select:focus {
+        .md-select:focus {
             outline: none;
-            border-color: var(--system-blue);
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
         }
 
-        /* Apple Mood History */
-        .mood-entry {
+        /* Material Design 3 History */
+        .history-item {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 16px; /* 2 * 8pt */
-            background: var(--tertiary-system-fill);
-            border-radius: 12px; /* 1.5 * 8pt */
-            margin-bottom: 8px; /* 1 * 8pt */
-            border: 0.5px solid var(--separator);
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 8px;
         }
 
-        .mood-entry-content {
+        .history-content {
             flex: 1;
         }
 
-        .mood-date {
-            font-weight: 600;
-            color: var(--system-blue);
-            font-size: 15px;
-            margin-bottom: 4px; /* 0.5 * 8pt */
+        .history-date {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 4px;
         }
 
-        .mood-value {
-            font-weight: 500;
-            color: var(--label);
+        .history-mood {
+            font-weight: 400;
+            color: var(--md-sys-color-on-surface);
             text-transform: capitalize;
-            font-size: 17px;
         }
 
-        .mood-notes {
-            font-size: 15px;
-            color: var(--tertiary-label);
-            margin-top: 4px; /* 0.5 * 8pt */
-            line-height: 1.33333333333333;
+        .history-notes {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 4px;
         }
 
-        .mood-time {
-            font-size: 13px;
-            color: var(--tertiary-label);
-            font-weight: 500;
+        .history-time {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 12px;
         }
 
-        /* Apple Responsive Design - Proper Breakpoints */
-        @media (max-width: 834px) { /* iPad Portrait */
+        /* Material Design 3 Responsive Design */
+        @media (max-width: 768px) {
             .container {
-                padding: 16px; /* 2 * 8pt */
+                padding: 12px;
             }
             
-            .header-content {
-                padding: 0 16px; /* 2 * 8pt */
-            }
-            
-            .card {
-                padding: 20px; /* 2.5 * 8pt */
+            .md-grid-2 {
+                grid-template-columns: 1fr;
             }
             
             .mood-grid {
-                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* 10 * 8pt */
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             }
             
             .metrics-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-        }
-
-        @media (max-width: 768px) { /* iPhone Plus Landscape */
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
             
-            .date-controls {
+            .controls-container {
                 flex-direction: column;
                 align-items: stretch;
             }
             
-            .date-select, .btn {
+            .md-select, .md-button {
                 width: 100%;
             }
             
@@ -681,58 +702,30 @@
                 height: 250px;
             }
             
-            .header-actions {
+            .top-app-bar-content {
                 flex-direction: column;
-                gap: 12px; /* 1.5 * 8pt */
+                gap: 12px;
+                min-height: auto;
+                padding: 8px 0;
             }
         }
 
-        @media (max-width: 430px) { /* iPhone 14 Pro Max */
-            .container {
-                padding: 12px; /* 1.5 * 8pt */
-            }
-            
+        @media (max-width: 480px) {
             .mood-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px; /* 1.5 * 8pt */
             }
             
             .metrics-grid {
                 grid-template-columns: 1fr;
             }
             
-            .mood-btn {
-                min-height: 72px; /* 9 * 8pt */
-                padding: 12px; /* 1.5 * 8pt */
-            }
-            
-            .mood-icon {
-                font-size: 24px; /* 3 * 8pt */
-            }
-        }
-
-        @media (max-width: 375px) { /* iPhone SE */
-            .header-content {
-                flex-direction: column;
-                gap: 12px; /* 1.5 * 8pt */
-                padding: 12px; /* 1.5 * 8pt */
-            }
-            
-            .logo {
-                font-size: 20px;
-            }
-            
-            .card {
-                padding: 16px; /* 2 * 8pt */
-            }
-            
             .chart-container {
                 height: 200px;
-                padding: 12px; /* 1.5 * 8pt */
+                padding: 12px;
             }
         }
 
-        /* Apple Accessibility - Reduce Motion */
+        /* Material Design 3 Accessibility */
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation-duration: 0.01ms !important;
@@ -741,49 +734,29 @@
             }
         }
 
-        /* Apple High Contrast Support */
         @media (prefers-contrast: high) {
-            .card {
+            .md-card, .mood-card, .md-text-field-input, .md-select {
                 border-width: 2px;
-            }
-            
-            .mood-btn {
-                border-width: 2px;
-            }
-            
-            .form-input {
-                border-width: 2px;
-            }
-            
-            .date-select {
-                border-width: 2px;
-            }
-        }
-
-        /* Apple Dark Mode Specific Adjustments */
-        @media (prefers-color-scheme: dark) {
-            .chart-container {
-                background: var(--tertiary-system-background);
             }
         }
     </style>
 </head>
-<body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-heart card-icon"></i>
-                <span class="title-3">Mood Tracker</span>
+    <!-- Material Design 3 Top App Bar -->
+    <header class="top-app-bar">
+        <div class="top-app-bar-content">
+            <div class="app-bar-title">
+                <i class="fas fa-heart md-card-icon"></i>
+                <span class="title-large">Mood Tracker</span>
             </div>
-            <div class="header-actions">
+            <div class="app-bar-actions">
                 <div class="theme-toggle">
-                    <i class="fas fa-sun" style="font-size: 14px; color: var(--text-tertiary);"></i>
-                    <button class="toggle-switch" onclick="toggleTheme(); return false;"></button>
-                    <i class="fas fa-moon" style="font-size: 14px; color: var(--text-tertiary);"></i>
+                    <i class="fas fa-sun theme-icon"></i>
+                    <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                    <i class="fas fa-moon theme-icon"></i>
                 </div>
-                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                    <span style="color: var(--text-secondary); font-size: 15px;">Welcome, {{ user.name }}</span>
-                    <a href="/logout" class="btn btn-secondary">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">Welcome, {{ user.name }}</span>
+                    <a href="/logout" class="md-button md-button-outlined">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
                     </a>
@@ -794,69 +767,71 @@
 
     <div class="container">
         <!-- System Status -->
-        <div class="status-bar">
-            <div class="status-item">
-                <i class="fas fa-database"></i>
-                <span>Database</span>
-                <div id="db-status" class="status-dot checking"></div>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Analytics</span>
-                <div id="analytics-status" class="status-dot checking"></div>
+        <div class="section">
+            <div class="status-container">
+                <div class="status-item">
+                    <i class="fas fa-database"></i>
+                    <span class="body-medium">Database</span>
+                    <div id="db-status" class="status-indicator checking"></div>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="body-medium">Analytics</span>
+                    <div id="analytics-status" class="status-indicator checking"></div>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-2">
+        <div class="md-grid md-grid-2">
             <!-- Mood Entry Card -->
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-heart card-icon"></i>
-                    <h2 class="card-title title-3">How are you feeling today?</h2>
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-heart md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">How are you feeling today?</h2>
                 </div>
                 
                 <form class="mood-form" action="/save_mood" method="post">
                     <div class="mood-grid">
-                        <button type="button" class="mood-btn" data-mood="very bad">
-                            <i class="fas fa-face-frown-open mood-icon" style="color: var(--accent-red);"></i>
-                            <span>Very Bad</span>
+                        <button type="button" class="mood-card" data-mood="very bad">
+                            <i class="fas fa-face-frown-open mood-icon" style="color: var(--md-sys-color-error);"></i>
+                            <span class="mood-label">Very Bad</span>
                         </button>
-                        <button type="button" class="mood-btn" data-mood="bad">
-                            <i class="fas fa-face-frown mood-icon" style="color: #ff9500;"></i>
-                            <span>Bad</span>
+                        <button type="button" class="mood-card" data-mood="bad">
+                            <i class="fas fa-face-frown mood-icon" style="color: #ff5722;"></i>
+                            <span class="mood-label">Bad</span>
                         </button>
-                        <button type="button" class="mood-btn" data-mood="slightly bad">
-                            <i class="fas fa-face-meh mood-icon" style="color: #ffcc00;"></i>
-                            <span>Slightly Bad</span>
+                        <button type="button" class="mood-card" data-mood="slightly bad">
+                            <i class="fas fa-face-meh mood-icon" style="color: #ff9800;"></i>
+                            <span class="mood-label">Slightly Bad</span>
                         </button>
-                        <button type="button" class="mood-btn" data-mood="neutral">
-                            <i class="fas fa-face-meh-blank mood-icon" style="color: var(--text-tertiary);"></i>
-                            <span>Neutral</span>
+                        <button type="button" class="mood-card" data-mood="neutral">
+                            <i class="fas fa-face-meh-blank mood-icon" style="color: var(--md-sys-color-on-surface-variant);"></i>
+                            <span class="mood-label">Neutral</span>
                         </button>
-                        <button type="button" class="mood-btn" data-mood="slightly well">
-                            <i class="fas fa-face-smile mood-icon" style="color: var(--accent-green);"></i>
-                            <span>Slightly Well</span>
+                        <button type="button" class="mood-card" data-mood="slightly well">
+                            <i class="fas fa-face-smile mood-icon" style="color: #8bc34a;"></i>
+                            <span class="mood-label">Slightly Well</span>
                         </button>
-                        <button type="button" class="mood-btn" data-mood="well">
-                            <i class="fas fa-face-smile-beam mood-icon" style="color: var(--accent-blue);"></i>
-                            <span>Well</span>
+                        <button type="button" class="mood-card" data-mood="well">
+                            <i class="fas fa-face-smile-beam mood-icon" style="color: #4caf50;"></i>
+                            <span class="mood-label">Well</span>
                         </button>
-                        <button type="button" class="mood-btn" data-mood="very well">
-                            <i class="fas fa-face-grin-stars mood-icon" style="color: #af52de;"></i>
-                            <span>Very Well</span>
+                        <button type="button" class="mood-card" data-mood="very well">
+                            <i class="fas fa-face-grin-stars mood-icon" style="color: var(--md-sys-color-tertiary);"></i>
+                            <span class="mood-label">Very Well</span>
                         </button>
                     </div>
                     
                     <input type="hidden" name="mood" id="selected-mood" required>
                     
-                    <div class="form-group">
-                        <label class="form-label">
+                    <div class="md-text-field">
+                        <textarea name="notes" class="md-text-field-input" rows="3" placeholder=" "></textarea>
+                        <label class="md-text-field-label">
                             <i class="fas fa-comment"></i> Notes (optional)
                         </label>
-                        <textarea name="notes" class="form-input" rows="3" placeholder="What's on your mind?"></textarea>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="md-button md-button-filled">
                         <i class="fas fa-save"></i>
                         <span>Save Mood</span>
                     </button>
@@ -864,10 +839,10 @@
             </div>
 
             <!-- Analytics Card -->
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar card-icon"></i>
-                    <h2 class="card-title title-3">Analytics</h2>
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-bar md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Analytics</h2>
                 </div>
                 
                 <div class="metrics-grid">
@@ -889,7 +864,15 @@
                     </div>
                 </div>
                 
-                <a href="/export_pdf" class="btn btn-secondary">
+                <div class="body-small" style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px; line-height: 1.4;">
+                    <strong>What are daily averages?</strong><br>
+                    • <strong>Daily Average:</strong> Average mood across all your days<br>
+                    • <strong>Good Days:</strong> Average of days with 5+ mood (Slightly Well or better)<br>
+                    • <strong>Bad Days:</strong> Average of days with 3- mood (Slightly Bad or worse)<br>
+                    • <strong>Total Days:</strong> Number of days you've tracked your mood
+                </div>
+                
+                <a href="/export_pdf" class="md-button md-button-outlined">
                     <i class="fas fa-download"></i>
                     <span>Export PDF</span>
                 </a>
@@ -897,153 +880,163 @@
         </div>
 
         <!-- Weekly Patterns -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-calendar-week card-icon"></i>
-                <h2 class="card-title">Weekly Patterns</h2>
-            </div>
-            
-            <div class="date-controls">
-                <select id="yearSelect" class="date-select">
-                    <option value="">Year</option>
-                </select>
-                <select id="monthSelect" class="date-select">
-                    <option value="">Month</option>
-                </select>
-                <select id="weekSelect" class="date-select">
-                    <option value="">Week</option>
-                </select>
-                <button onclick="loadWeeklyPatterns()" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                    <span>Load Week</span>
-                </button>
-                <button onclick="loadCurrentWeek()" class="btn btn-secondary">
-                    <i class="fas fa-calendar-day"></i>
-                    <span>Current Week</span>
-                </button>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="weeklyChart"></canvas>
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-calendar-week md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Weekly Patterns</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <select id="yearSelect" class="md-select">
+                        <option value="">Year</option>
+                    </select>
+                    <select id="monthSelect" class="md-select">
+                        <option value="">Month</option>
+                    </select>
+                    <select id="weekSelect" class="md-select">
+                        <option value="">Week</option>
+                    </select>
+                    <button onclick="loadWeeklyPatterns()" class="md-button md-button-filled">
+                        <i class="fas fa-search"></i>
+                        <span>Load Week</span>
+                    </button>
+                    <button onclick="loadCurrentWeek()" class="md-button md-button-text">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>Current Week</span>
+                    </button>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
             </div>
         </div>
         
         <!-- Daily Patterns -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-clock card-icon"></i>
-                <h2 class="card-title">Daily Patterns</h2>
-            </div>
-            
-            <div class="date-controls">
-                <input type="date" id="dailyDatePicker" class="date-select">
-                <button onclick="loadDailyPatterns(document.getElementById('dailyDatePicker').value)" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                    <span>Load Day</span>
-                </button>
-                <button onclick="loadDailyPatterns(null)" class="btn btn-secondary">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Hourly Average</span>
-                </button>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="dailyChart"></canvas>
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-clock md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Daily Patterns</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <input type="date" id="dailyDatePicker" class="md-select">
+                    <button onclick="loadDailyPatterns(document.getElementById('dailyDatePicker').value)" class="md-button md-button-filled">
+                        <i class="fas fa-search"></i>
+                        <span>Load Day</span>
+                    </button>
+                    <button onclick="loadDailyPatterns(null)" class="md-button md-button-text">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Hourly Average</span>
+                    </button>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
             </div>
         </div>
         
         <!-- Weekly Trends -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-chart-bar card-icon"></i>
-                <h2 class="card-title">Weekly Trends</h2>
-            </div>
-            
-            <div class="date-controls">
-                <select id="trendsYearSelect" class="date-select">
-                    <option value="">Year</option>
-                </select>
-                <select id="trendsMonthSelect" class="date-select">
-                    <option value="">Month</option>
-                </select>
-                <button onclick="loadWeeklyTrends()" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                    <span>Load Month</span>
-                </button>
-                <button onclick="loadCurrentMonthTrends()" class="btn btn-secondary">
-                    <i class="fas fa-calendar"></i>
-                    <span>Current Month</span>
-                </button>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="weeklyTrendChart"></canvas>
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-bar md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Weekly Trends</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <select id="trendsYearSelect" class="md-select">
+                        <option value="">Year</option>
+                    </select>
+                    <select id="trendsMonthSelect" class="md-select">
+                        <option value="">Month</option>
+                    </select>
+                    <button onclick="loadWeeklyTrends()" class="md-button md-button-filled">
+                        <i class="fas fa-search"></i>
+                        <span>Load Month</span>
+                    </button>
+                    <button onclick="loadCurrentMonthTrends()" class="md-button md-button-text">
+                        <i class="fas fa-calendar"></i>
+                        <span>Current Month</span>
+                    </button>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="weeklyTrendChart"></canvas>
+                </div>
             </div>
         </div>
         
         <!-- Monthly Trends -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-chart-area card-icon"></i>
-                <h2 class="card-title">Monthly Trends</h2>
-            </div>
-            
-            <div class="date-controls">
-                <select id="monthlyYearSelect" class="date-select">
-                    <option value="">Year</option>
-                </select>
-                <button onclick="loadMonthlyTrends()" class="btn btn-primary">
-                    <i class="fas fa-search"></i>
-                    <span>Load Year</span>
-                </button>
-                <button onclick="loadCurrentYearTrends()" class="btn btn-secondary">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Current Year</span>
-                </button>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="monthlyTrendChart"></canvas>
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-area md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Monthly Trends</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <select id="monthlyYearSelect" class="md-select">
+                        <option value="">Year</option>
+                    </select>
+                    <button onclick="loadMonthlyTrends()" class="md-button md-button-filled">
+                        <i class="fas fa-search"></i>
+                        <span>Load Year</span>
+                    </button>
+                    <button onclick="loadCurrentYearTrends()" class="md-button md-button-text">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Current Year</span>
+                    </button>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
             </div>
         </div>
         
         <!-- Mood History -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-history card-icon"></i>
-                <h2 class="card-title">Recent Moods</h2>
-            </div>
-            
-            {% for mood in moods %}
-            <div class="mood-entry">
-                <div>
-                    <div class="mood-date">{{ mood.date }}</div>
-                    <div class="mood-value">{{ mood.mood|title }}</div>
-                    {% if mood.notes %}
-                    <div class="mood-notes">{{ mood.notes }}</div>
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-history md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Recent Moods</h2>
+                </div>
+                
+                {% for mood in moods %}
+                <div class="history-item">
+                    <div class="history-content">
+                        <div class="history-date body-medium">{{ mood.date }}</div>
+                        <div class="history-mood body-large">{{ mood.mood|title }}</div>
+                        {% if mood.notes %}
+                        <div class="history-notes body-medium">{{ mood.notes }}</div>
+                        {% endif %}
+                    </div>
+                    {% if mood.timestamp %}
+                    <div class="history-time">
+                        {{ (mood.timestamp|utc_to_local).strftime('%H:%M') if mood.timestamp else 'Unknown time' }}
+                    </div>
                     {% endif %}
                 </div>
-                {% if mood.timestamp %}
-                <div style="font-size: 13px; color: var(--text-tertiary);">
-                    {{ (mood.timestamp|utc_to_local).strftime('%H:%M') if mood.timestamp else 'Unknown time' }}
+                {% endfor %}
+                
+                {% if not moods %}
+                <div style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 48px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <div class="body-large">No mood entries yet. Start tracking your mood above!</div>
                 </div>
                 {% endif %}
             </div>
-            {% endfor %}
-            
-            {% if not moods %}
-            <div style="color: var(--text-tertiary); text-align: center; padding: 48px;">
-                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                <div>No mood entries yet. Start tracking your mood above!</div>
-            </div>
-            {% endif %}
         </div>
     </div>
     <script>
-        // Mood selection
-        document.querySelectorAll('.mood-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+        // Mood selection functionality
+        document.querySelectorAll('.mood-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.mood-card').forEach(c => c.classList.remove('selected'));
                 this.classList.add('selected');
                 document.getElementById('selected-mood').value = this.dataset.mood;
             });
@@ -1059,7 +1052,7 @@
             }
         });
 
-        // Theme toggle
+        // Theme toggle functionality
         function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -1074,7 +1067,7 @@
             document.documentElement.setAttribute('data-theme', theme);
         }
 
-        // System status
+        // System status check
         async function checkSystemStatus() {
             const dbStatus = document.getElementById('db-status');
             const analyticsStatus = document.getElementById('analytics-status');
@@ -1082,84 +1075,67 @@
             try {
                 const dbResponse = await fetch('/health');
                 const dbData = await dbResponse.json();
-                dbStatus.className = dbData.status === 'healthy' ? 'status-dot' : 'status-dot error';
+                dbStatus.className = dbData.status === 'healthy' ? 'status-indicator healthy' : 'status-indicator error';
             } catch (error) {
-                dbStatus.className = 'status-dot error';
+                dbStatus.className = 'status-indicator error';
             }
             
             try {
                 const analyticsResponse = await fetch('/analytics-health');
                 const analyticsData = await analyticsResponse.json();
-                analyticsStatus.className = analyticsData.status === 'healthy' ? 'status-dot' : 'status-dot error';
+                analyticsStatus.className = analyticsData.status === 'healthy' ? 'status-indicator healthy' : 'status-indicator error';
             } catch (error) {
-                analyticsStatus.className = 'status-dot error';
+                analyticsStatus.className = 'status-indicator error';
             }
         }
 
         // Initialize dropdowns
         function initializeDropdowns() {
-            const yearSelect = document.getElementById('yearSelect');
-            const monthSelect = document.getElementById('monthSelect');
-            const weekSelect = document.getElementById('weekSelect');
-            const trendsYearSelect = document.getElementById('trendsYearSelect');
-            const trendsMonthSelect = document.getElementById('trendsMonthSelect');
-            const monthlyYearSelect = document.getElementById('monthlyYearSelect');
+            const selectors = {
+                year: document.getElementById('yearSelect'),
+                month: document.getElementById('monthSelect'),
+                week: document.getElementById('weekSelect'),
+                trendsYear: document.getElementById('trendsYearSelect'),
+                trendsMonth: document.getElementById('trendsMonthSelect'),
+                monthlyYear: document.getElementById('monthlyYearSelect')
+            };
             
             const currentYear = new Date().getFullYear();
             const currentMonth = new Date().getMonth() + 1;
             const months = ['January', 'February', 'March', 'April', 'May', 'June',
                           'July', 'August', 'September', 'October', 'November', 'December'];
             
-            // Weekly patterns selectors
-            if (yearSelect && monthSelect && weekSelect) {
-                for (let year = currentYear - 2; year <= currentYear + 2; year++) {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year === currentYear) option.selected = true;
-                    yearSelect.appendChild(option);
+            // Populate years
+            [selectors.year, selectors.trendsYear, selectors.monthlyYear].forEach(select => {
+                if (select) {
+                    for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        if (year === currentYear) option.selected = true;
+                        select.appendChild(option);
+                    }
                 }
-                
-                months.forEach((month, index) => {
-                    const option = document.createElement('option');
-                    option.value = index + 1;
-                    option.textContent = month;
-                    if (index + 1 === currentMonth) option.selected = true;
-                    monthSelect.appendChild(option);
-                });
-                
-                yearSelect.addEventListener('change', updateWeekOptions);
-                monthSelect.addEventListener('change', updateWeekOptions);
+            });
+            
+            // Populate months
+            [selectors.month, selectors.trendsMonth].forEach(select => {
+                if (select) {
+                    months.forEach((month, index) => {
+                        const option = document.createElement('option');
+                        option.value = index + 1;
+                        option.textContent = month;
+                        if (index + 1 === currentMonth) option.selected = true;
+                        select.appendChild(option);
+                    });
+                }
+            });
+            
+            // Add event listeners for week updates
+            if (selectors.year && selectors.month && selectors.week) {
+                selectors.year.addEventListener('change', updateWeekOptions);
+                selectors.month.addEventListener('change', updateWeekOptions);
                 updateWeekOptions();
-            }
-            
-            // Trends selectors
-            if (trendsYearSelect && trendsMonthSelect) {
-                for (let year = currentYear - 2; year <= currentYear + 2; year++) {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year === currentYear) option.selected = true;
-                    trendsYearSelect.appendChild(option);
-                }
-                
-                months.forEach((month, index) => {
-                    const option = document.createElement('option');
-                    option.value = index + 1;
-                    option.textContent = month;
-                    if (index + 1 === currentMonth) option.selected = true;
-                    trendsMonthSelect.appendChild(option);
-                });
-            }
-            
-            if (monthlyYearSelect) {
-                for (let year = currentYear - 2; year <= currentYear + 2; year++) {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year === currentYear) option.selected = true;
-                    monthlyYearSelect.appendChild(option);
-                }
             }
         }
 
@@ -1193,7 +1169,6 @@
                 
                 const weekEnd = new Date(currentWeekStart);
                 weekEnd.setDate(weekEnd.getDate() + 6);
-                
                 const actualWeekEnd = weekEnd > lastDay ? lastDay : weekEnd;
                 
                 option.textContent = `Week ${weekCount} (${currentWeekStart.getDate()}-${actualWeekEnd.getDate()})`;
@@ -1210,15 +1185,57 @@
             }
         }
 
-        // Chart initialization
+        // Chart initialization with Material Design 3 colors
         function initializeCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                family: 'Roboto',
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 1,
+                        max: 7,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                const labels = {
+                                    1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                    4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
+                                };
+                                return labels[value] || value;
+                            },
+                            font: {
+                                family: 'Roboto',
+                                size: 11
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                family: 'Roboto',
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            };
+
             // Daily Chart
             const dailyCtx = document.getElementById('dailyChart');
             if (dailyCtx) {
-                const hourLabels = [];
-                for (let i = 0; i < 24; i++) {
-                    hourLabels.push(`${i.toString().padStart(2, '0')}:00`);
-                }
+                const hourLabels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
                 
                 window.dailyChart = new Chart(dailyCtx.getContext('2d'), {
                     type: 'line',
@@ -1227,34 +1244,15 @@
                         datasets: [{
                             label: 'Loading...',
                             data: new Array(24).fill(null),
-                            borderColor: '#007aff',
-                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                            borderColor: '#6750a4',
+                            backgroundColor: 'rgba(103, 80, 164, 0.1)',
                             tension: 0.4,
                             borderWidth: 2,
                             pointRadius: 4,
                             spanGaps: true
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                min: 1,
-                                max: 7,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function(value) {
-                                        const labels = {
-                                            1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
-                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
-                                        };
-                                        return labels[value] || value;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    options: chartOptions
                 });
             }
             
@@ -1268,33 +1266,14 @@
                         datasets: [{
                             label: 'Loading...',
                             data: [0, 0, 0, 0, 0, 0, 0],
-                            borderColor: '#34c759',
-                            backgroundColor: 'rgba(52, 199, 89, 0.1)',
+                            borderColor: '#625b71',
+                            backgroundColor: 'rgba(98, 91, 113, 0.1)',
                             tension: 0.4,
                             borderWidth: 2,
                             pointRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                min: 1,
-                                max: 7,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function(value) {
-                                        const labels = {
-                                            1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
-                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
-                                        };
-                                        return labels[value] || value;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    options: chartOptions
                 });
             }
             
@@ -1308,28 +1287,18 @@
                         datasets: [{
                             label: 'Loading...',
                             data: [0, 0, 0, 0],
-                            backgroundColor: 'rgba(175, 82, 222, 0.6)',
-                            borderColor: '#af52de',
+                            backgroundColor: 'rgba(125, 82, 96, 0.6)',
+                            borderColor: '#7d5260',
                             borderWidth: 2
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        ...chartOptions,
                         scales: {
+                            ...chartOptions.scales,
                             y: {
-                                min: 0,
-                                max: 7,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function(value) {
-                                        const labels = {
-                                            0: '0', 1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
-                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
-                                        };
-                                        return labels[value] || value;
-                                    }
-                                }
+                                ...chartOptions.scales.y,
+                                min: 0
                             }
                         }
                     }
@@ -1346,28 +1315,18 @@
                         datasets: [{
                             label: 'Loading...',
                             data: new Array(12).fill(0),
-                            backgroundColor: 'rgba(52, 199, 89, 0.6)',
-                            borderColor: '#34c759',
+                            backgroundColor: 'rgba(103, 80, 164, 0.6)',
+                            borderColor: '#6750a4',
                             borderWidth: 2
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        ...chartOptions,
                         scales: {
+                            ...chartOptions.scales,
                             y: {
-                                min: 0,
-                                max: 7,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function(value) {
-                                        const labels = {
-                                            0: '0', 1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
-                                            4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
-                                        };
-                                        return labels[value] || value;
-                                    }
-                                }
+                                ...chartOptions.scales.y,
+                                min: 0
                             }
                         }
                     }
@@ -1499,12 +1458,13 @@
                 .catch(error => console.error('Error loading current year trends:', error));
         }
 
-        // Initialize everything
+        // Initialize everything when DOM loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeTheme();
             initializeDropdowns();
             initializeCharts();
             
+            // Load initial data
             setTimeout(() => {
                 loadDailyPatterns(null);
                 loadCurrentWeek();
@@ -1512,6 +1472,7 @@
                 loadCurrentYearTrends();
             }, 500);
             
+            // Check system status
             checkSystemStatus();
             setInterval(checkSystemStatus, 10000);
         });
