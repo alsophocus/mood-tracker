@@ -101,6 +101,32 @@ def weekly_patterns():
         
     return jsonify(result)
 
+@main_bp.route('/weekly_trends')
+@login_required
+def weekly_trends():
+    """Get weekly mood trends (sums) for specific month"""
+    from datetime import date, timedelta
+    import calendar
+    
+    # Get month parameters
+    year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int)
+    
+    moods = db.get_user_moods(current_user.id)
+    analytics = MoodAnalytics(moods)
+    
+    if year and month:
+        try:
+            result = analytics.get_weekly_trends_for_month(year, month)
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({"error": "Invalid date parameters"}), 400
+    else:
+        # Default to current month
+        today = date.today()
+        result = analytics.get_weekly_trends_for_month(today.year, today.month)
+        return jsonify(result)
+
 @main_bp.route('/daily_patterns')
 @login_required
 def daily_patterns():

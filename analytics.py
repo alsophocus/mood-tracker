@@ -219,3 +219,70 @@ class MoodAnalytics:
         result['days'] = result['labels']
         
         return result
+    
+    def get_weekly_trends_for_month(self, year, month):
+        """Get weekly mood trends (sums) for a specific month"""
+        from datetime import date, timedelta
+        import calendar
+        
+        # Calculate month boundaries
+        first_day = date(year, month, 1)
+        last_day = date(year, month, calendar.monthrange(year, month)[1])
+        
+        # Calculate first Monday of the month for week calculation
+        first_weekday = first_day.weekday()  # 0=Monday, 6=Sunday
+        days_to_first_monday = (7 - first_weekday) % 7
+        first_monday = first_day + timedelta(days=days_to_first_monday)
+        
+        # Initialize weekly sums
+        weekly_sums = {}
+        week_labels = []
+        
+        # Calculate weeks in this month
+        current_week_start = first_monday
+        week_num = 1
+        
+        while current_week_start.month <= month and current_week_start.year == year:
+            week_end = current_week_start + timedelta(days=6)
+            # Ensure we don't go past month end
+            week_end = min(week_end, last_day)
+            
+            weekly_sums[week_num] = 0
+            week_labels.append(f"Week {week_num}")
+            
+            # Sum moods for this week
+            for mood_entry in self.moods:
+                mood_date = mood_entry.get('date')
+                
+                # Convert mood_date to date object
+                if isinstance(mood_date, str):
+                    try:
+                        mood_date = datetime.strptime(mood_date, '%Y-%m-%d').date()
+                    except:
+                        continue
+                elif hasattr(mood_date, 'date'):
+                    mood_date = mood_date.date()
+                
+                # Check if mood is in this week
+                if current_week_start <= mood_date <= week_end:
+                    mood_value = MOOD_VALUES[mood_entry['mood']]
+                    weekly_sums[week_num] += mood_value
+            
+            # Move to next week
+            current_week_start += timedelta(days=7)
+            week_num += 1
+            
+            # Safety check
+            if week_num > 6:
+                break
+        
+        # Prepare data for chart
+        data = [weekly_sums.get(i, 0) for i in range(1, week_num)]
+        
+        return {
+            'labels': week_labels,
+            'data': data,
+            'period': f"Weekly Mood Sums for {calendar.month_name[month]} {year}",
+            'year': year,
+            'month': month
+        }
