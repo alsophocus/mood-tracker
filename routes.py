@@ -256,11 +256,13 @@ def reset_database():
             cursor = conn.cursor()
             
             # Count existing data
-            cursor.execute('SELECT COUNT(*) FROM moods')
-            mood_count = cursor.fetchone()[0]
+            cursor.execute('SELECT COUNT(*) as count FROM moods')
+            mood_result = cursor.fetchone()
+            mood_count = mood_result['count'] if mood_result else 0
             
-            cursor.execute('SELECT COUNT(*) FROM users')
-            user_count = cursor.fetchone()[0]
+            cursor.execute('SELECT COUNT(*) as count FROM users')
+            user_result = cursor.fetchone()
+            user_count = user_result['count'] if user_result else 0
             
             # Delete all moods
             cursor.execute('DELETE FROM moods')
@@ -274,6 +276,7 @@ def reset_database():
                 'message': 'Database reset completed',
                 'deleted_moods': deleted_count,
                 'remaining_users': user_count,
+                'original_mood_count': mood_count,
                 'timestamp': datetime.now().isoformat()
             }
             
