@@ -1062,6 +1062,7 @@
             cursor: pointer;
             box-sizing: border-box;
             min-height: 56px;
+            height: 56px;
         }
 
         .md-date-input:hover {
@@ -1156,20 +1157,19 @@
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 0;
-            margin-bottom: 4px;
+            margin-bottom: 0;
         }
 
         .md-calendar-weekday {
-            text-align: center;
-            padding: 8px 2px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: var(--md-sys-typescale-label-small-font);
             font-size: var(--md-sys-typescale-label-small-size);
             font-weight: var(--md-sys-typescale-label-small-weight);
             color: var(--md-sys-color-on-surface-variant);
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .md-calendar-days {
@@ -1179,8 +1179,8 @@
         }
 
         .md-calendar-day {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1191,7 +1191,6 @@
             font-weight: var(--md-sys-typescale-body-medium-weight);
             color: var(--md-sys-color-on-surface);
             transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
-            margin: 2px;
         }
 
         .md-calendar-day:hover {
@@ -1278,7 +1277,19 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
+            align-items: stretch;
+        }
+
+        /* Daily Patterns specific alignment */
+        .controls-container:has(.md-date-picker) {
+            grid-template-columns: 1fr 1fr 2fr;
             align-items: end;
+        }
+
+        .md-date-picker {
+            position: relative;
+            width: 100%;
+            min-height: 56px;
         }
 
         /* Single input controls (like date picker or single select) */
