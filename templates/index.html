@@ -962,38 +962,37 @@
         }
 
         function loadCurrentWeek() {
+            console.log('Loading current week patterns...');
+            
             fetch('/weekly_patterns')
-                .then(response => response.json())
-                .then(data => {
-                    if (window.weeklyChart) {
-                        window.weeklyChart.destroy();
+                .then(response => {
+                    console.log('Current week response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
                     }
-                    
-                    const ctx = document.getElementById('weeklyChart').getContext('2d');
-                    window.weeklyChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.days,
-                            datasets: [{
-                                label: 'Current Week',
-                                data: data.data,
-                                borderColor: 'rgba(34, 197, 94, 1)',
-                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    max: 5
-                                }
-                            }
-                        }
-                    });
+                    return response.json();
                 })
-                .catch(error => console.error('Error loading current week:', error));
+                .then(data => {
+                    console.log('Current week data:', data);
+                    
+                    if (window.weeklyChart) {
+                        // Update existing chart
+                        window.weeklyChart.data.labels = data.days || data.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                        window.weeklyChart.data.datasets[0].data = data.data || [0, 0, 0, 0, 0, 0, 0];
+                        window.weeklyChart.data.datasets[0].label = 'Current Week';
+                        window.weeklyChart.update();
+                        console.log('Weekly chart updated for current week');
+                    } else {
+                        console.error('Weekly chart not initialized');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading current week:', error);
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.datasets[0].label = 'Error loading current week';
+                        window.weeklyChart.update();
+                    }
+                });
         }
 
         // Initialize dropdowns
