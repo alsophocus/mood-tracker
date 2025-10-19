@@ -48,18 +48,58 @@ def mood_data():
 @main_bp.route('/weekly_patterns')
 @login_required
 def weekly_patterns():
-    """Get weekly mood patterns"""
+    """Get weekly mood patterns for specific week of month"""
+    from datetime import date, timedelta
+    import calendar
+    
+    # Get week parameters
+    year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int) 
+    week_of_month = request.args.get('week', type=int)
+    
     moods = db.get_user_moods(current_user.id)
     analytics = MoodAnalytics(moods)
-    return jsonify(analytics.get_weekly_patterns())
+    
+    if year and month and week_of_month:
+        # Calculate date range for specific week of month
+        try:
+            first_day = date(year, month, 1)
+            first_weekday = first_day.weekday()  # 0=Monday, 6=Sunday
+            
+            # Calculate the start of the specified week
+            days_to_first_monday = (7 - first_weekday) % 7
+            first_monday = first_day + timedelta(days=days_to_first_monday)
+            
+            # Calculate start and end of the requested week
+            week_start = first_monday + timedelta(weeks=week_of_month - 1)
+            week_end = week_start + timedelta(days=6)
+            
+            # Ensure we don't go outside the month boundaries
+            last_day = date(year, month, calendar.monthrange(year, month)[1])
+            
+            if week_start.month == month:
+                start_date = week_start
+                end_date = min(week_end, last_day)
+                return jsonify(analytics.get_weekly_patterns_for_period(start_date, end_date, f"Week {week_of_month} of {calendar.month_name[month]} {year}"))
+            else:
+                return jsonify({"error": "Week does not exist in this month"}), 400
+        except Exception as e:
+            return jsonify({"error": "Invalid date parameters"}), 400
+    else:
+        return jsonify(analytics.get_weekly_patterns())
 
 @main_bp.route('/daily_patterns')
 @login_required
 def daily_patterns():
-    """Get daily mood patterns"""
+    """Get daily mood patterns for specific date or all dates"""
+    selected_date = request.args.get('date')
     moods = db.get_user_moods(current_user.id)
     analytics = MoodAnalytics(moods)
-    return jsonify(analytics.get_daily_patterns())
+    
+    if selected_date:
+        return jsonify(analytics.get_daily_patterns_for_date(selected_date))
+    else:
+        return jsonify(analytics.get_daily_patterns())
 
 @main_bp.route('/export_pdf')
 @login_required

@@ -102,6 +102,41 @@
             background: #dc2626;
         }
         
+        /* Date Selectors */
+        .date-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .date-input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
         /* Grid Layout */
         .grid {
             display: grid;
@@ -612,6 +647,13 @@
             <div class="card-title">
                 <i class="fas fa-calendar-week"></i> Weekly Patterns
             </div>
+            <div class="date-selector">
+                <select id="yearSelect" class="date-input"></select>
+                <select id="monthSelect" class="date-input"></select>
+                <select id="weekSelect" class="date-input"></select>
+                <button onclick="loadWeeklyPatterns()" class="btn-primary">Load Week</button>
+                <button onclick="loadCurrentWeek()" class="btn-secondary">Current Week</button>
+            </div>
             <div class="chart-container">
                 <canvas id="weeklyChart"></canvas>
             </div>
@@ -621,6 +663,11 @@
         <div class="card">
             <div class="card-title">
                 <i class="fas fa-clock"></i> Daily Patterns
+            </div>
+            <div class="date-selector">
+                <input type="date" id="dailyDatePicker" class="date-input">
+                <button onclick="loadDailyPatterns()" class="btn-primary">Load Day</button>
+                <button onclick="loadDailyPatterns(null)" class="btn-secondary">All Days</button>
             </div>
             <div class="chart-container">
                 <canvas id="dailyChart"></canvas>
@@ -947,6 +994,166 @@
                 analyticsStatus.className = 'status-icon status-disconnected';
             }
         }
+
+        // Daily Patterns Functions
+        function loadDailyPatterns(selectedDate) {
+            const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.dailyChart) {
+                        window.dailyChart.destroy();
+                    }
+                    
+                    const ctx = document.getElementById('dailyChart').getContext('2d');
+                    window.dailyChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: data.period || 'Daily Patterns',
+                                data: data.data,
+                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 5
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading daily patterns:', error));
+        }
+
+        // Weekly Patterns Functions
+        function loadWeeklyPatterns() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const week = document.getElementById('weekSelect').value;
+            
+            const url = `/weekly_patterns?year=${year}&month=${month}&week=${week}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.destroy();
+                    }
+                    
+                    const ctx = document.getElementById('weeklyChart').getContext('2d');
+                    window.weeklyChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.days,
+                            datasets: [{
+                                label: data.period || 'Weekly Patterns',
+                                data: data.data,
+                                borderColor: 'rgba(34, 197, 94, 1)',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 5
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading weekly patterns:', error));
+        }
+
+        function loadCurrentWeek() {
+            fetch('/weekly_patterns')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.destroy();
+                    }
+                    
+                    const ctx = document.getElementById('weeklyChart').getContext('2d');
+                    window.weeklyChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.days,
+                            datasets: [{
+                                label: 'Current Week',
+                                data: data.data,
+                                borderColor: 'rgba(34, 197, 94, 1)',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 5
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading current week:', error));
+        }
+
+        // Initialize dropdowns
+        function initializeDropdowns() {
+            const yearSelect = document.getElementById('yearSelect');
+            const monthSelect = document.getElementById('monthSelect');
+            const weekSelect = document.getElementById('weekSelect');
+            
+            // Populate years (current year ± 2)
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+            
+            // Populate months
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            const currentMonth = new Date().getMonth() + 1;
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index + 1;
+                option.textContent = month;
+                if (index + 1 === currentMonth) option.selected = true;
+                monthSelect.appendChild(option);
+            });
+            
+            // Populate weeks
+            for (let week = 1; week <= 5; week++) {
+                const option = document.createElement('option');
+                option.value = week;
+                option.textContent = `Week ${week}`;
+                if (week === 1) option.selected = true;
+                weekSelect.appendChild(option);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDropdowns();
+            loadDailyPatterns(null); // Load all days initially
+            loadCurrentWeek(); // Load current week initially
+        });
 
         // Check system status on load
         checkSystemStatus();
