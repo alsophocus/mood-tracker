@@ -248,6 +248,42 @@ def debug_info():
         'timestamp': datetime.now().isoformat()
     }
 
+@main_bp.route('/reset-database-confirm-delete-all-data')
+def reset_database():
+    """Reset database - DELETE ALL MOOD DATA"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Count existing data
+            cursor.execute('SELECT COUNT(*) FROM moods')
+            mood_count = cursor.fetchone()[0]
+            
+            cursor.execute('SELECT COUNT(*) FROM users')
+            user_count = cursor.fetchone()[0]
+            
+            # Delete all moods
+            cursor.execute('DELETE FROM moods')
+            deleted_count = cursor.rowcount
+            
+            # Reset sequence
+            cursor.execute('ALTER SEQUENCE moods_id_seq RESTART WITH 1')
+            
+            return {
+                'status': 'success',
+                'message': 'Database reset completed',
+                'deleted_moods': deleted_count,
+                'remaining_users': user_count,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+    except Exception as e:
+        return {
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }, 500
+
 @main_bp.route('/analytics-health')
 @login_required
 def analytics_health():
