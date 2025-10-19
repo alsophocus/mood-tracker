@@ -25,17 +25,26 @@ def save_mood():
     mood = request.form.get('mood')
     notes = request.form.get('notes', '')
     
+    print(f"DEBUG: Received mood save request - mood: {mood}, notes: {notes}, user: {current_user.id}")
+    
     if not mood:
-        flash('Please select a mood before saving.')
-        return redirect(url_for('main.index'))
+        return jsonify({'error': 'Please select a mood before saving.'}), 400
     
     try:
-        db.save_mood(current_user.id, datetime.now().date(), mood, notes)
-        flash('Mood saved successfully!')
+        result = db.save_mood(current_user.id, datetime.now().date(), mood, notes)
+        print(f"DEBUG: Mood saved successfully - result: {result}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Mood saved successfully!',
+            'mood': mood,
+            'notes': notes,
+            'date': datetime.now().date().isoformat()
+        })
+            
     except Exception as e:
-        flash('Error saving mood - please try again.')
-    
-    return redirect(url_for('main.index'))
+        print(f"DEBUG: Error saving mood - {e}")
+        return jsonify({'error': 'Error saving mood - please try again.'}), 500
 
 @main_bp.route('/recent_moods')
 @login_required

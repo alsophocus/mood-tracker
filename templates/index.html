@@ -2931,6 +2931,13 @@
                     })
                     .then(response => {
                         if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Network response was not ok');
+                        }
+                    })
+                    .then(data => {
+                        if (data.success) {
                             // Reset form
                             moodCards.forEach(c => c.classList.remove('selected'));
                             selectedMoodInput.value = '';
@@ -2946,7 +2953,7 @@
                             loadAverageMoodData();
                             refreshRecentMoods();
                         } else {
-                            showSnackbar('Error saving mood - please try again.');
+                            showSnackbar(data.error || 'Error saving mood - please try again.');
                         }
                     })
                     .catch(error => {
