@@ -37,6 +37,13 @@ def save_mood():
     
     return redirect(url_for('main.index'))
 
+@main_bp.route('/recent_moods')
+@login_required
+def recent_moods():
+    """Get recent moods as JSON for AJAX updates"""
+    recent_moods = db.get_user_moods(current_user.id, limit=5)
+    return jsonify({'moods': recent_moods})
+
 @main_bp.route('/mood_data')
 @login_required
 def mood_data():

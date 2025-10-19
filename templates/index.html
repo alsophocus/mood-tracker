@@ -2901,8 +2901,9 @@
                             this.querySelector('textarea').value = '';
                             alert('Mood saved successfully!');
                             
-                            // Refresh page to update Recent Moods
-                            window.location.reload();
+                            // Refresh charts and data without page reload
+                            loadDailyPatterns();
+                            refreshRecentMoods();
                         } else {
                             alert('Error saving mood - please try again.');
                         }
@@ -2918,6 +2919,30 @@
                     });
                 });
             }
+        }
+        
+        // Function to refresh Recent Moods section
+        function refreshRecentMoods() {
+            fetch('/recent_moods')
+                .then(response => response.json())
+                .then(data => {
+                    const historyContainer = document.querySelector('.history-container');
+                    if (historyContainer && data.moods) {
+                        let html = '';
+                        data.moods.forEach(mood => {
+                            const date = new Date(mood.date).toLocaleDateString();
+                            html += `
+                                <div class="history-item">
+                                    <div class="history-date">${date}</div>
+                                    <div class="history-mood">${mood.mood}</div>
+                                    ${mood.notes ? `<div class="history-notes">${mood.notes}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        historyContainer.innerHTML = html;
+                    }
+                })
+                .catch(error => console.error('Error refreshing recent moods:', error));
         }
     </script>
 </body>
