@@ -1446,6 +1446,42 @@
                 border-width: 2px;
             }
         }
+        
+        /* Material Design 3 Snackbar */
+        .md-snackbar {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--md-sys-color-inverse-surface);
+            color: var(--md-sys-color-inverse-on-surface);
+            border-radius: 4px;
+            padding: 0;
+            min-width: 344px;
+            max-width: 672px;
+            box-shadow: var(--md-sys-elevation-level3);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            z-index: 1000;
+        }
+        
+        .md-snackbar.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .md-snackbar-content {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .md-snackbar-text {
+            font-family: var(--md-sys-typescale-body-medium-font);
+            font-size: var(--md-sys-typescale-body-medium-size);
+            font-weight: var(--md-sys-typescale-body-medium-weight);
+            line-height: var(--md-sys-typescale-body-medium-line-height);
+        }
     </style>
 </head>
 <body>
@@ -1902,7 +1938,7 @@
             const selectedMood = document.getElementById('selected-mood').value;
             if (!selectedMood) {
                 e.preventDefault();
-                alert('Please select a mood before saving!');
+                showSnackbar('Please select a mood before saving.');
                 return false;
             }
         });
@@ -2516,7 +2552,7 @@
             const week = document.getElementById('weekSelect').value;
             
             if (!year || !month || !week) {
-                alert('Please select Year, Month, and Week');
+                showSnackbar('Please select Year, Month, and Week');
                 return;
             }
             
@@ -2552,7 +2588,7 @@
             const month = document.getElementById('trendsMonthSelect').value;
             
             if (!year || !month) {
-                alert('Please select Year and Month');
+                showSnackbar('Please select Year and Month');
                 return;
             }
             
@@ -2587,7 +2623,7 @@
             const year = document.getElementById('monthlyYearSelect').value;
             
             if (!year) {
-                alert('Please select a Year');
+                showSnackbar('Please select a Year');
                 return;
             }
             
@@ -2877,7 +2913,7 @@
                     e.preventDefault(); // Always prevent default form submission
                     
                     if (!selectedMoodInput.value) {
-                        alert('Please select a mood before saving.');
+                        showSnackbar('Please select a mood before saving.');
                         return;
                     }
                     
@@ -2899,18 +2935,18 @@
                             moodCards.forEach(c => c.classList.remove('selected'));
                             selectedMoodInput.value = '';
                             this.querySelector('textarea').value = '';
-                            alert('Mood saved successfully!');
+                            showSnackbar('Mood saved successfully!');
                             
                             // Refresh charts and data without page reload
                             loadDailyPatterns();
                             refreshRecentMoods();
                         } else {
-                            alert('Error saving mood - please try again.');
+                            showSnackbar('Error saving mood - please try again.');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Error saving mood - please try again.');
+                        showSnackbar('Error saving mood - please try again.');
                     })
                     .finally(() => {
                         // Reset button
@@ -2919,6 +2955,19 @@
                     });
                 });
             }
+        }
+        
+        // Material Design 3 Snackbar function
+        function showSnackbar(message) {
+            const snackbar = document.getElementById('snackbar');
+            const text = snackbar.querySelector('.md-snackbar-text');
+            text.textContent = message;
+            
+            snackbar.classList.add('show');
+            
+            setTimeout(() => {
+                snackbar.classList.remove('show');
+            }, 4000);
         }
         
         // Function to refresh Recent Moods section
@@ -2945,5 +2994,12 @@
                 .catch(error => console.error('Error refreshing recent moods:', error));
         }
     </script>
+    
+    <!-- Material Design 3 Snackbar -->
+    <div id="snackbar" class="md-snackbar">
+        <div class="md-snackbar-content">
+            <span class="md-snackbar-text"></span>
+        </div>
+    </div>
 </body>
 </html>
