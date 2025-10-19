@@ -292,3 +292,47 @@ class MoodAnalytics:
             'year': year,
             'month': month
         }
+    
+    def get_monthly_trends_for_year(self, year):
+        """Get monthly mood trends (averages) for a specific year"""
+        import calendar
+        
+        # Initialize monthly data for all 12 months
+        monthly_moods = {month: [] for month in range(1, 13)}
+        
+        # Collect moods for each month
+        for mood_entry in self.moods:
+            mood_date = mood_entry.get('date')
+            
+            # Convert mood_date to date object
+            if isinstance(mood_date, str):
+                try:
+                    mood_date = datetime.strptime(mood_date, '%Y-%m-%d').date()
+                except:
+                    continue
+            elif hasattr(mood_date, 'date'):
+                mood_date = mood_date.date()
+            
+            # Check if mood is in the target year
+            if mood_date.year == year:
+                mood_value = MOOD_VALUES[mood_entry['mood']]
+                monthly_moods[mood_date.month].append(mood_value)
+        
+        # Calculate averages for each month
+        month_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        data = []
+        
+        for month in range(1, 13):
+            if monthly_moods[month]:
+                avg = round(sum(monthly_moods[month]) / len(monthly_moods[month]), 1)
+                data.append(avg)
+            else:
+                data.append(0)
+        
+        return {
+            'labels': month_labels,
+            'data': data,
+            'period': f"Monthly Mood Averages for {year}",
+            'year': year
+        }

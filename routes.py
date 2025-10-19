@@ -127,6 +127,30 @@ def weekly_trends():
         result = analytics.get_weekly_trends_for_month(today.year, today.month)
         return jsonify(result)
 
+@main_bp.route('/monthly_trends')
+@login_required
+def monthly_trends():
+    """Get monthly mood trends (averages) for specific year"""
+    from datetime import date
+    
+    # Get year parameter
+    year = request.args.get('year', type=int)
+    
+    moods = db.get_user_moods(current_user.id)
+    analytics = MoodAnalytics(moods)
+    
+    if year:
+        try:
+            result = analytics.get_monthly_trends_for_year(year)
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({"error": "Invalid year parameter"}), 400
+    else:
+        # Default to current year
+        today = date.today()
+        result = analytics.get_monthly_trends_for_year(today.year)
+        return jsonify(result)
+
 @main_bp.route('/daily_patterns')
 @login_required
 def daily_patterns():

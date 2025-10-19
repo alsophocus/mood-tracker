@@ -705,6 +705,13 @@
             <div class="card-title">
                 <i class="fas fa-chart-bar"></i> Monthly Trends
             </div>
+            <div class="date-selector">
+                <select id="monthlyYearSelect" class="date-input">
+                    <option value="">Year</option>
+                </select>
+                <button onclick="loadMonthlyTrends()" class="btn-primary">Load Year</button>
+                <button onclick="loadCurrentYearTrends()" class="btn-secondary">Current Year</button>
+            </div>
             <div class="chart-container">
                 <canvas id="monthlyTrendChart"></canvas>
             </div>
@@ -761,53 +768,6 @@
                 return false;
             }
         });
-
-        // Load monthly trends chart
-        fetch('/monthly_trends')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Monthly Trends Data:', data);
-                const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Monthly Average',
-                            data: data.data,
-                            backgroundColor: '#8b5cf6',
-                            borderColor: '#7c3aed',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: false,
-                                min: 1,
-                                max: 7,
-                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                                ticks: {
-                                    color: '#94a3b8',
-                                    callback: function(value) {
-                                        const labels = ['', 'Very Bad', 'Bad', 'Slightly Bad', 'Neutral', 'Slightly Well', 'Well', 'Very Well'];
-                                        return labels[value];
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                                ticks: { color: '#94a3b8' }
-                            }
-                        }
-                    }
-                });
-            });
 
         // System status check
         async function checkSystemStatus() {
@@ -1036,6 +996,83 @@
                 });
         }
 
+        // Monthly Trends Functions
+        function loadMonthlyTrends() {
+            const year = document.getElementById('monthlyYearSelect').value;
+            
+            if (!year) {
+                alert('Please select a Year');
+                return;
+            }
+            
+            const url = `/monthly_trends?year=${year}`;
+            console.log('Loading monthly trends from:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('Monthly trends response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Monthly trends data:', data);
+                    
+                    if (window.monthlyTrendChart) {
+                        // Update existing chart
+                        window.monthlyTrendChart.data.labels = data.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        window.monthlyTrendChart.data.datasets[0].data = data.data || new Array(12).fill(0);
+                        window.monthlyTrendChart.data.datasets[0].label = data.period || 'Monthly Trends';
+                        window.monthlyTrendChart.update();
+                        console.log('Monthly trends chart updated');
+                    } else {
+                        console.error('Monthly trends chart not initialized');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading monthly trends:', error);
+                    if (window.monthlyTrendChart) {
+                        window.monthlyTrendChart.data.datasets[0].label = 'Error loading data';
+                        window.monthlyTrendChart.update();
+                    }
+                });
+        }
+        
+        function loadCurrentYearTrends() {
+            console.log('Loading current year trends...');
+            
+            fetch('/monthly_trends')
+                .then(response => {
+                    console.log('Current year trends response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Current year trends data:', data);
+                    
+                    if (window.monthlyTrendChart) {
+                        // Update existing chart
+                        window.monthlyTrendChart.data.labels = data.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        window.monthlyTrendChart.data.datasets[0].data = data.data || new Array(12).fill(0);
+                        window.monthlyTrendChart.data.datasets[0].label = data.period || 'Current Year Trends';
+                        window.monthlyTrendChart.update();
+                        console.log('Monthly trends chart updated for current year');
+                    } else {
+                        console.error('Monthly trends chart not initialized');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading current year trends:', error);
+                    if (window.monthlyTrendChart) {
+                        window.monthlyTrendChart.data.datasets[0].label = 'Error loading current year';
+                        window.monthlyTrendChart.update();
+                    }
+                });
+        }
+
         // Initialize dropdowns
         function initializeDropdowns() {
             const yearSelect = document.getElementById('yearSelect');
@@ -1045,6 +1082,7 @@
             // Initialize trends dropdowns
             const trendsYearSelect = document.getElementById('trendsYearSelect');
             const trendsMonthSelect = document.getElementById('trendsMonthSelect');
+            const monthlyYearSelect = document.getElementById('monthlyYearSelect');
             
             // Populate years (current year ± 2)
             const currentYear = new Date().getFullYear();
@@ -1062,6 +1100,13 @@
                 option2.textContent = year;
                 if (year === currentYear) option2.selected = true;
                 trendsYearSelect.appendChild(option2);
+                
+                // Monthly trends year
+                const option3 = document.createElement('option');
+                option3.value = year;
+                option3.textContent = year;
+                if (year === currentYear) option3.selected = true;
+                monthlyYearSelect.appendChild(option3);
             }
             
             // Populate months
@@ -1163,6 +1208,7 @@
                     loadDailyPatterns(null); // Load all days initially
                     loadCurrentWeek(); // Load current week initially
                     loadCurrentMonthTrends(); // Load current month trends initially
+                    loadCurrentYearTrends(); // Load current year trends initially
                 }, 100);
                 
             } catch (error) {
@@ -1353,6 +1399,69 @@
                     }]
                 });
                 console.log('Weekly trends chart initialized');
+            }
+            
+            // Initialize Monthly Trends Chart
+            const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
+            if (monthlyTrendCtx) {
+                window.monthlyTrendChart = new Chart(monthlyTrendCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: new Array(12).fill(0),
+                            backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 7,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        const labels = {
+                                            0: '0',
+                                            1: 'Very Bad',
+                                            2: 'Bad', 
+                                            3: 'Slightly Bad',
+                                            4: 'Neutral',
+                                            5: 'Slightly Well',
+                                            6: 'Well',
+                                            7: 'Very Well'
+                                        };
+                                        return labels[value] || value;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [{
+                        afterDatasetsDraw: function(chart) {
+                            const ctx = chart.ctx;
+                            chart.data.datasets.forEach((dataset, i) => {
+                                const meta = chart.getDatasetMeta(i);
+                                meta.data.forEach((bar, index) => {
+                                    const data = dataset.data[index];
+                                    if (data > 0) {
+                                        ctx.fillStyle = 'white';
+                                        ctx.font = 'bold 12px Arial';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(data.toFixed(1), bar.x, bar.y);
+                                    }
+                                });
+                            });
+                        }
+                    }]
+                });
+                console.log('Monthly trends chart initialized');
             }
         }
 
