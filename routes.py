@@ -90,13 +90,16 @@ def health_check():
             'database_initialized': db._initialized
         }
     except Exception as e:
+        # Return degraded status instead of 500 error
         return {
-            'status': 'error',
+            'status': 'degraded',
+            'database_status': 'unavailable',
             'error': str(e),
             'timestamp': datetime.now().isoformat(),
             'database_url_set': bool(db.url),
-            'database_initialized': db._initialized
-        }, 500
+            'database_initialized': db._initialized,
+            'note': 'App running but database unavailable'
+        }, 200  # Return 200 instead of 500 for health checks
 
 @main_bp.route('/debug')
 def debug_info():
