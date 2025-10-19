@@ -1680,9 +1680,52 @@
                 select.addEventListener('change', updateLabel);
                 select.addEventListener('blur', updateLabel);
                 
+                // Auto-load data when selectors change
+                select.addEventListener('change', function() {
+                    // Weekly Patterns auto-load
+                    if (select.id === 'yearSelect' || select.id === 'monthSelect' || select.id === 'weekSelect') {
+                        const year = document.getElementById('yearSelect').value;
+                        const month = document.getElementById('monthSelect').value;
+                        const week = document.getElementById('weekSelect').value;
+                        
+                        if (year && month && week) {
+                            loadWeeklyPatterns();
+                        }
+                    }
+                    
+                    // Weekly Trends auto-load
+                    if (select.id === 'trendsYearSelect' || select.id === 'trendsMonthSelect') {
+                        const year = document.getElementById('trendsYearSelect').value;
+                        const month = document.getElementById('trendsMonthSelect').value;
+                        
+                        if (year && month) {
+                            loadWeeklyTrends();
+                        }
+                    }
+                    
+                    // Monthly Trends auto-load
+                    if (select.id === 'monthlyYearSelect') {
+                        const year = document.getElementById('monthlyYearSelect').value;
+                        
+                        if (year) {
+                            loadMonthlyTrends();
+                        }
+                    }
+                });
+                
                 // Initial state
                 updateLabel();
             });
+            
+            // Auto-load for date input
+            const dailyDatePicker = document.getElementById('dailyDatePicker');
+            if (dailyDatePicker) {
+                dailyDatePicker.addEventListener('change', function() {
+                    if (this.value) {
+                        loadDailyPatterns(this.value);
+                    }
+                });
+            }
         }
 
         // Initialize dropdowns with Material Design 3 enhancements
@@ -1767,7 +1810,11 @@
                 weekEnd.setDate(weekEnd.getDate() + 6);
                 const actualWeekEnd = weekEnd > lastDay ? lastDay : weekEnd;
                 
-                option.textContent = `Week ${weekCount} (${currentWeekStart.getDate()}-${actualWeekEnd.getDate()})`;
+                // Format dates for better readability
+                const startDate = currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const endDate = actualWeekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                option.textContent = `${startDate} - ${endDate}`;
                 weekSelect.appendChild(option);
                 
                 currentWeekStart.setDate(currentWeekStart.getDate() + 7);
@@ -1778,6 +1825,10 @@
             
             if (weekSelect.children.length > 1) {
                 weekSelect.children[1].selected = true;
+                // Auto-load if all values are selected
+                if (year && month) {
+                    loadWeeklyPatterns();
+                }
             }
         }
 
