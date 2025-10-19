@@ -2874,8 +2874,9 @@
             // Just need to handle form submission for better UX
             if (moodForm) {
                 moodForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Always prevent default form submission
+                    
                     if (!selectedMoodInput.value) {
-                        e.preventDefault();
                         alert('Please select a mood before saving.');
                         return;
                     }
@@ -2885,6 +2886,36 @@
                     const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
                     submitBtn.disabled = true;
+                    
+                    // Submit via AJAX
+                    const formData = new FormData(this);
+                    fetch('/save_mood', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Reset form
+                            moodCards.forEach(c => c.classList.remove('selected'));
+                            selectedMoodInput.value = '';
+                            this.querySelector('textarea').value = '';
+                            alert('Mood saved successfully!');
+                            
+                            // Refresh page to update Recent Moods
+                            window.location.reload();
+                        } else {
+                            alert('Error saving mood - please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error saving mood - please try again.');
+                    })
+                    .finally(() => {
+                        // Reset button
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
                 });
             }
         }
