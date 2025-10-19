@@ -2238,46 +2238,47 @@
             if (!year || !month) return;
             
             const today = new Date();
-            const currentWeekNumber = Math.ceil(today.getDate() / 7);
-            
             const firstDay = new Date(year, month - 1, 1);
             const lastDay = new Date(year, month, 0);
-            const firstWeekday = firstDay.getDay();
             
-            const daysToFirstMonday = (8 - firstWeekday) % 7;
-            const firstMonday = new Date(year, month - 1, 1 + daysToFirstMonday);
+            // Find the first Sunday that affects this month (could be in previous month)
+            let weekStart = new Date(firstDay);
+            weekStart.setDate(firstDay.getDate() - firstDay.getDay()); // Go back to Sunday
             
             let weekCount = 1;
-            let currentWeekStart = new Date(firstMonday);
             
-            while (currentWeekStart.getMonth() === month - 1) {
-                const option = document.createElement('option');
-                option.value = weekCount;
+            // Continue while the week overlaps with the target month
+            while (weekStart <= lastDay) {
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6); // Saturday
                 
-                const weekEnd = new Date(currentWeekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6);
-                const actualWeekEnd = weekEnd > lastDay ? lastDay : weekEnd;
-                
-                // Format dates for better readability
-                const startDate = currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const endDate = actualWeekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                
-                option.textContent = `${startDate} - ${endDate}`;
-                
-                // Select current week if we're in current month and year
-                if (year === today.getFullYear() && month === today.getMonth() + 1) {
-                    const todayDate = today.getDate();
-                    if (todayDate >= currentWeekStart.getDate() && todayDate <= (currentWeekStart.getDate() + 6)) {
-                        option.selected = true;
+                // Only include weeks that have at least one day in the target month
+                if (weekEnd >= firstDay) {
+                    const option = document.createElement('option');
+                    option.value = weekCount;
+                    
+                    // Format dates for better readability
+                    const startDate = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const endDate = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    option.textContent = `${startDate} - ${endDate}`;
+                    
+                    // Select current week if we're in current month and year
+                    if (year === today.getFullYear() && month === today.getMonth() + 1) {
+                        if (today >= weekStart && today <= weekEnd) {
+                            option.selected = true;
+                        }
                     }
+                    
+                    weekSelect.appendChild(option);
+                    weekCount++;
                 }
                 
-                weekSelect.appendChild(option);
+                // Move to next week
+                weekStart.setDate(weekStart.getDate() + 7);
                 
-                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-                weekCount++;
-                
-                if (weekCount > 6) break;
+                // Safety break to prevent infinite loop
+                if (weekCount > 10) break;
             }
             
             if (weekSelect.children.length > 1) {
