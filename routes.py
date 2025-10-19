@@ -18,6 +18,64 @@ def index():
     
     return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
+@main_bp.route('/fix-schema')
+def fix_schema():
+    """Fix database schema constraints"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Check current table structure
+            cursor.execute("""
+                SELECT column_name, data_type, is_nullable
+                FROM information_schema.columns 
+                WHERE table_name = 'moods'
+                ORDER BY ordinal_position
+            """)
+            columns = cursor.fetchall()
+            
+            # Check existing constraints
+            cursor.execute("""
+                SELECT constraint_name, constraint_type
+                FROM information_schema.table_constraints
+                WHERE table_name = 'moods'
+            """)
+            constraints = cursor.fetchall()
+            
+            # Drop and recreate the moods table with proper constraints
+            cursor.execute('DROP TABLE IF EXISTS moods CASCADE')
+            
+            cursor.execute('''
+                CREATE TABLE moods (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    date DATE NOT NULL,
+                    mood TEXT NOT NULL,
+                    notes TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(user_id, date)
+                )
+            ''')
+            
+            # Recreate indexes
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_moods_user_date ON moods(user_id, date)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_moods_timestamp ON moods(timestamp)')
+            
+            return jsonify({
+                'success': True,
+                'message': 'Schema fixed successfully',
+                'old_columns': [dict(col) for col in columns],
+                'old_constraints': [dict(cons) for cons in constraints]
+            })
+            
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
+
 @main_bp.route('/debug-save')
 def debug_save():
     """Debug save without authentication"""
