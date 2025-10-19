@@ -2853,6 +2853,7 @@
             initializeMaterialSelects();
             initializeDropdowns();
             initializeCharts();
+            initializeMoodForm();
             
             // Load initial data
             setTimeout(() => {
@@ -2866,6 +2867,31 @@
             checkSystemStatus();
             setInterval(checkSystemStatus, 10000);
         });
+
+        // Initialize mood form functionality
+        function initializeMoodForm() {
+            const moodCards = document.querySelectorAll('.mood-card');
+            const selectedMoodInput = document.getElementById('selected-mood');
+            const moodForm = document.querySelector('.mood-form');
+            
+            // The mood selection is already handled by existing JavaScript
+            // Just need to handle form submission for better UX
+            if (moodForm) {
+                moodForm.addEventListener('submit', function(e) {
+                    if (!selectedMoodInput.value) {
+                        e.preventDefault();
+                        alert('Please select a mood before saving.');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
+                    submitBtn.disabled = true;
+                });
+            }
+        }
     </script>
 </body>
 </html>
