@@ -18,6 +18,46 @@ def index():
     
     return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
+@main_bp.route('/debug-save')
+def debug_save():
+    """Debug save without authentication"""
+    try:
+        # Test database connection
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT COUNT(*) as count FROM users')
+            user_count = cursor.fetchone()['count']
+            
+            # Try to get first user
+            cursor.execute('SELECT id FROM users LIMIT 1')
+            first_user = cursor.fetchone()
+            
+            if first_user:
+                user_id = first_user['id']
+                # Try to save a test mood
+                result = db.save_mood(user_id, datetime.now().date(), 'well', 'debug test')
+                return jsonify({
+                    'success': True,
+                    'message': 'Debug save successful',
+                    'user_count': user_count,
+                    'test_user_id': user_id,
+                    'save_result': str(result)
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'No users found in database',
+                    'user_count': user_count
+                })
+                
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
+
 @main_bp.route('/test-save')
 @login_required
 def test_save():
