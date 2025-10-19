@@ -157,12 +157,12 @@
         {% endwith %}
         
         <div class="oauth-buttons">
-            <a href="{{ url_for('oauth_login', provider='google') }}" class="oauth-btn google-btn">
+            <a href="{{ url_for('auth.oauth_login', provider='google') }}" class="oauth-btn google-btn">
                 <i class="fab fa-google"></i>
                 Continue with Google
             </a>
             
-            <a href="{{ url_for('oauth_login', provider='github') }}" class="oauth-btn github-btn">
+            <a href="{{ url_for('auth.oauth_login', provider='github') }}" class="oauth-btn github-btn">
                 <i class="fab fa-github"></i>
                 Continue with GitHub
             </a>
