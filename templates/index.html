@@ -2601,9 +2601,8 @@
             pdf.setFont('helvetica', 'bold');
             pdf.text('Mood Tracker Report', 20, 25);
             
-            // Get actual user name from page or use default
-            const userNameElement = document.querySelector('.display-small');
-            const userName = userNameElement ? 'User' : 'User'; // You can enhance this to get actual user name
+            // Get actual user name from backend data
+            const userName = '{{ user.username if user and user.username else "User" }}';
             
             pdf.setFontSize(14);
             pdf.setFont('helvetica', 'normal');
