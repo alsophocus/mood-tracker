@@ -648,9 +648,15 @@
                 <i class="fas fa-calendar-week"></i> Weekly Patterns
             </div>
             <div class="date-selector">
-                <select id="yearSelect" class="date-input"></select>
-                <select id="monthSelect" class="date-input"></select>
-                <select id="weekSelect" class="date-input"></select>
+                <select id="yearSelect" class="date-input">
+                    <option value="">Year</option>
+                </select>
+                <select id="monthSelect" class="date-input">
+                    <option value="">Month</option>
+                </select>
+                <select id="weekSelect" class="date-input">
+                    <option value="">Week</option>
+                </select>
                 <button onclick="loadWeeklyPatterns()" class="btn-primary">Load Week</button>
                 <button onclick="loadCurrentWeek()" class="btn-secondary">Current Week</button>
             </div>
@@ -1039,6 +1045,12 @@
             const month = document.getElementById('monthSelect').value;
             const week = document.getElementById('weekSelect').value;
             
+            // Validate that all selections are made
+            if (!year || !month || !week) {
+                alert('Please select Year, Month, and Week');
+                return;
+            }
+            
             const url = `/weekly_patterns?year=${year}&month=${month}&week=${week}`;
             
             fetch(url)
@@ -1138,13 +1150,65 @@
                 monthSelect.appendChild(option);
             });
             
-            // Populate weeks
-            for (let week = 1; week <= 5; week++) {
+            // Add event listeners to update weeks when year/month changes
+            yearSelect.addEventListener('change', updateWeekOptions);
+            monthSelect.addEventListener('change', updateWeekOptions);
+            
+            // Initialize weeks for current month/year
+            updateWeekOptions();
+        }
+        
+        function updateWeekOptions() {
+            const yearSelect = document.getElementById('yearSelect');
+            const monthSelect = document.getElementById('monthSelect');
+            const weekSelect = document.getElementById('weekSelect');
+            
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            
+            // Clear existing options
+            weekSelect.innerHTML = '<option value="">Week</option>';
+            
+            if (!year || !month) return;
+            
+            // Calculate how many weeks exist in this month
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+            const firstWeekday = firstDay.getDay(); // 0=Sunday, 1=Monday, etc.
+            
+            // Calculate first Monday of the month
+            const daysToFirstMonday = (8 - firstWeekday) % 7;
+            const firstMonday = new Date(year, month - 1, 1 + daysToFirstMonday);
+            
+            // Calculate how many weeks fit in this month
+            let weekCount = 1;
+            let currentWeekStart = new Date(firstMonday);
+            
+            while (currentWeekStart.getMonth() === month - 1) {
                 const option = document.createElement('option');
-                option.value = week;
-                option.textContent = `Week ${week}`;
-                if (week === 1) option.selected = true;
+                option.value = weekCount;
+                
+                // Calculate week end date
+                const weekEnd = new Date(currentWeekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                
+                // Ensure week end doesn't go past month end
+                const actualWeekEnd = weekEnd > lastDay ? lastDay : weekEnd;
+                
+                option.textContent = `Week ${weekCount} (${currentWeekStart.getDate()}-${actualWeekEnd.getDate()})`;
                 weekSelect.appendChild(option);
+                
+                // Move to next week
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+                weekCount++;
+                
+                // Safety check to prevent infinite loop
+                if (weekCount > 6) break;
+            }
+            
+            // Select first week by default
+            if (weekSelect.children.length > 1) {
+                weekSelect.children[1].selected = true;
             }
         }
 
