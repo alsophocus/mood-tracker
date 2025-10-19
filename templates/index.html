@@ -1035,53 +1035,235 @@
             color: var(--md-sys-color-primary);
         }
 
-        /* Material Design 3 Date Input */
-        .md-date-input {
-            width: 100%;
-            padding: 16px;
-            border: 1px solid var(--md-sys-color-outline);
-            border-radius: var(--md-sys-shape-corner-extra-small);
-            background-color: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            font-size: 16px;
-            font-family: 'Roboto', sans-serif;
-            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
-            min-height: 56px;
-            cursor: pointer;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
+        /* Material Design 3 Date Picker */
+        .md-date-picker {
             position: relative;
+            width: 100%;
         }
 
-        .md-date-input::-webkit-calendar-picker-indicator {
-            background: transparent;
-            bottom: 0;
-            color: transparent;
+        .md-date-field {
+            position: relative;
+            width: 100%;
+        }
+
+        .md-date-input {
+            width: 100%;
+            padding: 16px 48px 16px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-on-surface);
+            font-family: var(--md-sys-typescale-body-large-font);
+            font-size: var(--md-sys-typescale-body-large-size);
+            font-weight: var(--md-sys-typescale-body-large-weight);
+            line-height: var(--md-sys-typescale-body-large-line-height);
+            letter-spacing: var(--md-sys-typescale-body-large-tracking);
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
             cursor: pointer;
-            height: auto;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
+            box-sizing: border-box;
+            min-height: 56px;
+        }
+
+        .md-date-input:hover {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-color: var(--md-sys-color-on-surface-variant);
         }
 
         .md-date-input:focus {
             outline: none;
             border-color: var(--md-sys-color-primary);
             border-width: 2px;
-            box-shadow: 0 0 0 8px rgba(103, 80, 164, 0.1);
-        }
-
-        .md-date-input:hover {
             background-color: var(--md-sys-color-surface-container-highest);
-            transform: translateY(-1px);
         }
 
-        /* Date input in select container */
-        .md-select-container .md-date-input {
-            padding-right: 48px;
+        .md-date-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 20px;
+            pointer-events: none;
+            transition: color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-date-field:hover .md-date-icon {
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .md-date-input:focus + .md-date-icon {
+            color: var(--md-sys-color-primary);
+        }
+
+        .md-date-calendar {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--md-sys-color-surface-container);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-medium);
+            box-shadow: var(--md-sys-elevation-level2);
+            z-index: 1000;
+            margin-top: 4px;
+            opacity: 0;
+            transform: translateY(-8px);
+            visibility: hidden;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate);
+        }
+
+        .md-date-calendar.open {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .md-calendar-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .md-calendar-nav {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 20px;
+            padding: 8px;
+            border-radius: var(--md-sys-shape-corner-full);
+            cursor: pointer;
+            transition: background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-calendar-nav:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .md-calendar-title {
+            font-family: var(--md-sys-typescale-title-medium-font);
+            font-size: var(--md-sys-typescale-title-medium-size);
+            font-weight: var(--md-sys-typescale-title-medium-weight);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .md-calendar-grid {
+            padding: 8px;
+        }
+
+        .md-calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .md-calendar-weekday {
+            text-align: center;
+            padding: 8px;
+            font-family: var(--md-sys-typescale-label-small-font);
+            font-size: var(--md-sys-typescale-label-small-size);
+            font-weight: var(--md-sys-typescale-label-small-weight);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .md-calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .md-calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--md-sys-shape-corner-full);
+            cursor: pointer;
+            font-family: var(--md-sys-typescale-body-medium-font);
+            font-size: var(--md-sys-typescale-body-medium-size);
+            font-weight: var(--md-sys-typescale-body-medium-weight);
+            color: var(--md-sys-color-on-surface);
+            transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-calendar-day:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .md-calendar-day.other-month {
+            color: var(--md-sys-color-on-surface-variant);
+            opacity: 0.6;
+        }
+
+        .md-calendar-day.selected {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .md-calendar-day.today {
+            border: 1px solid var(--md-sys-color-primary);
+        }
+
+        .md-calendar-popup {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            box-shadow: var(--md-sys-elevation-level3);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-8px) scale(0.95);
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            pointer-events: none;
+            margin-top: 8px;
+        }
+
+        .md-calendar-popup.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .md-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .md-calendar-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .md-calendar-nav {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--md-sys-shape-corner-full);
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-calendar-nav:hover {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            transform: scale(1.1);
+        }
+
+        .md-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            padding: 16px;
         }
 
         /* Material Design 3 Controls Container */
@@ -1393,9 +1575,34 @@
                 </div>
                 
                 <div class="controls-container">
-                    <div class="md-select-container">
-                        <input type="date" id="dailyDatePicker" class="md-date-input">
-                        <i class="fas fa-calendar-alt md-select-icon"></i>
+                    <div class="md-date-picker">
+                        <div class="md-date-field">
+                            <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
+                            <i class="fas fa-calendar-alt md-date-icon"></i>
+                        </div>
+                        <div class="md-date-calendar" id="dailyDateCalendar">
+                            <div class="md-calendar-header">
+                                <button type="button" class="md-calendar-nav" id="prevMonth">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div class="md-calendar-title" id="calendarTitle"></div>
+                                <button type="button" class="md-calendar-nav" id="nextMonth">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="md-calendar-grid">
+                                <div class="md-calendar-weekdays">
+                                    <div class="md-calendar-weekday">Sun</div>
+                                    <div class="md-calendar-weekday">Mon</div>
+                                    <div class="md-calendar-weekday">Tue</div>
+                                    <div class="md-calendar-weekday">Wed</div>
+                                    <div class="md-calendar-weekday">Thu</div>
+                                    <div class="md-calendar-weekday">Fri</div>
+                                    <div class="md-calendar-weekday">Sat</div>
+                                </div>
+                                <div class="md-calendar-days" id="calendarDays"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -1660,6 +1867,157 @@
             }
         }
 
+        // Material Design 3 Date Picker
+        class MD3DatePicker {
+            constructor(inputId, calendarId) {
+                this.input = document.getElementById(inputId);
+                this.calendar = document.getElementById(calendarId);
+                this.currentDate = new Date();
+                this.selectedDate = null;
+                
+                this.init();
+            }
+            
+            init() {
+                this.renderCalendar();
+                this.bindEvents();
+                
+                // Set today as default
+                const today = new Date();
+                this.selectDate(today);
+            }
+            
+            bindEvents() {
+                // Toggle calendar
+                this.input.addEventListener('click', () => this.toggleCalendar());
+                
+                // Navigation - use event delegation for dynamically created elements
+                this.calendar.addEventListener('click', (e) => {
+                    if (e.target.closest('#prevMonth')) {
+                        this.previousMonth();
+                    } else if (e.target.closest('#nextMonth')) {
+                        this.nextMonth();
+                    }
+                });
+                
+                // Close on outside click
+                document.addEventListener('click', (e) => {
+                    if (!this.input.closest('.md-date-picker').contains(e.target)) {
+                        this.closeCalendar();
+                    }
+                });
+            }
+            
+            toggleCalendar() {
+                this.calendar.classList.toggle('open');
+            }
+            
+            closeCalendar() {
+                this.calendar.classList.remove('open');
+            }
+            
+            previousMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.renderCalendar();
+            }
+            
+            nextMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.renderCalendar();
+            }
+            
+            renderCalendar() {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                
+                // Update title
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+                document.getElementById('calendarTitle').textContent = `${monthNames[month]} ${year}`;
+                
+                // Clear days
+                const daysContainer = document.getElementById('calendarDays');
+                daysContainer.innerHTML = '';
+                
+                // Get first day of month and number of days
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDayOfWeek = firstDay.getDay();
+                
+                // Add previous month's trailing days
+                const prevMonth = new Date(year, month - 1, 0);
+                for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+                    const day = prevMonth.getDate() - i;
+                    const dayElement = this.createDayElement(day, true);
+                    daysContainer.appendChild(dayElement);
+                }
+                
+                // Add current month's days
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayElement = this.createDayElement(day, false);
+                    const dayDate = new Date(year, month, day);
+                    
+                    // Mark today
+                    const today = new Date();
+                    if (dayDate.toDateString() === today.toDateString()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    // Mark selected
+                    if (this.selectedDate && dayDate.toDateString() === this.selectedDate.toDateString()) {
+                        dayElement.classList.add('selected');
+                    }
+                    
+                    dayElement.addEventListener('click', () => this.selectDate(dayDate));
+                    daysContainer.appendChild(dayElement);
+                }
+                
+                // Add next month's leading days
+                const totalCells = daysContainer.children.length;
+                const remainingCells = 42 - totalCells; // 6 rows × 7 days
+                for (let day = 1; day <= remainingCells && day <= 14; day++) {
+                    const dayElement = this.createDayElement(day, true);
+                    daysContainer.appendChild(dayElement);
+                }
+            }
+            
+            createDayElement(day, isOtherMonth) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'md-calendar-day';
+                dayElement.textContent = day;
+                
+                if (isOtherMonth) {
+                    dayElement.classList.add('other-month');
+                }
+                
+                return dayElement;
+            }
+            
+            selectDate(date) {
+                this.selectedDate = new Date(date);
+                this.input.value = this.formatDate(date);
+                this.renderCalendar();
+                this.closeCalendar();
+                
+                // Trigger change event for auto-loading
+                const changeEvent = new Event('change', { bubbles: true });
+                this.input.dispatchEvent(changeEvent);
+            }
+            
+            formatDate(date) {
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+            
+            getSelectedDateISO() {
+                return this.selectedDate ? this.selectedDate.toISOString().split('T')[0] : null;
+            }
+        }
+
         // Initialize Material Design 3 select components
         function initializeMaterialSelects() {
             document.querySelectorAll('.md-select').forEach(select => {
@@ -1713,12 +2071,16 @@
                 updateLabel();
             });
             
-            // Auto-load for date input
-            const dailyDatePicker = document.getElementById('dailyDatePicker');
-            if (dailyDatePicker) {
-                dailyDatePicker.addEventListener('change', function() {
-                    if (this.value) {
-                        loadDailyPatterns(this.value);
+            // Auto-load for Material Design 3 date picker
+            window.dailyDatePicker = new MD3DatePicker('dailyDatePicker', 'dailyDateCalendar');
+            
+            // Listen for date changes
+            const dailyDateInput = document.getElementById('dailyDatePicker');
+            if (dailyDateInput) {
+                dailyDateInput.addEventListener('change', function() {
+                    const selectedDate = window.dailyDatePicker.getSelectedDateISO();
+                    if (selectedDate) {
+                        loadDailyPatterns(selectedDate);
                     }
                 });
             }
