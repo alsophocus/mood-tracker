@@ -1155,13 +1155,13 @@
         .md-calendar-weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+            gap: 0;
             margin-bottom: 8px;
         }
 
         .md-calendar-weekday {
             text-align: center;
-            padding: 8px;
+            padding: 12px 4px;
             font-family: var(--md-sys-typescale-label-small-font);
             font-size: var(--md-sys-typescale-label-small-size);
             font-weight: var(--md-sys-typescale-label-small-weight);
@@ -1171,7 +1171,7 @@
         .md-calendar-days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+            gap: 0;
         }
 
         .md-calendar-day {
@@ -1186,6 +1186,7 @@
             font-weight: var(--md-sys-typescale-body-medium-weight);
             color: var(--md-sys-color-on-surface);
             transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+            margin: 2px;
         }
 
         .md-calendar-day:hover {
@@ -1582,12 +1583,18 @@
                         </div>
                         <div class="md-date-calendar" id="dailyDateCalendar">
                             <div class="md-calendar-header">
+                                <button type="button" class="md-calendar-nav" id="prevYear">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </button>
                                 <button type="button" class="md-calendar-nav" id="prevMonth">
                                     <i class="fas fa-chevron-left"></i>
                                 </button>
                                 <div class="md-calendar-title" id="calendarTitle"></div>
                                 <button type="button" class="md-calendar-nav" id="nextMonth">
                                     <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <button type="button" class="md-calendar-nav" id="nextYear">
+                                    <i class="fas fa-angle-double-right"></i>
                                 </button>
                             </div>
                             <div class="md-calendar-grid">
@@ -1897,6 +1904,10 @@
                         this.previousMonth();
                     } else if (e.target.closest('#nextMonth')) {
                         this.nextMonth();
+                    } else if (e.target.closest('#prevYear')) {
+                        this.previousYear();
+                    } else if (e.target.closest('#nextYear')) {
+                        this.nextYear();
                     }
                 });
                 
@@ -1923,6 +1934,16 @@
             
             nextMonth() {
                 this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.renderCalendar();
+            }
+            
+            previousYear() {
+                this.currentDate.setFullYear(this.currentDate.getFullYear() - 1);
+                this.renderCalendar();
+            }
+            
+            nextYear() {
+                this.currentDate.setFullYear(this.currentDate.getFullYear() + 1);
                 this.renderCalendar();
             }
             
@@ -2105,6 +2126,8 @@
             // Populate years
             [selectors.year, selectors.trendsYear, selectors.monthlyYear].forEach(select => {
                 if (select) {
+                    // Clear existing options
+                    select.innerHTML = '';
                     for (let year = currentYear - 2; year <= currentYear + 2; year++) {
                         const option = document.createElement('option');
                         option.value = year;
@@ -2118,6 +2141,8 @@
             // Populate months
             [selectors.month, selectors.trendsMonth].forEach(select => {
                 if (select) {
+                    // Clear existing options
+                    select.innerHTML = '';
                     months.forEach((month, index) => {
                         const option = document.createElement('option');
                         option.value = index + 1;
@@ -2146,9 +2171,12 @@
             const year = parseInt(yearSelect.value);
             const month = parseInt(monthSelect.value);
             
-            weekSelect.innerHTML = '<option value="">Week</option>';
+            weekSelect.innerHTML = '';
             
             if (!year || !month) return;
+            
+            const today = new Date();
+            const currentWeekNumber = Math.ceil(today.getDate() / 7);
             
             const firstDay = new Date(year, month - 1, 1);
             const lastDay = new Date(year, month, 0);
@@ -2173,6 +2201,15 @@
                 const endDate = actualWeekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 
                 option.textContent = `${startDate} - ${endDate}`;
+                
+                // Select current week if we're in current month and year
+                if (year === today.getFullYear() && month === today.getMonth() + 1) {
+                    const todayDate = today.getDate();
+                    if (todayDate >= currentWeekStart.getDate() && todayDate <= (currentWeekStart.getDate() + 6)) {
+                        option.selected = true;
+                    }
+                }
+                
                 weekSelect.appendChild(option);
                 
                 currentWeekStart.setDate(currentWeekStart.getDate() + 7);
