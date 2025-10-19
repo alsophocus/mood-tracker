@@ -888,39 +888,32 @@
             fetch(url)
                 .then(response => {
                     console.log('Daily patterns response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
                     return response.json();
                 })
                 .then(data => {
                     console.log('Daily patterns data:', data);
-                    if (window.dailyChart) {
-                        window.dailyChart.destroy();
-                    }
                     
-                    const ctx = document.getElementById('dailyChart').getContext('2d');
-                    window.dailyChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.labels,
-                            datasets: [{
-                                label: data.period || 'Daily Patterns',
-                                data: data.data,
-                                borderColor: 'rgba(59, 130, 246, 1)',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    max: 5
-                                }
-                            }
-                        }
-                    });
+                    if (window.dailyChart) {
+                        // Update existing chart
+                        window.dailyChart.data.labels = data.labels || ['Morning', 'Afternoon', 'Evening', 'Night'];
+                        window.dailyChart.data.datasets[0].data = data.data || [0, 0, 0, 0];
+                        window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
+                        window.dailyChart.update();
+                        console.log('Daily chart updated');
+                    } else {
+                        console.error('Daily chart not initialized');
+                    }
                 })
-                .catch(error => console.error('Error loading daily patterns:', error));
+                .catch(error => {
+                    console.error('Error loading daily patterns:', error);
+                    if (window.dailyChart) {
+                        window.dailyChart.data.datasets[0].label = 'Error loading data';
+                        window.dailyChart.update();
+                    }
+                });
         }
 
         // Weekly Patterns Functions
@@ -929,7 +922,6 @@
             const month = document.getElementById('monthSelect').value;
             const week = document.getElementById('weekSelect').value;
             
-            // Validate that all selections are made
             if (!year || !month || !week) {
                 alert('Please select Year, Month, and Week');
                 return;
@@ -941,39 +933,32 @@
             fetch(url)
                 .then(response => {
                     console.log('Weekly patterns response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
                     return response.json();
                 })
                 .then(data => {
                     console.log('Weekly patterns data:', data);
-                    if (window.weeklyChart) {
-                        window.weeklyChart.destroy();
-                    }
                     
-                    const ctx = document.getElementById('weeklyChart').getContext('2d');
-                    window.weeklyChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.days,
-                            datasets: [{
-                                label: data.period || 'Weekly Patterns',
-                                data: data.data,
-                                borderColor: 'rgba(34, 197, 94, 1)',
-                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    max: 5
-                                }
-                            }
-                        }
-                    });
+                    if (window.weeklyChart) {
+                        // Update existing chart
+                        window.weeklyChart.data.labels = data.days || data.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                        window.weeklyChart.data.datasets[0].data = data.data || [0, 0, 0, 0, 0, 0, 0];
+                        window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+                        window.weeklyChart.update();
+                        console.log('Weekly chart updated');
+                    } else {
+                        console.error('Weekly chart not initialized');
+                    }
                 })
-                .catch(error => console.error('Error loading weekly patterns:', error));
+                .catch(error => {
+                    console.error('Error loading weekly patterns:', error);
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.datasets[0].label = 'Error loading data';
+                        window.weeklyChart.update();
+                    }
+                });
         }
 
         function loadCurrentWeek() {
@@ -1103,10 +1088,79 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initializeDropdowns();
-            loadDailyPatterns(null); // Load all days initially
-            loadCurrentWeek(); // Load current week initially
+            console.log('DOM loaded, initializing charts...');
+            
+            try {
+                initializeDropdowns();
+                console.log('Dropdowns initialized');
+                
+                // Initialize empty charts first
+                initializeEmptyCharts();
+                
+                // Then load data
+                setTimeout(() => {
+                    loadDailyPatterns(null); // Load all days initially
+                    loadCurrentWeek(); // Load current week initially
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
         });
+        
+        function initializeEmptyCharts() {
+            console.log('Initializing empty charts...');
+            
+            // Initialize Daily Chart
+            const dailyCtx = document.getElementById('dailyChart');
+            if (dailyCtx) {
+                window.dailyChart = new Chart(dailyCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: [0, 0, 0, 0],
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, max: 5 }
+                        }
+                    }
+                });
+                console.log('Daily chart initialized');
+            }
+            
+            // Initialize Weekly Chart
+            const weeklyCtx = document.getElementById('weeklyChart');
+            if (weeklyCtx) {
+                window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, max: 5 }
+                        }
+                    }
+                });
+                console.log('Weekly chart initialized');
+            }
+        }
 
         // Check system status on load
         checkSystemStatus();
