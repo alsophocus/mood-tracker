@@ -1123,13 +1123,35 @@
                             data: [0, 0, 0, 0],
                             borderColor: 'rgba(59, 130, 246, 1)',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         scales: {
-                            y: { beginAtZero: true, max: 5 }
+                            y: {
+                                min: 1,
+                                max: 7,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        const labels = {
+                                            1: 'Very Bad',
+                                            2: 'Bad', 
+                                            3: 'Slightly Bad',
+                                            4: 'Neutral',
+                                            5: 'Slightly Well',
+                                            6: 'Well',
+                                            7: 'Very Well'
+                                        };
+                                        return labels[value] || value;
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -1148,13 +1170,35 @@
                             data: [0, 0, 0, 0, 0, 0, 0],
                             borderColor: 'rgba(34, 197, 94, 1)',
                             backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         scales: {
-                            y: { beginAtZero: true, max: 5 }
+                            y: {
+                                min: 1,
+                                max: 7,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        const labels = {
+                                            1: 'Very Bad',
+                                            2: 'Bad', 
+                                            3: 'Slightly Bad',
+                                            4: 'Neutral',
+                                            5: 'Slightly Well',
+                                            6: 'Well',
+                                            7: 'Very Well'
+                                        };
+                                        return labels[value] || value;
+                                    }
+                                }
+                            }
                         }
                     }
                 });
