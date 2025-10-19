@@ -221,7 +221,7 @@ class MoodAnalytics:
         return result
     
     def get_weekly_trends_for_month(self, year, month):
-        """Get weekly mood trends (sums) for a specific month"""
+        """Get weekly mood trends (averages) for a specific month"""
         from datetime import date, timedelta
         import calendar
         
@@ -234,8 +234,8 @@ class MoodAnalytics:
         days_to_first_monday = (7 - first_weekday) % 7
         first_monday = first_day + timedelta(days=days_to_first_monday)
         
-        # Initialize weekly sums
-        weekly_sums = {}
+        # Initialize weekly data
+        weekly_moods = {}
         week_labels = []
         
         # Calculate weeks in this month
@@ -247,10 +247,10 @@ class MoodAnalytics:
             # Ensure we don't go past month end
             week_end = min(week_end, last_day)
             
-            weekly_sums[week_num] = 0
+            weekly_moods[week_num] = []
             week_labels.append(f"Week {week_num}")
             
-            # Sum moods for this week
+            # Collect moods for this week
             for mood_entry in self.moods:
                 mood_date = mood_entry.get('date')
                 
@@ -266,7 +266,7 @@ class MoodAnalytics:
                 # Check if mood is in this week
                 if current_week_start <= mood_date <= week_end:
                     mood_value = MOOD_VALUES[mood_entry['mood']]
-                    weekly_sums[week_num] += mood_value
+                    weekly_moods[week_num].append(mood_value)
             
             # Move to next week
             current_week_start += timedelta(days=7)
@@ -276,13 +276,19 @@ class MoodAnalytics:
             if week_num > 6:
                 break
         
-        # Prepare data for chart
-        data = [weekly_sums.get(i, 0) for i in range(1, week_num)]
+        # Calculate averages for each week
+        data = []
+        for i in range(1, week_num):
+            if weekly_moods[i]:
+                avg = round(sum(weekly_moods[i]) / len(weekly_moods[i]), 1)
+                data.append(avg)
+            else:
+                data.append(0)
         
         return {
             'labels': week_labels,
             'data': data,
-            'period': f"Weekly Mood Sums for {calendar.month_name[month]} {year}",
+            'period': f"Weekly Mood Averages for {calendar.month_name[month]} {year}",
             'year': year,
             'month': month
         }
