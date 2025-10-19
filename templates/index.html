@@ -1047,6 +1047,24 @@
             font-family: 'Roboto', sans-serif;
             transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
             min-height: 56px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            position: relative;
+        }
+
+        .md-date-input::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
         }
 
         .md-date-input:focus {
@@ -1059,6 +1077,11 @@
         .md-date-input:hover {
             background-color: var(--md-sys-color-surface-container-highest);
             transform: translateY(-1px);
+        }
+
+        /* Date input in select container */
+        .md-select-container .md-date-input {
+            padding-right: 48px;
         }
 
         /* Material Design 3 Controls Container */
@@ -1370,7 +1393,10 @@
                 </div>
                 
                 <div class="controls-container">
-                    <input type="date" id="dailyDatePicker" class="md-date-input">
+                    <div class="md-select-container">
+                        <input type="date" id="dailyDatePicker" class="md-date-input">
+                        <i class="fas fa-calendar-alt md-select-icon"></i>
+                    </div>
                 </div>
                 
                 <div class="chart-container">
