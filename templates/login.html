@@ -1,135 +1,343 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Mood Tracker</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Material Design 3 (Material You) Design System */
+        :root {
+            /* Material Design 3 Color Tokens */
+            --md-sys-color-primary: rgb(103, 80, 164);
+            --md-sys-color-on-primary: rgb(255, 255, 255);
+            --md-sys-color-primary-container: rgb(234, 221, 255);
+            --md-sys-color-on-primary-container: rgb(33, 0, 93);
+            --md-sys-color-secondary: rgb(98, 91, 113);
+            --md-sys-color-on-secondary: rgb(255, 255, 255);
+            --md-sys-color-secondary-container: rgb(232, 222, 248);
+            --md-sys-color-on-secondary-container: rgb(29, 25, 43);
+            --md-sys-color-tertiary: rgb(125, 82, 96);
+            --md-sys-color-on-tertiary: rgb(255, 255, 255);
+            --md-sys-color-tertiary-container: rgb(255, 216, 228);
+            --md-sys-color-on-tertiary-container: rgb(55, 11, 30);
+            --md-sys-color-error: rgb(186, 26, 26);
+            --md-sys-color-on-error: rgb(255, 255, 255);
+            --md-sys-color-error-container: rgb(255, 218, 214);
+            --md-sys-color-on-error-container: rgb(65, 0, 2);
+            --md-sys-color-background: rgb(255, 251, 254);
+            --md-sys-color-on-background: rgb(28, 27, 31);
+            --md-sys-color-surface: rgb(255, 251, 254);
+            --md-sys-color-on-surface: rgb(28, 27, 31);
+            --md-sys-color-surface-variant: rgb(231, 224, 236);
+            --md-sys-color-on-surface-variant: rgb(73, 69, 79);
+            --md-sys-color-outline: rgb(121, 116, 126);
+            --md-sys-color-outline-variant: rgb(202, 196, 208);
+            --md-sys-color-shadow: rgb(0, 0, 0);
+            --md-sys-color-scrim: rgb(0, 0, 0);
+            --md-sys-color-inverse-surface: rgb(49, 48, 51);
+            --md-sys-color-inverse-on-surface: rgb(244, 239, 244);
+            --md-sys-color-inverse-primary: rgb(208, 188, 255);
+            --md-sys-color-surface-dim: rgb(222, 216, 225);
+            --md-sys-color-surface-bright: rgb(255, 251, 254);
+            --md-sys-color-surface-container-lowest: rgb(255, 255, 255);
+            --md-sys-color-surface-container-low: rgb(247, 242, 250);
+            --md-sys-color-surface-container: rgb(247, 243, 249);
+            --md-sys-color-surface-container-high: rgb(236, 230, 240);
+            --md-sys-color-surface-container-highest: rgb(230, 224, 233);
+
+            /* Material Design 3 Typography Scale */
+            --md-sys-typescale-display-large-font: 'Roboto';
+            --md-sys-typescale-display-large-size: 57px;
+            --md-sys-typescale-display-large-weight: 400;
+            --md-sys-typescale-display-large-line-height: 64px;
+            --md-sys-typescale-display-large-tracking: -0.25px;
+
+            --md-sys-typescale-headline-large-font: 'Roboto';
+            --md-sys-typescale-headline-large-size: 32px;
+            --md-sys-typescale-headline-large-weight: 400;
+            --md-sys-typescale-headline-large-line-height: 40px;
+            --md-sys-typescale-headline-large-tracking: 0px;
+
+            --md-sys-typescale-title-large-font: 'Roboto';
+            --md-sys-typescale-title-large-size: 22px;
+            --md-sys-typescale-title-large-weight: 400;
+            --md-sys-typescale-title-large-line-height: 28px;
+            --md-sys-typescale-title-large-tracking: 0px;
+
+            --md-sys-typescale-body-large-font: 'Roboto';
+            --md-sys-typescale-body-large-size: 16px;
+            --md-sys-typescale-body-large-weight: 400;
+            --md-sys-typescale-body-large-line-height: 24px;
+            --md-sys-typescale-body-large-tracking: 0.5px;
+
+            --md-sys-typescale-label-large-font: 'Roboto';
+            --md-sys-typescale-label-large-size: 14px;
+            --md-sys-typescale-label-large-weight: 500;
+            --md-sys-typescale-label-large-line-height: 20px;
+            --md-sys-typescale-label-large-tracking: 0.1px;
+
+            /* Material Design 3 Shape Tokens */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+
+            /* Material Design 3 Motion Tokens */
+            --md-sys-motion-duration-short1: 50ms;
+            --md-sys-motion-duration-short2: 100ms;
+            --md-sys-motion-duration-short3: 150ms;
+            --md-sys-motion-duration-short4: 200ms;
+            --md-sys-motion-duration-medium1: 250ms;
+            --md-sys-motion-duration-medium2: 300ms;
+            --md-sys-motion-duration-medium3: 350ms;
+            --md-sys-motion-duration-medium4: 400ms;
+            --md-sys-motion-duration-long1: 450ms;
+            --md-sys-motion-duration-long2: 500ms;
+            --md-sys-motion-duration-long3: 550ms;
+            --md-sys-motion-duration-long4: 600ms;
+            --md-sys-motion-duration-extra-long1: 700ms;
+            --md-sys-motion-duration-extra-long2: 800ms;
+            --md-sys-motion-duration-extra-long3: 900ms;
+            --md-sys-motion-duration-extra-long4: 1000ms;
+
+            --md-sys-motion-easing-linear: cubic-bezier(0, 0, 1, 1);
+            --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+            --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+            --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+            --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+            --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+            --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+            /* Material Design 3 Elevation */
+            --md-sys-elevation-level0: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level1: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level3: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level4: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level5: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--md-sys-typescale-body-large-font);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #333;
+            padding: 16px;
         }
-        
+
         .login-container {
-            background: white;
-            border-radius: 20px;
-            padding: 50px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 48px;
+            box-shadow: var(--md-sys-elevation-level3);
             text-align: center;
-            max-width: 450px;
-            width: 90%;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, transparent 50%);
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
         .logo {
-            font-size: 4rem;
-            color: #667eea;
-            margin-bottom: 20px;
+            font-size: 64px;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 24px;
+            animation: heartbeat 2s ease-in-out infinite;
         }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #333;
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
-        
-        .subtitle {
-            color: #666;
+
+        .headline-large {
+            font-family: var(--md-sys-typescale-headline-large-font);
+            font-size: var(--md-sys-typescale-headline-large-size);
+            font-weight: var(--md-sys-typescale-headline-large-weight);
+            line-height: var(--md-sys-typescale-headline-large-line-height);
+            letter-spacing: var(--md-sys-typescale-headline-large-tracking);
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 8px;
+        }
+
+        .body-large {
+            font-family: var(--md-sys-typescale-body-large-font);
+            font-size: var(--md-sys-typescale-body-large-size);
+            font-weight: var(--md-sys-typescale-body-large-weight);
+            line-height: var(--md-sys-typescale-body-large-line-height);
+            letter-spacing: var(--md-sys-typescale-body-large-tracking);
+            color: var(--md-sys-color-on-surface-variant);
             margin-bottom: 40px;
-            font-size: 1.1rem;
         }
-        
+
         .oauth-buttons {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
+            margin-bottom: 32px;
         }
-        
-        .oauth-btn {
+
+        .md-button {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            padding: 18px 25px;
+            gap: 12px;
+            padding: 16px 24px;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-family: var(--md-sys-typescale-label-large-font);
+            font-size: var(--md-sys-typescale-label-large-size);
+            font-weight: var(--md-sys-typescale-label-large-weight);
+            line-height: var(--md-sys-typescale-label-large-line-height);
+            letter-spacing: var(--md-sys-typescale-label-large-tracking);
             text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            position: relative;
+            overflow: hidden;
+            min-height: 56px;
         }
-        
-        .oauth-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+
+        .md-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: currentColor;
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
         }
-        
+
+        .md-button:hover::before {
+            opacity: 0.08;
+        }
+
+        .md-button:active::before {
+            opacity: 0.12;
+        }
+
+        .md-button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .md-button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
         .google-btn {
-            background: linear-gradient(135deg, #4285f4, #34a853);
+            background-color: #4285f4;
             color: white;
         }
-        
+
         .github-btn {
-            background: linear-gradient(135deg, #333, #24292e);
+            background-color: #24292e;
             color: white;
         }
-        
-        .security-info {
-            margin-top: 40px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .security-info h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-        
-        .security-info p {
-            color: #666;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-        
-        .features {
-            margin-top: 30px;
+
+        .md-card {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: var(--md-sys-elevation-level1);
             text-align: left;
         }
-        
-        .feature {
+
+        .card-title {
+            font-family: var(--md-sys-typescale-title-large-font);
+            font-size: var(--md-sys-typescale-title-large-size);
+            font-weight: var(--md-sys-typescale-title-large-weight);
+            color: var(--md-sys-color-primary);
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin: 10px 0;
-            color: #666;
+            gap: 8px;
         }
-        
-        .feature i {
-            color: #667eea;
+
+        .card-content {
+            font-family: var(--md-sys-typescale-body-large-font);
+            font-size: var(--md-sys-typescale-body-large-size);
+            color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.5;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+
+        .feature-icon {
+            color: var(--md-sys-color-primary);
             width: 20px;
+            text-align: center;
         }
-        
-        @media (max-width: 480px) {
+
+        .flash-message {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin: 16px 0;
+            border-left: 4px solid var(--md-sys-color-error);
+        }
+
+        @media (max-width: 600px) {
             .login-container {
-                padding: 30px 20px;
+                padding: 32px 24px;
+                margin: 16px;
             }
-            
-            h1 {
-                font-size: 2rem;
+
+            .headline-large {
+                font-size: 28px;
             }
-            
-            .oauth-btn {
-                padding: 15px 20px;
-                font-size: 1rem;
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+
+            .md-button {
+                padding: 14px 20px;
+                font-size: 14px;
             }
         }
     </style>
@@ -140,15 +348,16 @@
             <i class="fas fa-heart"></i>
         </div>
         
-        <h1>Mood Tracker</h1>
-        <p class="subtitle">Secure login to track your emotional journey</p>
+        <h1 class="headline-large">Mood Tracker</h1>
+        <p class="body-large">Secure login to track your emotional journey</p>
         
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <div style="margin: 20px 0;">
+                <div>
                     {% for message in messages %}
-                        <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; margin: 5px 0;">
+                        <div class="flash-message">
+                            <i class="fas fa-exclamation-triangle"></i>
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -157,37 +366,42 @@
         {% endwith %}
         
         <div class="oauth-buttons">
-            <a href="{{ url_for('auth.oauth_login', provider='google') }}" class="oauth-btn google-btn">
+            <a href="{{ url_for('auth.oauth_login', provider='google') }}" class="md-button google-btn">
                 <i class="fab fa-google"></i>
-                Continue with Google
+                <span>Continue with Google</span>
             </a>
             
-            <a href="{{ url_for('auth.oauth_login', provider='github') }}" class="oauth-btn github-btn">
+            <a href="{{ url_for('auth.oauth_login', provider='github') }}" class="md-button github-btn">
                 <i class="fab fa-github"></i>
-                Continue with GitHub
+                <span>Continue with GitHub</span>
             </a>
         </div>
         
-        <div class="security-info">
-            <h3><i class="fas fa-shield-alt"></i> Your Privacy Matters</h3>
-            <p>We use secure OAuth authentication. Your mood data is private and only accessible to you. We never store your passwords.</p>
+        <div class="md-card">
+            <div class="card-title">
+                <i class="fas fa-shield-alt"></i>
+                Your Privacy Matters
+            </div>
+            <div class="card-content">
+                We use secure OAuth authentication. Your mood data is private and only accessible to you. We never store your passwords.
+            </div>
         </div>
         
-        <div class="features">
-            <div class="feature">
-                <i class="fas fa-lock"></i>
-                <span>End-to-end encrypted data</span>
+        <div class="features-list">
+            <div class="feature-item">
+                <i class="fas fa-lock feature-icon"></i>
+                <span>End-to-end encrypted</span>
             </div>
-            <div class="feature">
-                <i class="fas fa-chart-line"></i>
-                <span>Personal analytics & insights</span>
+            <div class="feature-item">
+                <i class="fas fa-chart-line feature-icon"></i>
+                <span>Personal analytics</span>
             </div>
-            <div class="feature">
-                <i class="fas fa-download"></i>
-                <span>Export your data anytime</span>
+            <div class="feature-item">
+                <i class="fas fa-download feature-icon"></i>
+                <span>Export your data</span>
             </div>
-            <div class="feature">
-                <i class="fas fa-mobile-alt"></i>
+            <div class="feature-item">
+                <i class="fas fa-mobile-alt feature-icon"></i>
                 <span>Works on all devices</span>
             </div>
         </div>
