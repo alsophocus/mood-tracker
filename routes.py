@@ -86,7 +86,20 @@ def weekly_patterns():
         except Exception as e:
             return jsonify({"error": "Invalid date parameters"}), 400
     else:
-        return jsonify(analytics.get_weekly_patterns())
+        result = analytics.get_weekly_patterns()
+        
+    # Ensure we always return a valid structure
+    if not result.get('labels') and not result.get('days'):
+        result = {
+            'labels': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            'days': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            'data': [0, 0, 0, 0, 0, 0, 0],
+            'period': 'No data available'
+        }
+    elif result.get('labels') and not result.get('days'):
+        result['days'] = result['labels']
+        
+    return jsonify(result)
 
 @main_bp.route('/daily_patterns')
 @login_required
@@ -97,9 +110,19 @@ def daily_patterns():
     analytics = MoodAnalytics(moods)
     
     if selected_date:
-        return jsonify(analytics.get_daily_patterns_for_date(selected_date))
+        result = analytics.get_daily_patterns_for_date(selected_date)
     else:
-        return jsonify(analytics.get_daily_patterns())
+        result = analytics.get_daily_patterns()
+    
+    # Ensure we always return a valid structure
+    if not result.get('labels') or not result.get('data'):
+        result = {
+            'labels': ['Morning (6-12)', 'Afternoon (12-18)', 'Evening (18-24)', 'Night (0-6)'],
+            'data': [0, 0, 0, 0],
+            'period': 'No data available'
+        }
+    
+    return jsonify(result)
 
 @main_bp.route('/export_pdf')
 @login_required
