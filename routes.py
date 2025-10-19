@@ -18,6 +18,28 @@ def index():
     
     return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
+@main_bp.route('/test-save')
+@login_required
+def test_save():
+    """Test saving a mood to debug issues"""
+    try:
+        # Try to save a test mood
+        result = db.save_mood(current_user.id, datetime.now().date(), 'well', 'test mood')
+        return jsonify({
+            'success': True,
+            'message': 'Test mood saved successfully',
+            'result': str(result),
+            'user_id': current_user.id,
+            'date': datetime.now().date().isoformat()
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'user_id': current_user.id,
+            'date': datetime.now().date().isoformat()
+        }), 500
+
 @main_bp.route('/save_mood', methods=['POST'])
 @login_required
 def save_mood():
