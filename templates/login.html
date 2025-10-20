@@ -543,7 +543,9 @@
              */
             updateThemeIcon(theme) {
                 if (this.themeIcon) {
-                    this.themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+                    // Show sun icon in dark mode (to indicate switching to light)
+                    // Show moon icon in light mode (to indicate switching to dark)
+                    this.themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
                 }
             }
 
@@ -551,7 +553,7 @@
              * Toggle between light and dark themes
              */
             toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 this.setTheme(newTheme);
             }
