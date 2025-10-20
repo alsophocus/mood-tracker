@@ -303,11 +303,19 @@ def monthly_trends():
 def daily_patterns():
     """Get daily mood patterns for specific date or all dates"""
     selected_date = request.args.get('date')
+    print(f"DEBUG: Daily patterns requested for date: {selected_date}")
+    
     moods = db.get_user_moods(current_user.id)
+    print(f"DEBUG: Found {len(moods)} total moods for user {current_user.id}")
+    
+    if moods and selected_date:
+        print(f"DEBUG: Sample mood dates: {[str(mood.get('date')) for mood in moods[:3]]}")
+    
     analytics = MoodAnalytics(moods)
     
     if selected_date:
         result = analytics.get_daily_patterns_for_date(selected_date)
+        print(f"DEBUG: Result for {selected_date}: {len([x for x in result.get('data', []) if x is not None])} non-null values")
     else:
         result = analytics.get_daily_patterns()
     
