@@ -2207,13 +2207,18 @@
             // Auto-load for Material Design 3 date picker
             window.dailyDatePicker = new MD3DatePicker('dailyDatePicker', 'dailyDateCalendar');
             
-            // Auto-load current day data
-            const today = new Date().toISOString().split('T')[0];
-            loadDailyPatterns(today);
+            // Auto-load current day data using Chile timezone (UTC-3)
+            const now = new Date();
+            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtract 3 hours for Chile timezone
+            const today = chileTime.toISOString().split('T')[0];
+            console.log('Loading daily patterns for Chile date:', today);
             
-            // Listen for date changes
+            // Set the date picker to show current Chile date and listen for changes
             const dailyDateInput = document.getElementById('dailyDatePicker');
             if (dailyDateInput) {
+                dailyDateInput.value = today;
+                
+                // Listen for date changes
                 dailyDateInput.addEventListener('change', function() {
                     const selectedDate = window.dailyDatePicker.getSelectedDateISO();
                     if (selectedDate) {
@@ -2221,6 +2226,8 @@
                     }
                 });
             }
+            
+            loadDailyPatterns(today);
         }
 
         // Initialize dropdowns with Material Design 3 enhancements
@@ -2944,8 +2951,10 @@
                             this.querySelector('textarea').value = '';
                             showSnackbar('Mood saved successfully!');
                             
-                            // Refresh charts and data without page reload
-                            const today = new Date().toISOString().split('T')[0];
+                            // Refresh charts and data without page reload using Chile timezone
+                            const now = new Date();
+                            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtract 3 hours for Chile timezone
+                            const today = chileTime.toISOString().split('T')[0];
                             loadDailyPatterns(today);
                             loadCurrentWeek();
                             loadCurrentMonthTrends();
