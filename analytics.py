@@ -155,16 +155,27 @@ class MoodAnalytics:
         """Get mood patterns for a specific date"""
         from datetime import datetime
         
+        print(f"DEBUG: Filtering moods for date: {selected_date}")
+        print(f"DEBUG: Total moods to filter: {len(self.moods)}")
+        
         # Filter moods for the selected date
         filtered_moods = []
         for mood_entry in self.moods:
             mood_date = mood_entry.get('date')
+            print(f"DEBUG: Checking mood date: {mood_date} (type: {type(mood_date)})")
+            
             if isinstance(mood_date, str):
                 if mood_date == selected_date:
                     filtered_moods.append(mood_entry)
+                    print(f"DEBUG: String date match found")
             elif hasattr(mood_date, 'strftime'):
-                if mood_date.strftime('%Y-%m-%d') == selected_date:
+                formatted_date = mood_date.strftime('%Y-%m-%d')
+                print(f"DEBUG: Formatted date: {formatted_date}")
+                if formatted_date == selected_date:
                     filtered_moods.append(mood_entry)
+                    print(f"DEBUG: Date object match found")
+        
+        print(f"DEBUG: Filtered moods count: {len(filtered_moods)}")
         
         # Create temporary analytics instance for filtered data
         temp_analytics = MoodAnalytics(filtered_moods)
@@ -173,6 +184,7 @@ class MoodAnalytics:
         
         # If no data for the date, return empty structure
         if not filtered_moods:
+            print(f"DEBUG: No moods found for {selected_date}, returning empty data")
             result = {
                 'labels': [f"{hour:02d}:00" for hour in range(24)],
                 'data': [None] * 24,
