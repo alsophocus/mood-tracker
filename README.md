@@ -177,6 +177,79 @@ SECRET_KEY=your_secret_key
 - **Analytics Health**: `/analytics-health` - User data access
 - **Status Codes**: 200 (healthy), 500 (error), 302 (redirect to login)
 
+## Project Structure
+
+```
+mood-tracker/
+├── templates/
+│   ├── index.html              # Main frontend template with Material Design 3
+│   ├── index_old.html          # Legacy template backup
+│   └── login.html              # OAuth login page
+├── tests/
+│   ├── conftest.py             # Test configuration and fixtures
+│   ├── test_analytics.py       # Analytics engine tests
+│   ├── test_api.py             # API endpoint tests
+│   ├── test_auth.py            # Authentication tests
+│   ├── test_database.py        # Database layer tests
+│   ├── test_mood_tracking.py   # Mood tracking functionality tests
+│   ├── test_routes.py          # Route handler tests
+│   └── test_security.py        # Security and validation tests
+├── analytics.py                # Analytics engine for mood patterns
+├── app.py                      # Flask application entry point
+├── auth.py                     # OAuth authentication handlers
+├── config.py                   # Configuration management
+├── container.py                # Dependency injection container (SOLID)
+├── database.py                 # Legacy database implementation
+├── database_new.py             # SOLID-refactored database repositories
+├── interfaces.py               # Data access interfaces (SOLID)
+├── models.py                   # Domain models and entities (SOLID)
+├── pdf_export.py               # PDF report generation
+├── routes.py                   # Legacy route handlers
+├── routes_new.py               # SOLID-refactored controllers
+├── services.py                 # Business logic services (SOLID)
+├── Procfile                    # Railway deployment configuration
+├── README.md                   # Project documentation
+├── requirements.txt            # Python dependencies
+├── requirements-test.txt       # Test dependencies
+├── runtime.txt                 # Python version specification
+└── railway.json                # Railway configuration
+```
+
+### File Organization
+
+#### SOLID Architecture Files (New)
+- `interfaces.py` - Abstract interfaces for data access (Interface Segregation)
+- `models.py` - Domain models with business logic (Single Responsibility)
+- `database_new.py` - Repository pattern implementations (Dependency Inversion)
+- `services.py` - Business logic services (Single Responsibility)
+- `container.py` - Dependency injection container (Dependency Inversion)
+- `routes_new.py` - HTTP controllers with single responsibilities
+
+#### Legacy Files (To be migrated)
+- `database.py` - Original database implementation
+- `routes.py` - Original route handlers
+
+#### Core Application Files
+- `app.py` - Flask application setup and configuration
+- `auth.py` - OAuth authentication with Google and GitHub
+- `analytics.py` - Mood analytics and pattern detection
+- `pdf_export.py` - PDF report generation with embedded charts
+- `config.py` - Environment and configuration management
+
+#### Frontend
+- `templates/index.html` - Single-page application with Material Design 3
+- `templates/login.html` - OAuth login interface
+
+#### Testing
+- `tests/` - Comprehensive test suite with pytest
+- `requirements-test.txt` - Testing dependencies
+
+#### Deployment
+- `Procfile` - Railway deployment commands
+- `railway.json` - Railway service configuration
+- `requirements.txt` - Python package dependencies
+- `runtime.txt` - Python version (3.11.x)
+
 ## Contributing
 
 ### Development Workflow
