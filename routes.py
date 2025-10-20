@@ -520,3 +520,54 @@ def fix_mood_dates():
             'error': str(e),
             'traceback': traceback.format_exc()
         }), 500
+@main_bp.route('/add-fake-data')
+@login_required
+def add_fake_data():
+    """Add fake mood data for October 19th for testing"""
+    try:
+        import random
+        from datetime import datetime, date, timedelta
+        
+        target_date = date(2025, 10, 19)
+        moods = ['very bad', 'bad', 'slightly bad', 'neutral', 'slightly well', 'well', 'very well']
+        notes_options = ['', 'feeling good', 'rough day', 'work stress', 'relaxing', 'productive', 'tired']
+        
+        added_count = 0
+        
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Add 35 random mood entries throughout October 19th
+            for i in range(35):
+                # Random hour between 6 AM and 11 PM
+                hour = random.randint(6, 23)
+                minute = random.randint(0, 59)
+                
+                # Create timestamp for October 19th Chile time
+                fake_timestamp = datetime(2025, 10, 19, hour, minute)
+                
+                # Random mood and notes
+                mood = random.choice(moods)
+                notes = random.choice(notes_options)
+                
+                cursor.execute('''
+                    INSERT INTO moods (user_id, date, mood, notes, timestamp)
+                    VALUES (%s, %s, %s, %s, %s)
+                ''', (current_user.id, target_date, mood, notes, fake_timestamp))
+                
+                added_count += 1
+        
+        return jsonify({
+            'success': True,
+            'message': f'Added {added_count} fake mood entries for October 19th',
+            'date': target_date.isoformat(),
+            'added_count': added_count
+        })
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
