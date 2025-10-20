@@ -1,6 +1,64 @@
 # Mood Tracker
 
-A secure, modern web application to track your daily mood with advanced analytics, OAuth authentication, and beautiful insights.
+A secure, modern web application to track your daily mood with advanced analytics, OAuth authentication, and beautiful insights. Built following SOLID principles for maintainable, extensible code.
+
+## Architecture
+
+The application follows SOLID principles with a clean, layered architecture:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Frontend                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │   HTML/CSS      │  │   JavaScript    │  │   Charts    │ │
+│  │   Templates     │  │   UI Logic      │  │   D3.js     │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Routes Layer                            │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │ MoodController  │  │AnalyticsController│ │ UserController│ │
+│  │ (HTTP Concerns) │  │ (HTTP Concerns)  │  │(HTTP Concerns)│ │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Service Layer                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │   MoodService   │  │ TimezoneService │  │ UserService │ │
+│  │(Business Logic) │  │(Timezone Logic) │  │(User Logic) │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Repository Layer                            │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │ MoodRepository  │  │ UserRepository  │  │   Analytics │ │
+│  │ (Data Access)   │  │ (Data Access)   │  │  (Patterns) │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Database Layer                            │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │ PostgreSQL      │  │   Connection    │  │   Models    │ │
+│  │   Database      │  │   Management    │  │  (Domain)   │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### SOLID Principles Applied
+
+- **S**ingle Responsibility: Each class has one reason to change
+- **O**pen/Closed: Open for extension, closed for modification
+- **L**iskov Substitution: Derived classes are substitutable for base classes
+- **I**nterface Segregation: Clients depend only on methods they use
+- **D**ependency Inversion: Depend on abstractions, not concretions
 
 ## Features
 
@@ -15,6 +73,7 @@ A secure, modern web application to track your daily mood with advanced analytic
 - **Daily logging** with optional notes
 - **Same-day updates** - modify your mood throughout the day
 - **Rich text notes** with emoji support
+- **Timezone handling** - proper Chile timezone (UTC-3) support
 
 ### Advanced Analytics
 - **Current Streak**: Track consecutive good days (mood 5+)
@@ -22,12 +81,33 @@ A secure, modern web application to track your daily mood with advanced analytic
 - **Daily Patterns**: Analyze mood trends by time of day with hourly breakdown
 - **Monthly Trends**: Interactive charts showing mood over time
 - **Real-time Monitoring**: Live database and analytics status indicators
+- **Date-specific filtering**: View patterns for specific dates
 
 ### PDF Export
 - **Comprehensive Reports**: Complete analytics with embedded charts
 - **Professional Design**: Beautiful layout with charts and statistics
 - **All Data Included**: Summary, patterns, trends, and recent history
 - **Visual Charts**: Weekly and monthly trend charts embedded in PDF
+
+## Technical Stack
+
+### Backend
+- **Python 3.11+** with Flask framework
+- **PostgreSQL** database with psycopg3
+- **SOLID Architecture** with dependency injection
+- **Repository Pattern** for data access
+- **Service Layer** for business logic
+
+### Frontend
+- **Material Design 3** components and styling
+- **Chart.js** for interactive charts
+- **D3.js** for calendar heatmaps
+- **Responsive design** for all devices
+
+### Infrastructure
+- **Railway** for deployment and PostgreSQL hosting
+- **OAuth** integration for secure authentication
+- **Environment-based** configuration
 
 ## PostgreSQL Setup (Railway)
 
@@ -43,11 +123,80 @@ A secure, modern web application to track your daily mood with advanced analytic
 - **Library**: `psycopg[binary]==3.2.10` (Python 3.14 compatible)
 - **Connection**: Internal Railway network (`postgres-XXXX.railway.internal`)
 - **Security**: No public access, internal network only
-- **Rollback**: Use tag `v1.0-stable` if issues occur
+- **Rollback**: Use tag `v0.1.1` for stable version with working charts
 
 ### Troubleshooting
 - **"Servname not supported"**: Check DATABASE_URL hostname
 - **"Application Failed to Respond"**: Database blocking startup
+
+## Development
+
+### Version History
+- **v0.1.1** - Working charts with timezone fixes and daily patterns functionality
+- **v0.1.0-stable** - Initial stable release with basic functionality
+- **Current** - SOLID refactoring with clean architecture
+
+### Code Quality Standards
+- **SOLID Principles** enforced in all new code
+- **Interface Segregation** for clean dependencies
+- **Dependency Injection** for testability
+- **Single Responsibility** for maintainability
+
+### Testing Requirements
+- HTML/CSS/JavaScript integration testing after every change
+- Deployment endpoint validation (200/302 responses)
+- Syntax validation for all script blocks
+- No commits without passing all tests
+
+### Architecture Benefits
+- **Maintainable**: Clear separation of concerns
+- **Testable**: Dependency injection enables unit testing
+- **Extensible**: Open/Closed principle allows easy feature addition
+- **Scalable**: Layered architecture supports growth
+
+## Deployment
+
+### Railway Deployment
+1. Connect GitHub repository to Railway
+2. Set environment variables (DATABASE_URL, OAuth keys)
+3. Deploy automatically on push to main branch
+4. Monitor health endpoints: `/health` and `/analytics-health`
+
+### Environment Variables
+```bash
+DATABASE_URL=postgresql://...
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+SECRET_KEY=your_secret_key
+```
+
+### Health Monitoring
+- **System Health**: `/health` - Database connectivity
+- **Analytics Health**: `/analytics-health` - User data access
+- **Status Codes**: 200 (healthy), 500 (error), 302 (redirect to login)
+
+## Contributing
+
+### Development Workflow
+1. Follow SOLID principles in all code changes
+2. Test HTML/CSS/JavaScript integration after modifications
+3. Validate deployment endpoints before committing
+4. Use dependency injection for new services
+5. Maintain single responsibility in classes/functions
+
+### Code Structure
+```
+├── interfaces.py          # Data access interfaces
+├── models.py             # Domain models
+├── database_new.py       # Repository implementations
+├── services.py           # Business logic services
+├── container.py          # Dependency injection
+├── routes_new.py         # HTTP controllers
+├── analytics.py          # Analytics engine
+└── templates/            # Frontend templates
+```
 - **Debug endpoints**: `/status`, `/test-db`, `/debug-oauth`, `/health`
 
 ## Technology Stack
