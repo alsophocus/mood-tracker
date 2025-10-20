@@ -94,14 +94,12 @@ class Database:
             return cursor.fetchone()
     
     def save_mood(self, user_id, date, mood, notes=''):
-        """Save or update mood entry"""
+        """Save mood entry with current timestamp"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO moods (user_id, date, mood, notes)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (user_id, date)
-                DO UPDATE SET mood = EXCLUDED.mood, notes = EXCLUDED.notes, timestamp = CURRENT_TIMESTAMP
+                INSERT INTO moods (user_id, date, mood, notes, timestamp)
+                VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
                 RETURNING *
             ''', (user_id, date, mood, notes))
             return cursor.fetchone()
