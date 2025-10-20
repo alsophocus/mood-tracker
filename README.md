@@ -141,12 +141,24 @@ The application follows SOLID principles with a clean, layered architecture:
 - **Interface Segregation** for clean dependencies
 - **Dependency Injection** for testability
 - **Single Responsibility** for maintainability
+- **Comprehensive Documentation** with docstrings and type hints
+- **Inline Comments** explaining complex logic and design decisions
+- **Self-documenting Code** with clear variable and function names
+
+### Documentation Requirements
+- All functions and classes must have detailed docstrings
+- Type hints required for all parameters and return values
+- Complex logic must include inline comments explaining WHY
+- Public APIs must have comprehensive documentation with examples
+- Error handling and edge cases must be documented
 
 ### Testing Requirements
 - HTML/CSS/JavaScript integration testing after every change
 - Deployment endpoint validation (200/302 responses)
 - Syntax validation for all script blocks
-- No commits without passing all tests
+- Documentation completeness validation
+- Type hint coverage verification
+- No commits without passing all tests and complete documentation
 
 ### Architecture Benefits
 - **Maintainable**: Clear separation of concerns
@@ -219,10 +231,13 @@ mood-tracker/
 
 ### Development Workflow
 1. Follow SOLID principles in all code changes
-2. Test HTML/CSS/JavaScript integration after modifications
-3. Validate deployment endpoints before committing
-4. Use dependency injection for new services
-5. Maintain single responsibility in classes/functions
+2. Add comprehensive documentation with docstrings and type hints
+3. Include inline comments explaining complex logic and design decisions
+4. Test HTML/CSS/JavaScript integration after modifications
+5. Validate deployment endpoints before committing
+6. Use dependency injection for new services
+7. Maintain single responsibility in classes/functions
+8. Ensure all public APIs have complete documentation with examples
 
 ### Code Structure
 ```
