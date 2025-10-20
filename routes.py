@@ -243,18 +243,18 @@ def weekly_patterns():
     else:
         result = analytics.get_weekly_patterns()
         
-    # Ensure we always return a valid structure
-    if not result.get('labels') and not result.get('days'):
-        result = {
-            'labels': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-            'days': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-            'data': [0, 0, 0, 0, 0, 0, 0],
-            'period': 'No data available'
-        }
-    elif result.get('labels') and not result.get('days'):
-        result['days'] = result['labels']
-        
-    return jsonify(result)
+        # Ensure we always return a valid structure
+        if not result.get('labels') and not result.get('days'):
+            result = {
+                'labels': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                'days': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                'data': [0, 0, 0, 0, 0, 0, 0],
+                'period': 'No data available'
+            }
+        elif result.get('labels') and not result.get('days'):
+            result['days'] = result['labels']
+            
+        return jsonify(result)
 
 @main_bp.route('/weekly_trends')
 @login_required
