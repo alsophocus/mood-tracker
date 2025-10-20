@@ -2300,7 +2300,11 @@
             
             if (!year || !month) return;
             
-            const today = new Date();
+            // Use Chile timezone for current date calculation
+            const now = new Date();
+            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtract 3 hours for Chile timezone
+            const today = chileTime;
+            
             const firstDay = new Date(year, month - 1, 1);
             const lastDay = new Date(year, month, 0);
             
@@ -2309,6 +2313,7 @@
             weekStart.setDate(firstDay.getDate() - firstDay.getDay()); // Go back to Sunday
             
             let weekCount = 1;
+            let currentWeekSelected = false;
             
             // Continue while the week overlaps with the target month
             while (weekStart <= lastDay) {
@@ -2326,10 +2331,12 @@
                     
                     option.textContent = `${startDate} - ${endDate}`;
                     
-                    // Select current week if we're in current month and year
+                    // Select current week if we're in current month and year using Chile timezone
                     if (year === today.getFullYear() && month === today.getMonth() + 1) {
                         if (today >= weekStart && today <= weekEnd) {
                             option.selected = true;
+                            currentWeekSelected = true;
+                            console.log('Selected current week:', option.textContent);
                         }
                     }
                     
@@ -2344,12 +2351,16 @@
                 if (weekCount > 10) break;
             }
             
-            if (weekSelect.children.length > 1) {
-                weekSelect.children[1].selected = true;
-                // Auto-load if all values are selected
-                if (year && month) {
-                    loadWeeklyPatterns();
-                }
+            // If no current week was selected and we have weeks, select the first one
+            if (!currentWeekSelected && weekSelect.children.length > 0) {
+                weekSelect.children[0].selected = true;
+                console.log('Fallback: Selected first week');
+            }
+            
+            // Auto-load if all values are selected
+            if (year && month && weekSelect.value) {
+                console.log('Auto-loading weekly patterns for selected week');
+                loadWeeklyPatterns();
             }
         }
 

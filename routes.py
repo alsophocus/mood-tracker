@@ -523,12 +523,22 @@ def fix_mood_dates():
 @main_bp.route('/add-fake-data')
 @login_required
 def add_fake_data():
-    """Add fake mood data for October 19th for testing"""
+    """Add fake mood data for current week for testing"""
     try:
         import random
         from datetime import datetime, date, timedelta
         
-        target_date = date(2025, 10, 19)
+        # Get current week dates (Sunday to Saturday)
+        timezone_service = container.get_timezone_service()
+        today = timezone_service.get_chile_date()
+        
+        # Find Sunday of current week (start of week)
+        days_since_sunday = today.weekday() + 1  # Monday=0, so Sunday=6, adjust to Sunday=0
+        if days_since_sunday == 7:  # If today is Sunday
+            days_since_sunday = 0
+        
+        week_start = today - timedelta(days=days_since_sunday)
+        
         moods = ['very bad', 'bad', 'slightly bad', 'neutral', 'slightly well', 'well', 'very well']
         notes_options = ['', 'feeling good', 'rough day', 'work stress', 'relaxing', 'productive', 'tired']
         
@@ -537,30 +547,37 @@ def add_fake_data():
         with db.get_connection() as conn:
             cursor = conn.cursor()
             
-            # Add 35 random mood entries throughout October 19th
-            for i in range(35):
-                # Random hour between 6 AM and 11 PM
-                hour = random.randint(6, 23)
-                minute = random.randint(0, 59)
+            # Add mood entries for each day of the current week
+            for day_offset in range(7):  # Sunday to Saturday
+                current_date = week_start + timedelta(days=day_offset)
                 
-                # Create timestamp for October 19th Chile time
-                fake_timestamp = datetime(2025, 10, 19, hour, minute)
+                # Add 3-8 random moods per day
+                moods_per_day = random.randint(3, 8)
                 
-                # Random mood and notes
-                mood = random.choice(moods)
-                notes = random.choice(notes_options)
-                
-                cursor.execute('''
-                    INSERT INTO moods (user_id, date, mood, notes, timestamp)
-                    VALUES (%s, %s, %s, %s, %s)
-                ''', (current_user.id, target_date, mood, notes, fake_timestamp))
-                
-                added_count += 1
+                for _ in range(moods_per_day):
+                    # Random hour between 6 AM and 11 PM
+                    hour = random.randint(6, 23)
+                    minute = random.randint(0, 59)
+                    
+                    # Create timestamp for the specific date
+                    fake_timestamp = datetime.combine(current_date, datetime.min.time()) + timedelta(hours=hour, minutes=minute)
+                    
+                    # Random mood and notes
+                    mood = random.choice(moods)
+                    notes = random.choice(notes_options)
+                    
+                    cursor.execute('''
+                        INSERT INTO moods (user_id, date, mood, notes, timestamp)
+                        VALUES (%s, %s, %s, %s, %s)
+                    ''', (current_user.id, current_date, mood, notes, fake_timestamp))
+                    
+                    added_count += 1
         
         return jsonify({
             'success': True,
-            'message': f'Added {added_count} fake mood entries for October 19th',
-            'date': target_date.isoformat(),
+            'message': f'Added {added_count} fake mood entries for current week',
+            'week_start': week_start.isoformat(),
+            'week_end': (week_start + timedelta(days=6)).isoformat(),
             'added_count': added_count
         })
         
