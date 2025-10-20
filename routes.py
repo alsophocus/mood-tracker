@@ -160,7 +160,15 @@ def save_mood():
     
     try:
         print(f"DEBUG: Attempting to save mood for user {current_user.id}")
-        result = db.save_mood(current_user.id, datetime.now().date(), mood, notes)
+        
+        # Use Chile timezone (UTC-3) for the date
+        from datetime import timedelta
+        chile_time = datetime.now() - timedelta(hours=3)
+        chile_date = chile_time.date()
+        
+        print(f"DEBUG: Server time: {datetime.now()}, Chile time: {chile_time}, Chile date: {chile_date}")
+        
+        result = db.save_mood(current_user.id, chile_date, mood, notes)
         print(f"DEBUG: Mood saved successfully - result: {result}")
         
         return jsonify({
@@ -168,7 +176,7 @@ def save_mood():
             'message': 'Mood saved successfully!',
             'mood': mood,
             'notes': notes,
-            'date': datetime.now().date().isoformat()
+            'date': chile_date.isoformat()
         })
             
     except Exception as e:
