@@ -73,6 +73,9 @@
         .goodbye-content {
             text-align: center;
             max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .goodbye-icon {
@@ -134,16 +137,21 @@
             transform: translateY(0);
         }
 
-        .features-info {
+        .features-container {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 32px;
             margin-top: 48px;
-            text-align: left;
+            width: 100%;
+            max-width: 480px;
+            transition: background-color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
         }
 
         .features-title {
             font-size: 20px;
             font-weight: 500;
             color: var(--md-sys-color-on-surface);
-            margin-bottom: 16px;
+            margin-bottom: 24px;
             text-align: center;
             transition: color var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
         }
@@ -151,7 +159,7 @@
         .features-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 20px;
         }
 
         .feature-item {
@@ -204,7 +212,7 @@
             <span>Sign In Again</span>
         </a>
         
-        <div class="features-info">
+        <div class="features-container">
             <div class="features-title">What you'll find when you return:</div>
             <div class="features-grid">
                 <div class="feature-item">
