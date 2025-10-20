@@ -213,11 +213,17 @@
             transition: background-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
         }
 
-        .login-header {
-            margin-bottom: 32px;
+        .logo {
+            margin-bottom: 24px;
         }
 
-        .login-title {
+        .logo i {
+            font-size: 64px;
+            color: var(--md-sys-color-primary);
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .headline-large {
             font-family: var(--md-sys-typescale-headline-large-font-family-name);
             font-size: var(--md-sys-typescale-headline-large-font-size);
             font-weight: var(--md-sys-typescale-headline-large-font-weight);
@@ -227,19 +233,31 @@
             transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
         }
 
-        .login-subtitle {
+        .body-large {
             color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 0;
+            margin-bottom: 32px;
             transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .flash-message {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .oauth-buttons {
             display: flex;
             flex-direction: column;
             gap: 16px;
+            margin-bottom: 32px;
         }
 
-        .oauth-button {
+        .md-button {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -256,57 +274,109 @@
             overflow: hidden;
         }
 
-        .oauth-button:hover {
+        .md-button:hover {
             background-color: var(--md-sys-color-surface-container-high);
             border-color: var(--md-sys-color-primary);
             transform: translateY(-1px);
             box-shadow: var(--md-sys-elevation-level2);
         }
 
-        .oauth-button:active {
+        .md-button:active {
             transform: translateY(0);
             box-shadow: var(--md-sys-elevation-level1);
         }
 
-        .oauth-button i {
+        .md-button i {
             font-size: 20px;
         }
 
-        .google-button {
+        .google-btn {
             border-color: #4285f4;
         }
 
-        .google-button:hover {
+        .google-btn:hover {
             background-color: rgba(66, 133, 244, 0.04);
             border-color: #4285f4;
         }
 
-        .github-button {
+        .github-btn {
             border-color: #333;
         }
 
-        .github-button:hover {
+        .github-btn:hover {
             background-color: rgba(51, 51, 51, 0.04);
             border-color: #333;
         }
 
+        .md-card {
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+            transition: background-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 12px;
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .card-title i {
+            color: var(--md-sys-color-primary);
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .card-content {
+            color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.5;
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .feature-icon {
+            color: var(--md-sys-color-primary);
+            font-size: 16px;
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
         /* Dark theme specific adjustments */
         @media (prefers-color-scheme: dark) {
-            .github-button {
+            .github-btn {
                 border-color: #f0f6fc;
             }
 
-            .github-button:hover {
+            .github-btn:hover {
                 background-color: rgba(240, 246, 252, 0.04);
                 border-color: #f0f6fc;
             }
         }
 
-        [data-theme="dark"] .github-button {
+        [data-theme="dark"] .github-btn {
             border-color: #f0f6fc;
         }
 
-        [data-theme="dark"] .github-button:hover {
+        [data-theme="dark"] .github-btn:hover {
             background-color: rgba(240, 246, 252, 0.04);
             border-color: #f0f6fc;
         }
@@ -356,21 +426,66 @@
     </button>
 
     <div class="login-container">
-        <div class="login-header">
-            <h1 class="login-title">Sign In</h1>
-            <p class="login-subtitle">Choose your preferred sign-in method</p>
+        <div class="logo">
+            <i class="fas fa-brain"></i>
         </div>
         
+        <h1 class="headline-large">Mood Tracker</h1>
+        <p class="body-large">Sign In to track your emotional journey</p>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div>
+                    {% for message in messages %}
+                        <div class="flash-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
         <div class="oauth-buttons">
-            <a href="/auth/google" class="oauth-button google-button">
+            <a href="{{ url_for('auth.oauth_login', provider='google') }}" class="md-button google-btn">
                 <i class="fab fa-google"></i>
-                Continue with Google
+                <span>Continue with Google</span>
             </a>
             
-            <a href="/auth/github" class="oauth-button github-button">
+            <a href="{{ url_for('auth.oauth_login', provider='github') }}" class="md-button github-btn">
                 <i class="fab fa-github"></i>
-                Continue with GitHub
+                <span>Continue with GitHub</span>
             </a>
+        </div>
+        
+        <div class="md-card">
+            <div class="card-title">
+                <i class="fas fa-shield-alt"></i>
+                Your Privacy Matters
+            </div>
+            <div class="card-content">
+                We use secure OAuth authentication. Your mood data is private and only accessible to you. We never store your passwords.
+            </div>
+        </div>
+        
+        <div class="features-list">
+            <div class="feature-item">
+                <i class="fas fa-lock feature-icon"></i>
+                <span>End-to-end encrypted</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-chart-line feature-icon"></i>
+                <span>Personal analytics</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-download feature-icon"></i>
+                <span>Export your data</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-mobile-alt feature-icon"></i>
+                <span>Works on all devices</span>
+            </div>
         </div>
     </div>
 
