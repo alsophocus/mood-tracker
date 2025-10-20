@@ -1896,30 +1896,89 @@
         `;
         document.head.appendChild(style);
 
-        // Enhanced theme toggle with expressive animation
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            // Add transition class for smooth theme change
-            document.body.classList.add('theme-transitioning');
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Remove transition class after animation
-            setTimeout(() => {
-                document.body.classList.remove('theme-transitioning');
-            }, 300);
-            
-            // Animate all cards with staggered effect
-            document.querySelectorAll('.md-card').forEach((card, index) => {
-                card.style.animationDelay = `${index * 100}ms`;
-                card.style.animation = 'none';
+        /**
+         * Enhanced theme management following Single Responsibility Principle
+         * Handles theme detection, switching, persistence, and system preference sync
+         */
+        class ThemeManager {
+            constructor() {
+                this.initializeTheme();
+            }
+
+            /**
+             * Initialize theme based on system preference or stored preference
+             * Follows Open/Closed Principle - can be extended for more themes
+             */
+            initializeTheme() {
+                // Check for stored theme preference first
+                const storedTheme = localStorage.getItem('theme');
+                
+                if (storedTheme) {
+                    this.setTheme(storedTheme);
+                } else {
+                    // Use system preference as default
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    this.setTheme(prefersDark ? 'dark' : 'light');
+                }
+
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    // Only auto-switch if user hasn't manually set a preference
+                    if (!localStorage.getItem('theme')) {
+                        this.setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+
+            /**
+             * Set theme and update UI elements with smooth transitions
+             * @param {string} theme - 'light' or 'dark'
+             */
+            setTheme(theme) {
+                // Add transition class for smooth theme change
+                document.body.classList.add('theme-transitioning');
+                
+                document.documentElement.setAttribute('data-theme', theme);
+                
+                // Store user preference
+                localStorage.setItem('theme', theme);
+                
+                // Remove transition class after animation
                 setTimeout(() => {
-                    card.style.animation = 'md-fade-in-scale 400ms var(--md-sys-motion-easing-emphasized)';
-                }, 10);
-            });
+                    document.body.classList.remove('theme-transitioning');
+                }, 300);
+                
+                // Animate all cards with staggered effect
+                document.querySelectorAll('.md-card').forEach((card, index) => {
+                    card.style.animationDelay = `${index * 100}ms`;
+                    card.style.animation = 'none';
+                    setTimeout(() => {
+                        card.style.animation = 'md-fade-in-scale 400ms var(--md-sys-motion-easing-emphasized)';
+                    }, 10);
+                });
+                
+                console.log(`Theme switched to: ${theme}`);
+            }
+
+            /**
+             * Toggle between light and dark themes
+             */
+            toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+            }
+        }
+
+        // Initialize theme manager
+        const themeManager = new ThemeManager();
+
+        /**
+         * Global function for theme toggle button
+         * Delegates to ThemeManager following Single Responsibility Principle
+         */
+        function toggleTheme() {
+            themeManager.toggleTheme();
         }
 
         // Add theme transition styles

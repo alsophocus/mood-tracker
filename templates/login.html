@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Mood Tracker</title>
+    <title>Sign In - Mood Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
     <style>
-        /* Material Design 3 (Material You) Design System */
+        /* Material Design 3 (Material You) Design System with Dark Theme Support */
         :root {
-            /* Material Design 3 Color Tokens */
+            /* Light Theme - Material Design 3 Color Tokens */
             --md-sys-color-primary: rgb(103, 80, 164);
             --md-sys-color-on-primary: rgb(255, 255, 255);
             --md-sys-color-primary-container: rgb(234, 221, 255);
@@ -48,6 +48,407 @@
             --md-sys-color-surface-container-highest: rgb(230, 224, 233);
 
             /* Material Design 3 Typography Scale */
+            --md-sys-typescale-display-large-font-family-name: 'Roboto';
+            --md-sys-typescale-display-large-font-weight: 400;
+            --md-sys-typescale-display-large-font-size: 57px;
+            --md-sys-typescale-display-large-line-height: 64px;
+            --md-sys-typescale-headline-large-font-family-name: 'Roboto';
+            --md-sys-typescale-headline-large-font-weight: 400;
+            --md-sys-typescale-headline-large-font-size: 32px;
+            --md-sys-typescale-headline-large-line-height: 40px;
+            --md-sys-typescale-body-large-font-family-name: 'Roboto';
+            --md-sys-typescale-body-large-font-weight: 400;
+            --md-sys-typescale-body-large-font-size: 16px;
+            --md-sys-typescale-body-large-line-height: 24px;
+
+            /* Material Design 3 Motion Tokens */
+            --md-sys-motion-duration-short1: 50ms;
+            --md-sys-motion-duration-short2: 100ms;
+            --md-sys-motion-duration-short3: 150ms;
+            --md-sys-motion-duration-short4: 200ms;
+            --md-sys-motion-duration-medium1: 250ms;
+            --md-sys-motion-duration-medium2: 300ms;
+            --md-sys-motion-duration-medium3: 350ms;
+            --md-sys-motion-duration-medium4: 400ms;
+            --md-sys-motion-duration-long1: 450ms;
+            --md-sys-motion-duration-long2: 500ms;
+            --md-sys-motion-duration-long3: 550ms;
+            --md-sys-motion-duration-long4: 600ms;
+            --md-sys-motion-easing-linear: cubic-bezier(0, 0, 1, 1);
+            --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+            --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+            --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+            --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+            --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+            --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+            /* Material Design 3 Shape Tokens */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 9999px;
+
+            /* Material Design 3 Elevation Tokens */
+            --md-sys-elevation-level0: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level1: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+            --md-sys-elevation-level2: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+            --md-sys-elevation-level3: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+            --md-sys-elevation-level4: 0px 2px 3px 0px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
+            --md-sys-elevation-level5: 0px 4px 4px 0px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Dark Theme - Material Design 3 Dark Color Tokens */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --md-sys-color-primary: rgb(208, 188, 255);
+                --md-sys-color-on-primary: rgb(54, 44, 63);
+                --md-sys-color-primary-container: rgb(78, 55, 118);
+                --md-sys-color-on-primary-container: rgb(234, 221, 255);
+                --md-sys-color-secondary: rgb(204, 194, 220);
+                --md-sys-color-on-secondary: rgb(50, 47, 66);
+                --md-sys-color-secondary-container: rgb(73, 69, 79);
+                --md-sys-color-on-secondary-container: rgb(232, 222, 248);
+                --md-sys-color-tertiary: rgb(225, 187, 200);
+                --md-sys-color-on-tertiary: rgb(76, 37, 50);
+                --md-sys-color-tertiary-container: rgb(101, 58, 72);
+                --md-sys-color-on-tertiary-container: rgb(255, 216, 228);
+                --md-sys-color-error: rgb(255, 180, 171);
+                --md-sys-color-on-error: rgb(105, 0, 5);
+                --md-sys-color-error-container: rgb(147, 0, 10);
+                --md-sys-color-on-error-container: rgb(255, 218, 214);
+                --md-sys-color-background: rgb(16, 14, 19);
+                --md-sys-color-on-background: rgb(230, 225, 229);
+                --md-sys-color-surface: rgb(16, 14, 19);
+                --md-sys-color-on-surface: rgb(230, 225, 229);
+                --md-sys-color-surface-variant: rgb(73, 69, 79);
+                --md-sys-color-on-surface-variant: rgb(202, 196, 208);
+                --md-sys-color-outline: rgb(148, 143, 153);
+                --md-sys-color-outline-variant: rgb(73, 69, 79);
+                --md-sys-color-shadow: rgb(0, 0, 0);
+                --md-sys-color-scrim: rgb(0, 0, 0);
+                --md-sys-color-inverse-surface: rgb(230, 225, 229);
+                --md-sys-color-inverse-on-surface: rgb(49, 48, 51);
+                --md-sys-color-inverse-primary: rgb(103, 80, 164);
+                --md-sys-color-surface-dim: rgb(16, 14, 19);
+                --md-sys-color-surface-bright: rgb(54, 52, 56);
+                --md-sys-color-surface-container-lowest: rgb(11, 10, 14);
+                --md-sys-color-surface-container-low: rgb(24, 22, 26);
+                --md-sys-color-surface-container: rgb(28, 27, 31);
+                --md-sys-color-surface-container-high: rgb(38, 37, 41);
+                --md-sys-color-surface-container-highest: rgb(49, 48, 51);
+            }
+        }
+
+        /* Manual dark theme class for explicit control */
+        [data-theme="dark"] {
+            --md-sys-color-primary: rgb(208, 188, 255);
+            --md-sys-color-on-primary: rgb(54, 44, 63);
+            --md-sys-color-primary-container: rgb(78, 55, 118);
+            --md-sys-color-on-primary-container: rgb(234, 221, 255);
+            --md-sys-color-secondary: rgb(204, 194, 220);
+            --md-sys-color-on-secondary: rgb(50, 47, 66);
+            --md-sys-color-secondary-container: rgb(73, 69, 79);
+            --md-sys-color-on-secondary-container: rgb(232, 222, 248);
+            --md-sys-color-tertiary: rgb(225, 187, 200);
+            --md-sys-color-on-tertiary: rgb(76, 37, 50);
+            --md-sys-color-tertiary-container: rgb(101, 58, 72);
+            --md-sys-color-on-tertiary-container: rgb(255, 216, 228);
+            --md-sys-color-error: rgb(255, 180, 171);
+            --md-sys-color-on-error: rgb(105, 0, 5);
+            --md-sys-color-error-container: rgb(147, 0, 10);
+            --md-sys-color-on-error-container: rgb(255, 218, 214);
+            --md-sys-color-background: rgb(16, 14, 19);
+            --md-sys-color-on-background: rgb(230, 225, 229);
+            --md-sys-color-surface: rgb(16, 14, 19);
+            --md-sys-color-on-surface: rgb(230, 225, 229);
+            --md-sys-color-surface-variant: rgb(73, 69, 79);
+            --md-sys-color-on-surface-variant: rgb(202, 196, 208);
+            --md-sys-color-outline: rgb(148, 143, 153);
+            --md-sys-color-outline-variant: rgb(73, 69, 79);
+            --md-sys-color-shadow: rgb(0, 0, 0);
+            --md-sys-color-scrim: rgb(0, 0, 0);
+            --md-sys-color-inverse-surface: rgb(230, 225, 229);
+            --md-sys-color-inverse-on-surface: rgb(49, 48, 51);
+            --md-sys-color-inverse-primary: rgb(103, 80, 164);
+            --md-sys-color-surface-dim: rgb(16, 14, 19);
+            --md-sys-color-surface-bright: rgb(54, 52, 56);
+            --md-sys-color-surface-container-lowest: rgb(11, 10, 14);
+            --md-sys-color-surface-container-low: rgb(24, 22, 26);
+            --md-sys-color-surface-container: rgb(28, 27, 31);
+            --md-sys-color-surface-container-high: rgb(38, 37, 41);
+            --md-sys-color-surface-container-highest: rgb(49, 48, 51);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--md-sys-typescale-body-large-font-family-name);
+            font-size: var(--md-sys-typescale-body-large-font-size);
+            line-height: var(--md-sys-typescale-body-large-line-height);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard),
+                        color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .login-container {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 48px;
+            box-shadow: var(--md-sys-elevation-level3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            transition: background-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .login-title {
+            font-family: var(--md-sys-typescale-headline-large-font-family-name);
+            font-size: var(--md-sys-typescale-headline-large-font-size);
+            font-weight: var(--md-sys-typescale-headline-large-font-weight);
+            line-height: var(--md-sys-typescale-headline-large-line-height);
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 8px;
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .login-subtitle {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 32px;
+            transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+        }
+
+        .oauth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .oauth-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 24px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-full);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .oauth-button:hover {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-color: var(--md-sys-color-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--md-sys-elevation-level2);
+        }
+
+        .oauth-button:active {
+            transform: translateY(0);
+            box-shadow: var(--md-sys-elevation-level1);
+        }
+
+        .oauth-button i {
+            font-size: 20px;
+        }
+
+        .google-button {
+            border-color: #4285f4;
+        }
+
+        .google-button:hover {
+            background-color: rgba(66, 133, 244, 0.04);
+            border-color: #4285f4;
+        }
+
+        .github-button {
+            border-color: #333;
+        }
+
+        .github-button:hover {
+            background-color: rgba(51, 51, 51, 0.04);
+            border-color: #333;
+        }
+
+        /* Dark theme specific adjustments */
+        @media (prefers-color-scheme: dark) {
+            .github-button {
+                border-color: #f0f6fc;
+            }
+
+            .github-button:hover {
+                background-color: rgba(240, 246, 252, 0.04);
+                border-color: #f0f6fc;
+            }
+        }
+
+        [data-theme="dark"] .github-button {
+            border-color: #f0f6fc;
+        }
+
+        [data-theme="dark"] .github-button:hover {
+            background-color: rgba(240, 246, 252, 0.04);
+            border-color: #f0f6fc;
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-full);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .theme-toggle:hover {
+            background: var(--md-sys-color-surface-container-highest);
+            border-color: var(--md-sys-color-outline);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 16px;
+                padding: 32px 24px;
+            }
+            
+            .theme-toggle {
+                top: 16px;
+                right: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme toggle button -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i class="fas fa-sun" id="theme-icon"></i>
+    </button>
+
+    <div class="login-container">
+        <h1 class="login-title">Sign In</h1>
+        <p class="login-subtitle">Choose your preferred sign-in method</p>
+        
+        <div class="oauth-buttons">
+            <a href="/auth/google" class="oauth-button google-button">
+                <i class="fab fa-google"></i>
+                Continue with Google
+            </a>
+            
+            <a href="/auth/github" class="oauth-button github-button">
+                <i class="fab fa-github"></i>
+                Continue with GitHub
+            </a>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Theme management following Single Responsibility Principle
+         * Handles theme detection, switching, and persistence
+         */
+        class ThemeManager {
+            constructor() {
+                this.themeIcon = document.getElementById('theme-icon');
+                this.initializeTheme();
+            }
+
+            /**
+             * Initialize theme based on system preference or stored preference
+             * Follows Open/Closed Principle - can be extended for more themes
+             */
+            initializeTheme() {
+                // Check for stored theme preference first
+                const storedTheme = localStorage.getItem('theme');
+                
+                if (storedTheme) {
+                    this.setTheme(storedTheme);
+                } else {
+                    // Use system preference as default
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    this.setTheme(prefersDark ? 'dark' : 'light');
+                }
+
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    // Only auto-switch if user hasn't manually set a preference
+                    if (!localStorage.getItem('theme')) {
+                        this.setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+
+            /**
+             * Set theme and update UI elements
+             * @param {string} theme - 'light' or 'dark'
+             */
+            setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                this.updateThemeIcon(theme);
+                
+                // Store user preference
+                localStorage.setItem('theme', theme);
+            }
+
+            /**
+             * Update theme toggle icon based on current theme
+             * @param {string} theme - Current theme
+             */
+            updateThemeIcon(theme) {
+                if (this.themeIcon) {
+                    this.themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+                }
+            }
+
+            /**
+             * Toggle between light and dark themes
+             */
+            toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+            }
+        }
+
+        // Initialize theme manager
+        const themeManager = new ThemeManager();
+
+        /**
+         * Global function for theme toggle button
+         * Delegates to ThemeManager following Single Responsibility Principle
+         */
+        function toggleTheme() {
+            themeManager.toggleTheme();
+        }
+    </script>
+</body>
+</html>
             --md-sys-typescale-display-large-font: 'Roboto';
             --md-sys-typescale-display-large-size: 57px;
             --md-sys-typescale-display-large-weight: 400;
