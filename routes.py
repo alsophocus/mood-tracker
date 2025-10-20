@@ -464,3 +464,59 @@ def analytics_health():
         return {'status': 'healthy', 'mood_count': mood_count}
     except Exception as e:
         return {'status': 'error', 'error': str(e)}, 500
+
+@main_bp.route('/fix-mood-dates')
+@login_required
+def fix_mood_dates():
+    """Fix mood dates that were saved with wrong timezone"""
+    try:
+        from datetime import timedelta
+        
+        # Get all user moods
+        moods = db.get_user_moods(current_user.id)
+        print(f"DEBUG: Found {len(moods)} moods to potentially fix")
+        
+        fixed_count = 0
+        
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            for mood in moods:
+                mood_id = mood['id']
+                current_date = mood['date']
+                timestamp = mood['timestamp']
+                
+                # Check if this mood was likely saved with UTC timezone
+                # (if timestamp hour suggests it was saved late at night Chile time)
+                if hasattr(timestamp, 'hour'):
+                    # If timestamp is between 00:00-05:59 UTC, it was likely saved 
+                    # the previous day in Chile time (21:00-02:59 Chile time)
+                    if 0 <= timestamp.hour <= 5:
+                        # Shift date back by one day
+                        corrected_date = current_date - timedelta(days=1)
+                        
+                        cursor.execute('''
+                            UPDATE moods 
+                            SET date = %s 
+                            WHERE id = %s
+                        ''', (corrected_date, mood_id))
+                        
+                        fixed_count += 1
+                        print(f"DEBUG: Fixed mood {mood_id}: {current_date} -> {corrected_date}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Fixed {fixed_count} mood dates',
+            'total_moods': len(moods),
+            'fixed_count': fixed_count
+        })
+        
+    except Exception as e:
+        import traceback
+        print(f"DEBUG: Error fixing mood dates: {e}")
+        print(f"DEBUG: Traceback: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
