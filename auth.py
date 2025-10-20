@@ -82,7 +82,6 @@ def oauth_callback(provider):
         user = User(user_data['id'], user_data['email'], user_data['name'], user_data['provider'])
         
         login_user(user)
-        flash(f'Successfully logged in with {provider.title()}!')
         return redirect(url_for('main.index'))
         
     except Exception as e:
@@ -157,4 +156,4 @@ def _exchange_code_for_user_info(provider, code):
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('auth.login'))
+    return render_template('logout.html')

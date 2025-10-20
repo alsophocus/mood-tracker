@@ -543,9 +543,8 @@
              */
             updateThemeIcon(theme) {
                 if (this.themeIcon) {
-                    // Show sun icon in dark mode (to indicate switching to light)
-                    // Show moon icon in light mode (to indicate switching to dark)
-                    this.themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                    // Show current theme icon: moon for dark, sun for light
+                    this.themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
                 }
             }
 

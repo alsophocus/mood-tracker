@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goodbye - Mood Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <style>
+        :root {
+            --md-sys-color-primary: rgb(103, 80, 164);
+            --md-sys-color-background: rgb(255, 251, 254);
+            --md-sys-color-on-background: rgb(28, 27, 31);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --md-sys-color-primary: rgb(208, 188, 255);
+                --md-sys-color-background: rgb(16, 14, 19);
+                --md-sys-color-on-background: rgb(230, 225, 229);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .goodbye-message {
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 16px;
+        }
+
+        .comeback-message {
+            font-size: 18px;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 32px;
+        }
+
+        .login-link {
+            color: var(--md-sys-color-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="goodbye-message">Goodbye! Please come back!</div>
+        <div class="comeback-message">
+            <a href="{{ url_for('auth.login') }}" class="login-link">
+                <i class="fas fa-sign-in-alt"></i> Sign In Again
+            </a>
+        </div>
+    </div>
+</body>
+</html>
