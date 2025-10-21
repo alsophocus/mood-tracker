@@ -1,18 +1,18 @@
 """
-Admin routes following SOLID principles
-Centralized admin interface with Material Design 3
+SQL operations routes following SOLID principles
+Database management interface with Material Design 3
 """
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from database import db
 from admin_services import AdminService
 
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+sql_bp = Blueprint('sql', __name__, url_prefix='/sql')
 
-@admin_bp.route('/')
+@sql_bp.route('/')
 @login_required
-def admin_dashboard():
-    """Admin dashboard with Material Design 3"""
+def sql_dashboard():
+    """SQL operations dashboard with Material Design 3"""
     admin_service = AdminService(db)
     operations = admin_service.get_available_operations()
     
@@ -24,24 +24,24 @@ def admin_dashboard():
             grouped_ops[category] = []
         grouped_ops[category].append(op)
     
-    return render_template('admin_dashboard.html', 
+    return render_template('sql_dashboard.html', 
                          operations=grouped_ops,
                          user=current_user)
 
-@admin_bp.route('/api/operations')
+@sql_bp.route('/api/operations')
 @login_required
 def get_operations():
-    """Get available admin operations"""
+    """Get available SQL operations"""
     admin_service = AdminService(db)
     return jsonify({
         'success': True,
         'operations': admin_service.get_available_operations()
     })
 
-@admin_bp.route('/api/execute/<operation_id>', methods=['POST'])
+@sql_bp.route('/api/execute/<operation_id>', methods=['POST'])
 @login_required
 def execute_operation(operation_id):
-    """Execute admin operation"""
+    """Execute SQL operation"""
     admin_service = AdminService(db)
     
     # Get parameters from request
@@ -60,7 +60,7 @@ def execute_operation(operation_id):
     
     return jsonify(result)
 
-@admin_bp.route('/api/stats')
+@sql_bp.route('/api/stats')
 @login_required
 def get_database_stats():
     """Get database statistics"""

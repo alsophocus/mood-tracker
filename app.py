@@ -4,7 +4,7 @@ from config import Config
 from database import db
 from auth import auth_bp, init_auth
 from routes import main_bp
-from admin_routes import admin_bp
+from admin_routes import sql_bp
 
 def create_app():
     """Application factory"""
@@ -43,7 +43,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
-    app.register_blueprint(admin_bp)  # Add admin blueprint
+    app.register_blueprint(sql_bp)  # SQL operations blueprint
     
     # Add timezone conversion filter
     @app.template_filter('utc_to_local')

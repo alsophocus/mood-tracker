@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Mood Tracker</title>
+    <title>SQL Operations - Mood Tracker</title>
     
     <!-- Material Design 3 -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -34,24 +34,24 @@
             line-height: 1.6;
         }
         
-        .admin-container {
+        .sql-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 24px;
         }
         
-        .admin-header {
+        .sql-header {
             margin-bottom: 32px;
         }
         
-        .admin-title {
+        .sql-title {
             font-size: 2rem;
             font-weight: 500;
             color: var(--md-sys-color-primary);
             margin-bottom: 8px;
         }
         
-        .admin-subtitle {
+        .sql-subtitle {
             color: var(--md-sys-color-on-surface-variant);
             font-size: 1rem;
         }
@@ -228,15 +228,15 @@
     </style>
 </head>
 <body>
-    <div class="admin-container">
+    <div class="sql-container">
         <a href="/" class="back-link">
             <span class="material-icons" style="margin-right: 8px;">arrow_back</span>
             Back to Mood Tracker
         </a>
         
-        <div class="admin-header">
-            <h1 class="admin-title">Admin Dashboard</h1>
-            <p class="admin-subtitle">Manage database operations and view system statistics</p>
+        <div class="sql-header">
+            <h1 class="sql-title">SQL Operations</h1>
+            <p class="sql-subtitle">Database management and operations interface</p>
         </div>
         
         <!-- Database Statistics -->
@@ -300,7 +300,7 @@
         // Load database statistics
         async function loadStats() {
             try {
-                const response = await fetch('/admin/api/stats');
+                const response = await fetch('/sql/api/stats');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -325,7 +325,7 @@
             }
         }
         
-        // Execute admin operation
+        // Execute SQL operation
         async function executeOperation(operationId) {
             const button = event.target;
             const resultDiv = document.getElementById(`result-${operationId}`);
@@ -345,7 +345,7 @@
             });
             
             try {
-                const response = await fetch(`/admin/api/execute/${operationId}`, {
+                const response = await fetch(`/sql/api/execute/${operationId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
