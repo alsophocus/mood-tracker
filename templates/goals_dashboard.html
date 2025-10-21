@@ -1144,11 +1144,19 @@
                         <span>{{ user.name }}</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
+                    <div class="user-menu-dropdown" id="userMenuDropdown">
+                        <div class="user-menu-header">
+                            <div class="user-menu-name">{{ user.name }}</div>
+                            <div class="user-menu-email">{{ user.email if user.email else 'User Account' }}</div>
+                        </div>
+                        <div class="user-menu-items">
+                            <button class="user-menu-item destructive" onclick="window.location.href='/logout'">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sign out</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <a href="/logout" class="md-button md-button-outlined">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
             </div>
         </div>
     </header>
