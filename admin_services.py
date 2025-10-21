@@ -33,35 +33,91 @@ class DatabaseCleanupService:
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             
-            # Count records first
+            # Count records before deletion
             cursor.execute('SELECT COUNT(*) FROM moods WHERE date <= %s', (target_date,))
-            count = cursor.fetchone()[0]
+            count_before = cursor.fetchone()[0]
             
-            if count == 0:
-                return {'deleted': 0, 'message': 'No records to delete'}
+            # Get total records before
+            cursor.execute('SELECT COUNT(*) FROM moods')
+            total_before = cursor.fetchone()[0]
+            
+            if count_before == 0:
+                return {
+                    'deleted': 0, 
+                    'message': f'No records found to delete until {target_date}',
+                    'total_before': total_before,
+                    'total_after': total_before,
+                    'target_date': str(target_date)
+                }
             
             # Delete records
             cursor.execute('DELETE FROM moods WHERE date <= %s', (target_date,))
             deleted = cursor.rowcount
             conn.commit()
             
-            return {'deleted': deleted, 'message': f'Deleted {deleted} records until {target_date}'}
+            # Verify deletion by counting remaining records
+            cursor.execute('SELECT COUNT(*) FROM moods')
+            total_after = cursor.fetchone()[0]
+            
+            # Double-check no records exist until target date
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE date <= %s', (target_date,))
+            remaining_until_date = cursor.fetchone()[0]
+            
+            # Get date range of remaining data
+            cursor.execute('SELECT MIN(date), MAX(date) FROM moods')
+            date_range = cursor.fetchone()
+            
+            return {
+                'deleted': deleted,
+                'message': f'Successfully deleted {deleted} records until {target_date}',
+                'total_before': total_before,
+                'total_after': total_after,
+                'remaining_until_date': remaining_until_date,
+                'target_date': str(target_date),
+                'date_range_after': {
+                    'start': str(date_range[0]) if date_range[0] else None,
+                    'end': str(date_range[1]) if date_range[1] else None
+                },
+                'verification': 'PASSED' if remaining_until_date == 0 else f'FAILED - {remaining_until_date} records still exist until {target_date}'
+            }
     
     def clear_all_data(self) -> Dict[str, Any]:
         """Clear all mood data"""
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             
+            # Count before deletion
             cursor.execute('SELECT COUNT(*) FROM moods')
-            count = cursor.fetchone()[0]
+            count_before = cursor.fetchone()[0]
             
+            if count_before == 0:
+                return {
+                    'deleted': 0,
+                    'message': 'Database was already empty',
+                    'total_before': 0,
+                    'total_after': 0,
+                    'verification': 'PASSED'
+                }
+            
+            # Delete all records
             cursor.execute('DELETE FROM moods')
             deleted = cursor.rowcount
             
+            # Reset sequence
             cursor.execute('ALTER SEQUENCE moods_id_seq RESTART WITH 1')
             conn.commit()
             
-            return {'deleted': deleted, 'message': f'Cleared all {deleted} mood records'}
+            # Verify deletion
+            cursor.execute('SELECT COUNT(*) FROM moods')
+            count_after = cursor.fetchone()[0]
+            
+            return {
+                'deleted': deleted,
+                'message': f'Successfully cleared all {deleted} mood records',
+                'total_before': count_before,
+                'total_after': count_after,
+                'verification': 'PASSED' if count_after == 0 else f'FAILED - {count_after} records still exist'
+            }
 
 class DataGenerationService:
     """Data generation operations - Single Responsibility Principle"""
@@ -73,25 +129,55 @@ class DataGenerationService:
         """Generate fake mood data for testing"""
         moods = list(MoodType)
         generated = 0
+        errors = []
         
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # Count before generation
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = %s', (user_id,))
+            count_before = cursor.fetchone()[0]
             
             for i in range(days):
                 target_date = date.today() - timedelta(days=i)
                 mood = random.choice(moods).value
                 notes = f"Generated mood entry for {target_date}"
                 
-                cursor.execute('''
-                    INSERT INTO moods (user_id, date, mood, notes, timestamp)
-                    VALUES (%s, %s, %s, %s, %s)
-                ''', (user_id, target_date, mood, notes, datetime.now()))
-                
-                generated += 1
+                try:
+                    cursor.execute('''
+                        INSERT INTO moods (user_id, date, mood, notes, timestamp)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (user_id, date) DO NOTHING
+                    ''', (user_id, target_date, mood, notes, datetime.now()))
+                    
+                    if cursor.rowcount > 0:
+                        generated += 1
+                except Exception as e:
+                    errors.append(f"Error on {target_date}: {str(e)}")
             
             conn.commit()
             
-        return {'generated': generated, 'message': f'Generated {generated} fake mood entries'}
+            # Count after generation
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = %s', (user_id,))
+            count_after = cursor.fetchone()[0]
+            
+            # Get date range
+            cursor.execute('SELECT MIN(date), MAX(date) FROM moods WHERE user_id = %s', (user_id,))
+            date_range = cursor.fetchone()
+            
+            return {
+                'generated': generated,
+                'message': f'Generated {generated} fake mood entries for user {user_id}',
+                'total_before': count_before,
+                'total_after': count_after,
+                'actual_increase': count_after - count_before,
+                'errors': errors,
+                'date_range': {
+                    'start': str(date_range[0]) if date_range[0] else None,
+                    'end': str(date_range[1]) if date_range[1] else None
+                },
+                'verification': 'PASSED' if count_after > count_before else 'WARNING - No new records added'
+            }
     
     def generate_current_week_data(self, user_id: int) -> Dict[str, Any]:
         """Generate mood data for current week"""
@@ -104,6 +190,10 @@ class DataGenerationService:
         
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # Count before generation
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = %s', (user_id,))
+            count_before = cursor.fetchone()[0]
             
             for i in range(7):
                 current_date = week_start + timedelta(days=i)
@@ -122,7 +212,20 @@ class DataGenerationService:
             
             conn.commit()
             
-        return {'generated': generated, 'message': f'Generated {generated} entries for current week'}
+            # Count after generation
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE user_id = %s', (user_id,))
+            count_after = cursor.fetchone()[0]
+            
+            return {
+                'generated': generated,
+                'message': f'Generated {generated} entries for current week (user {user_id})',
+                'total_before': count_before,
+                'total_after': count_after,
+                'actual_increase': count_after - count_before,
+                'week_start': str(week_start),
+                'week_end': str(week_start + timedelta(days=6)),
+                'verification': 'PASSED' if count_after >= count_before else 'WARNING - No new records added'
+            }
 
 class DatabaseAnalyticsService:
     """Database analytics operations - Single Responsibility Principle"""

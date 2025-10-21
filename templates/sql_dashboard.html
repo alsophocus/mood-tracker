@@ -183,6 +183,8 @@
             border-radius: 8px;
             font-size: 0.875rem;
             display: none;
+            white-space: pre-line;
+            font-family: 'Roboto Mono', monospace;
         }
         
         .result-success {
@@ -359,7 +361,45 @@
                 resultDiv.style.display = 'block';
                 if (result.success) {
                     resultDiv.className = 'result-area result-success';
-                    resultDiv.textContent = result.message || 'Operation completed successfully';
+                    
+                    // Build detailed message
+                    let message = result.message || 'Operation completed successfully';
+                    
+                    // Add verification status
+                    if (result.verification) {
+                        message += `\n\nVerification: ${result.verification}`;
+                    }
+                    
+                    // Add detailed stats for cleanup operations
+                    if (result.total_before !== undefined) {
+                        message += `\n\nDetails:`;
+                        message += `\n• Records before: ${result.total_before}`;
+                        message += `\n• Records after: ${result.total_after}`;
+                        
+                        if (result.deleted !== undefined) {
+                            message += `\n• Deleted: ${result.deleted}`;
+                        }
+                        
+                        if (result.generated !== undefined) {
+                            message += `\n• Generated: ${result.generated}`;
+                            message += `\n• Actual increase: ${result.actual_increase}`;
+                        }
+                        
+                        if (result.date_range_after) {
+                            const range = result.date_range_after;
+                            if (range.start && range.end) {
+                                message += `\n• Remaining date range: ${range.start} to ${range.end}`;
+                            } else if (!range.start && !range.end) {
+                                message += `\n• Database is now empty`;
+                            }
+                        }
+                        
+                        if (result.target_date) {
+                            message += `\n• Target date: ${result.target_date}`;
+                        }
+                    }
+                    
+                    resultDiv.textContent = message;
                 } else {
                     resultDiv.className = 'result-area result-error';
                     resultDiv.textContent = result.error || 'Operation failed';
