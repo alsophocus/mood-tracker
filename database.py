@@ -98,36 +98,42 @@ class Database:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
-            # First, try to add triggers column if it doesn't exist
             try:
-                cursor.execute('ALTER TABLE moods ADD COLUMN triggers TEXT DEFAULT \'\'')
+                # First, try to add triggers column if it doesn't exist
+                try:
+                    cursor.execute('ALTER TABLE moods ADD COLUMN triggers TEXT DEFAULT \'\'')
+                    conn.commit()
+                    print("Added triggers column to moods table")
+                except Exception as e:
+                    # Column probably already exists, rollback and continue
+                    conn.rollback()
+                
+                # Check if entry exists for this user and date
+                cursor.execute('SELECT id FROM moods WHERE user_id = %s AND date = %s', (user_id, date))
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # Update existing entry
+                    cursor.execute('''
+                        UPDATE moods 
+                        SET mood = %s, notes = %s, triggers = %s, timestamp = CURRENT_TIMESTAMP
+                        WHERE user_id = %s AND date = %s
+                        RETURNING *
+                    ''', (mood, notes, triggers, user_id, date))
+                else:
+                    # Insert new entry
+                    cursor.execute('''
+                        INSERT INTO moods (user_id, date, mood, notes, triggers, timestamp)
+                        VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                        RETURNING *
+                    ''', (user_id, date, mood, notes, triggers))
+                
                 conn.commit()
-                print("Added triggers column to moods table")
+                return cursor.fetchone()
+                
             except Exception as e:
-                # Column probably already exists
-                pass
-            
-            # Check if entry exists for this user and date
-            cursor.execute('SELECT id FROM moods WHERE user_id = %s AND date = %s', (user_id, date))
-            existing = cursor.fetchone()
-            
-            if existing:
-                # Update existing entry
-                cursor.execute('''
-                    UPDATE moods 
-                    SET mood = %s, notes = %s, triggers = %s, timestamp = CURRENT_TIMESTAMP
-                    WHERE user_id = %s AND date = %s
-                    RETURNING *
-                ''', (mood, notes, triggers, user_id, date))
-            else:
-                # Insert new entry
-                cursor.execute('''
-                    INSERT INTO moods (user_id, date, mood, notes, triggers, timestamp)
-                    VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-                    RETURNING *
-                ''', (user_id, date, mood, notes, triggers))
-            
-            return cursor.fetchone()
+                conn.rollback()
+                raise e
     
     def get_user_moods(self, user_id, limit=None):
         """Get user's moods"""
