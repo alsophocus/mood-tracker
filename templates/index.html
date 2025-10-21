@@ -1350,7 +1350,66 @@
             max-width: 300px;
         }
 
-        /* Material Design 3 History */
+        /* Material Design 3 Trigger Tags */
+        .trigger-tag {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 12px 8px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-medium);
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            min-height: 70px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trigger-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--md-sys-color-tertiary);
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .trigger-tag:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--md-sys-elevation-level2);
+        }
+
+        .trigger-tag:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
+        }
+
+        .trigger-tag.selected {
+            background-color: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            border-color: var(--md-sys-color-tertiary);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--md-sys-elevation-level3);
+        }
+
+        .trigger-tag i {
+            font-size: 16px;
+            z-index: 1;
+        }
+
+        .trigger-tag span {
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* Material Design 3 Mood History with Icons */
         .history-item {
             display: flex;
             justify-content: space-between;
@@ -1362,6 +1421,18 @@
         }
 
         .history-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mood-icon-history {
+            font-size: 24px;
+            min-width: 32px;
+        }
+
+        .history-details {
             flex: 1;
         }
 
@@ -1593,6 +1664,50 @@
                     
                     <input type="hidden" name="mood" id="selected-mood" required>
                     
+                    <!-- Mood Triggers Section -->
+                    <div class="triggers-section" style="margin: 24px 0;">
+                        <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-tags" style="color: var(--md-sys-color-tertiary);"></i>
+                            What's affecting your mood? (optional)
+                        </h3>
+                        
+                        <div class="triggers-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 16px;">
+                            <div class="trigger-tag" data-trigger="work">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Work</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="exercise">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercise</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="family">
+                                <i class="fas fa-home"></i>
+                                <span>Family</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="friends">
+                                <i class="fas fa-user-friends"></i>
+                                <span>Friends</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="sleep">
+                                <i class="fas fa-bed"></i>
+                                <span>Sleep</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="stress">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Stress</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="weather">
+                                <i class="fas fa-cloud-sun"></i>
+                                <span>Weather</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="food">
+                                <i class="fas fa-utensils"></i>
+                                <span>Food</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="triggers" id="selected-triggers">
+                    </div>
+                    
                     <div class="md-text-field">
                         <textarea name="notes" class="md-text-field-input" rows="3" placeholder=" "></textarea>
                         <label class="md-text-field-label">
@@ -1813,11 +1928,32 @@
                 {% for mood in moods %}
                 <div class="history-item">
                     <div class="history-content">
-                        <div class="history-date body-medium">{{ mood.date }}</div>
-                        <div class="history-mood body-large">{{ mood.mood|title }}</div>
-                        {% if mood.notes %}
-                        <div class="history-notes body-medium">{{ mood.notes }}</div>
-                        {% endif %}
+                        <div class="mood-icon-history">
+                            {% if mood.mood == 'very bad' %}
+                                <i class="fas fa-face-frown-open" style="color: var(--md-sys-color-error);"></i>
+                            {% elif mood.mood == 'bad' %}
+                                <i class="fas fa-face-frown" style="color: #ff5722;"></i>
+                            {% elif mood.mood == 'slightly bad' %}
+                                <i class="fas fa-face-meh" style="color: #ff9800;"></i>
+                            {% elif mood.mood == 'neutral' %}
+                                <i class="fas fa-face-meh-blank" style="color: var(--md-sys-color-on-surface-variant);"></i>
+                            {% elif mood.mood == 'slightly well' %}
+                                <i class="fas fa-face-smile" style="color: #8bc34a;"></i>
+                            {% elif mood.mood == 'well' %}
+                                <i class="fas fa-face-smile-beam" style="color: #4caf50;"></i>
+                            {% elif mood.mood == 'very well' %}
+                                <i class="fas fa-face-grin-stars" style="color: var(--md-sys-color-tertiary);"></i>
+                            {% else %}
+                                <i class="fas fa-circle" style="color: var(--md-sys-color-on-surface-variant);"></i>
+                            {% endif %}
+                        </div>
+                        <div class="history-details">
+                            <div class="history-date body-medium">{{ mood.date }}</div>
+                            <div class="history-mood body-large">{{ mood.mood|title }}</div>
+                            {% if mood.notes %}
+                            <div class="history-notes body-medium">{{ mood.notes }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                     {% if mood.timestamp %}
                     <div class="history-time">
@@ -3244,50 +3380,70 @@
         // Initialize mood form functionality
         function initializeMoodForm() {
             const moodCards = document.querySelectorAll('.mood-card');
+            const triggerTags = document.querySelectorAll('.trigger-tag');
             const selectedMoodInput = document.getElementById('selected-mood');
+            const selectedTriggersInput = document.getElementById('selected-triggers');
             const moodForm = document.querySelector('.mood-form');
             
-            // The mood selection is already handled by existing JavaScript
-            // Just need to handle form submission for better UX
+            // Mood selection (existing functionality)
+            moodCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    moodCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedMoodInput.value = this.dataset.mood;
+                    createRipple(this, event);
+                });
+            });
+            
+            // Trigger selection (new functionality)
+            triggerTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                    updateSelectedTriggers();
+                    createRipple(this, event);
+                });
+            });
+            
+            function updateSelectedTriggers() {
+                const selectedTriggers = Array.from(document.querySelectorAll('.trigger-tag.selected'))
+                    .map(tag => tag.dataset.trigger);
+                selectedTriggersInput.value = selectedTriggers.join(',');
+            }
+            
+            // Form submission (existing functionality with triggers)
             if (moodForm) {
                 moodForm.addEventListener('submit', function(e) {
-                    e.preventDefault(); // Always prevent default form submission
+                    e.preventDefault();
                     
                     if (!selectedMoodInput.value) {
                         showSnackbar('Please select a mood before saving.');
                         return;
                     }
                     
-                    // Show loading state
                     const submitBtn = this.querySelector('button[type="submit"]');
                     const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
                     submitBtn.disabled = true;
                     
-                    // Submit via AJAX
                     const formData = new FormData(this);
                     fetch('/save_mood', {
                         method: 'POST',
                         body: formData
                     })
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json();
-                        } else {
-                            throw new Error('Network response was not ok');
-                        }
-                    })
+                    .then(response => response.ok ? response.json() : Promise.reject('Network error'))
                     .then(data => {
                         if (data.success) {
                             // Reset form
                             moodCards.forEach(c => c.classList.remove('selected'));
+                            triggerTags.forEach(t => t.classList.remove('selected'));
                             selectedMoodInput.value = '';
+                            selectedTriggersInput.value = '';
                             this.querySelector('textarea').value = '';
                             showSnackbar('Mood saved successfully!');
                             
-                            // Refresh charts and data without page reload using Chile timezone
+                            // Refresh data
                             const now = new Date();
-                            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtract 3 hours for Chile timezone
+                            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
                             const today = chileTime.toISOString().split('T')[0];
                             loadDailyPatterns(today);
                             loadCurrentWeek();
@@ -3304,7 +3460,6 @@
                         showSnackbar('Error saving mood - please try again.');
                     })
                     .finally(() => {
-                        // Reset button
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
                     });

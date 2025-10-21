@@ -266,8 +266,9 @@ def save_mood():
     """Save mood entry"""
     mood = request.form.get('mood')
     notes = request.form.get('notes', '')
+    triggers = request.form.get('triggers', '')
     
-    print(f"DEBUG: Received mood save request - mood: {mood}, notes: {notes}")
+    print(f"DEBUG: Received mood save request - mood: {mood}, notes: {notes}, triggers: {triggers}")
     
     # Check if user is authenticated
     if not current_user or not hasattr(current_user, 'id'):
@@ -293,11 +294,18 @@ def save_mood():
         result = db.save_mood(current_user.id, chile_date, mood, notes)
         print(f"DEBUG: Mood saved successfully - result: {result}")
         
+        # Save triggers if provided
+        if triggers:
+            trigger_list = [t.strip() for t in triggers.split(',') if t.strip()]
+            print(f"DEBUG: Saving triggers: {trigger_list}")
+            # Note: Trigger saving can be implemented later with proper tag system
+        
         return jsonify({
             'success': True,
             'message': 'Mood saved successfully!',
             'mood': mood,
             'notes': notes,
+            'triggers': triggers
             'date': chile_date.isoformat()
         })
             
