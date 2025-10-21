@@ -3849,39 +3849,65 @@
         }
         
         function loadTopTriggers() {
-            const triggers = [
-                { name: 'work', icon: 'fa-briefcase', count: 15 },
-                { name: 'sleep', icon: 'fa-bed', count: 12 },
-                { name: 'exercise', icon: 'fa-dumbbell', count: 8 },
-                { name: 'stress', icon: 'fa-exclamation-triangle', count: 6 },
-                { name: 'family', icon: 'fa-home', count: 5 }
-            ];
-            
-            const container = document.getElementById('top-triggers');
-            container.innerHTML = triggers.map(trigger => `
-                <div class="trigger-analytics-item">
-                    <i class="fas ${trigger.icon}"></i>
-                    <span>${trigger.name}</span>
-                    <span class="trigger-count">${trigger.count}</span>
-                </div>
-            `).join('');
+            fetch('/api/analytics/triggers')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('top-triggers');
+                    if (data.success && data.triggers.length > 0) {
+                        const triggerIcons = {
+                            'work': 'fa-briefcase', 'meeting': 'fa-users', 'deadline': 'fa-clock', 'project': 'fa-tasks',
+                            'exercise': 'fa-dumbbell', 'sleep': 'fa-bed', 'food': 'fa-utensils', 'medication': 'fa-pills',
+                            'family': 'fa-home', 'friends': 'fa-user-friends', 'party': 'fa-glass-cheers', 'date': 'fa-heart',
+                            'music': 'fa-music', 'reading': 'fa-book', 'gaming': 'fa-gamepad', 'cooking': 'fa-cookie-bite',
+                            'weather': 'fa-cloud-sun', 'home': 'fa-house', 'outdoors': 'fa-tree', 'travel': 'fa-plane',
+                            'stress': 'fa-exclamation-triangle', 'relaxation': 'fa-spa', 'excitement': 'fa-star', 'anxiety': 'fa-dizzy'
+                        };
+                        
+                        container.innerHTML = data.triggers.slice(0, 5).map(trigger => `
+                            <div class="trigger-analytics-item">
+                                <i class="fas ${triggerIcons[trigger.name] || 'fa-tag'}"></i>
+                                <span>${trigger.name}</span>
+                                <span class="trigger-count">${trigger.count}</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<div class="loading-triggers">No trigger data available yet</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading triggers:', error);
+                    document.getElementById('top-triggers').innerHTML = '<div class="loading-triggers">Error loading triggers</div>';
+                });
         }
         
         function loadWeekComparison() {
-            const thisWeek = 5.2;
-            const lastWeek = 4.8;
-            const change = thisWeek - lastWeek;
-            
-            document.getElementById('this-week-avg').textContent = thisWeek.toFixed(1);
-            document.getElementById('last-week-avg').textContent = lastWeek.toFixed(1);
-            
-            const changeElement = document.getElementById('week-change');
-            const changeText = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
-            changeElement.textContent = changeText;
-            changeElement.className = `week-value ${change > 0 ? 'positive' : change < 0 ? 'negative' : ''}`;
-            
-            document.getElementById('current-streak').textContent = '7';
-            document.getElementById('best-mood').textContent = 'Very Well';
+            fetch('/api/analytics/week-comparison')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const thisWeek = data.this_week;
+                        const lastWeek = data.last_week;
+                        const change = thisWeek - lastWeek;
+                        
+                        document.getElementById('this-week-avg').textContent = thisWeek.toFixed(1);
+                        document.getElementById('last-week-avg').textContent = lastWeek.toFixed(1);
+                        
+                        const changeElement = document.getElementById('week-change');
+                        const changeText = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+                        changeElement.textContent = changeText;
+                        changeElement.className = `week-value ${change > 0 ? 'positive' : change < 0 ? 'negative' : ''}`;
+                        
+                        document.getElementById('current-streak').textContent = data.streak;
+                        
+                        // Update best mood based on this week's data
+                        const bestMood = thisWeek >= 6.5 ? 'Very Well' : thisWeek >= 5.5 ? 'Well' : 
+                                        thisWeek >= 4.5 ? 'Slightly Well' : thisWeek >= 3.5 ? 'Neutral' : 'Below Average';
+                        document.getElementById('best-mood').textContent = bestMood;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading week comparison:', error);
+                });
         }
         
         function loadQuickInsights() {

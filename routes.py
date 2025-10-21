@@ -307,7 +307,137 @@ def save_mood():
         print(f"DEBUG: Error saving mood - {e}")
         import traceback
         print(f"DEBUG: Traceback - {traceback.format_exc()}")
-        return jsonify({'error': f'Error saving mood: {str(e)}'}), 500
+@main_bp.route('/api/analytics/triggers')
+@login_required
+def get_trigger_analytics():
+    """Get top triggers analytics"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    TRIM(UNNEST(STRING_TO_ARRAY(triggers, ','))) as trigger,
+                    COUNT(*) as count
+                FROM moods 
+                WHERE user_id = %s AND triggers IS NOT NULL AND triggers != ''
+                GROUP BY TRIM(UNNEST(STRING_TO_ARRAY(triggers, ',')))
+                ORDER BY count DESC
+                LIMIT 10
+            """, (current_user.id,))
+            
+            results = cursor.fetchall()
+            triggers = [{'name': row['trigger'], 'count': row['count']} for row in results if row['trigger']]
+            
+            return jsonify({'success': True, 'triggers': triggers})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/api/analytics/week-comparison')
+@login_required
+def get_week_comparison():
+    """Get this week vs last week comparison"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Map mood strings to numbers
+            mood_values = {
+                'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4,
+                'slightly well': 5, 'well': 6, 'very well': 7
+            }
+            
+            # This week
+            cursor.execute("""
+                SELECT AVG(CASE 
+                    WHEN mood = 'very bad' THEN 1
+                    WHEN mood = 'bad' THEN 2
+                    WHEN mood = 'slightly bad' THEN 3
+                    WHEN mood = 'neutral' THEN 4
+                    WHEN mood = 'slightly well' THEN 5
+                    WHEN mood = 'well' THEN 6
+                    WHEN mood = 'very well' THEN 7
+                    ELSE 4
+                END) as avg_mood
+                FROM moods 
+                WHERE user_id = %s 
+                AND date >= CURRENT_DATE - INTERVAL '7 days'
+            """, (current_user.id,))
+            
+            this_week = cursor.fetchone()['avg_mood'] or 0
+            
+            # Last week
+            cursor.execute("""
+                SELECT AVG(CASE 
+                    WHEN mood = 'very bad' THEN 1
+                    WHEN mood = 'bad' THEN 2
+                    WHEN mood = 'slightly bad' THEN 3
+                    WHEN mood = 'neutral' THEN 4
+                    WHEN mood = 'slightly well' THEN 5
+                    WHEN mood = 'well' THEN 6
+                    WHEN mood = 'very well' THEN 7
+                    ELSE 4
+                END) as avg_mood
+                FROM moods 
+                WHERE user_id = %s 
+                AND date >= CURRENT_DATE - INTERVAL '14 days'
+                AND date < CURRENT_DATE - INTERVAL '7 days'
+            """, (current_user.id,))
+            
+            last_week = cursor.fetchone()['avg_mood'] or 0
+            
+            # Current streak
+            cursor.execute("""
+                WITH daily_moods AS (
+                    SELECT date, COUNT(*) as entries
+                    FROM moods 
+                    WHERE user_id = %s 
+                    GROUP BY date
+                    ORDER BY date DESC
+                ),
+                streak_calc AS (
+                    SELECT date, 
+                           ROW_NUMBER() OVER (ORDER BY date DESC) - 
+                           ROW_NUMBER() OVER (PARTITION BY date - ROW_NUMBER() OVER (ORDER BY date DESC) * INTERVAL '1 day' ORDER BY date DESC) as streak_group
+                    FROM daily_moods
+                )
+                SELECT COUNT(*) as streak
+                FROM streak_calc
+                WHERE streak_group = 0
+            """, (current_user.id,))
+            
+            streak = cursor.fetchone()['streak'] or 0
+            
+            return jsonify({
+                'success': True,
+                'this_week': float(this_week),
+                'last_week': float(last_week),
+                'streak': streak
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@main_bp.route('/api/analytics/mood-distribution')
+@login_required
+def get_mood_distribution():
+    """Get mood distribution for last 30 days"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT mood, COUNT(*) as count
+                FROM moods 
+                WHERE user_id = %s 
+                AND date >= CURRENT_DATE - INTERVAL '30 days'
+                GROUP BY mood
+                ORDER BY count DESC
+            """, (current_user.id,))
+            
+            results = cursor.fetchall()
+            distribution = [{'mood': row['mood'], 'count': row['count']} for row in results]
+            
+            return jsonify({'success': True, 'distribution': distribution})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 @main_bp.route('/recent_moods')
 @login_required
