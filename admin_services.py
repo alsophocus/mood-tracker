@@ -238,6 +238,54 @@ class DatabaseMigrationService:
     def __init__(self, db: Database):
         self.db = db
     
+    def test_migration_connection(self) -> Dict[str, Any]:
+        """Test database connection specifically for migrations"""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Test 1: Basic query
+                cursor.execute('SELECT 1 as test')
+                basic_test = cursor.fetchone()[0]
+                
+                # Test 2: Check if we can create a simple table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS migration_test (
+                        id SERIAL PRIMARY KEY,
+                        test_column VARCHAR(50)
+                    )
+                ''')
+                
+                # Test 3: Insert and select from test table
+                cursor.execute("INSERT INTO migration_test (test_column) VALUES ('test_value')")
+                cursor.execute("SELECT test_column FROM migration_test LIMIT 1")
+                test_value = cursor.fetchone()[0]
+                
+                # Test 4: Drop test table
+                cursor.execute('DROP TABLE migration_test')
+                
+                conn.commit()
+                
+                return {
+                    'success': True,
+                    'message': 'Migration connection test passed',
+                    'tests': {
+                        'basic_query': basic_test,
+                        'table_creation': 'SUCCESS',
+                        'insert_select': test_value,
+                        'table_drop': 'SUCCESS'
+                    }
+                }
+                
+        except Exception as e:
+            import traceback
+            return {
+                'success': False,
+                'error': f'Migration connection test failed: {str(e)}',
+                'traceback': traceback.format_exc(),
+                'error_type': type(e).__name__
+            }
+    
     def migrate_mood_triggers(self) -> Dict[str, Any]:
         """Add mood triggers and context tables"""
         steps_completed = []
@@ -508,6 +556,13 @@ class AdminService(AdminServiceInterface):
                 'params': []
             },
             {
+                'id': 'test_migration_connection',
+                'name': 'Test Migration Connection',
+                'description': 'Test database connection specifically for migrations',
+                'category': 'debug',
+                'params': []
+            },
+            {
                 'id': 'migrate_mood_triggers',
                 'name': 'Migrate Mood Triggers',
                 'description': 'Add tables and columns for mood triggers and context system',
@@ -563,6 +618,11 @@ class AdminService(AdminServiceInterface):
         try:
             if operation_id == 'test_connection':
                 return self.test_service.test_connection()
+            
+            elif operation_id == 'test_migration_connection':
+                result = self.migration_service.test_migration_connection()
+                result['success'] = result.get('success', True)
+                return result
             
             elif operation_id == 'migrate_mood_triggers':
                 result = self.migration_service.migrate_mood_triggers()
