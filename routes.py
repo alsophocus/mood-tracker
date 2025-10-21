@@ -719,6 +719,65 @@ def export_pdf():
     filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
     return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
+@main_bp.route('/api/pdf-simple')
+@login_required
+def simple_pdf_export():
+    """Simple server-side PDF export"""
+    try:
+        moods = db.get_user_moods(current_user.id)
+        exporter = PDFExporter(current_user, moods)
+        buffer = exporter.generate_report()
+        
+        filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
+        return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'PDF generation failed'
+        }), 500
+
+@main_bp.route('/api/pdf-test')
+@login_required
+def pdf_test_api():
+    """API endpoint to test PDF export data"""
+    try:
+        # Get user moods for analytics
+        moods = db.get_user_moods(current_user.id)
+        analytics = MoodAnalytics(moods).get_summary()
+        
+        # Prepare PDF test data
+        pdf_data = {
+            'user_name': current_user.name or 'User',
+            'total_entries': len(moods),
+            'current_streak': analytics.get('current_streak', 0),
+            'average_mood': analytics.get('daily_average', 0),
+            'best_day': analytics.get('best_day', 'N/A'),
+            'recent_moods': [
+                {
+                    'date': mood['date'].strftime('%Y-%m-%d') if mood['date'] else 'N/A',
+                    'mood': mood['mood'],
+                    'notes': mood['notes'] or ''
+                } for mood in moods[:5]  # Last 5 moods
+            ],
+            'pdf_ready': True,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': pdf_data,
+            'message': 'PDF data ready for export'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Failed to prepare PDF data'
+        }), 500
+
 @main_bp.route('/health')
 def health_check():
     """Health check endpoint"""
