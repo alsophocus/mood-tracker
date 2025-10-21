@@ -262,83 +262,77 @@ class DatabaseTestService:
     def test_connection(self) -> Dict[str, Any]:
         """Test basic database connectivity"""
         import traceback
+        from config import Config
         
         try:
-            with self.db.get_connection() as conn:
-                cursor = conn.cursor()
+            # Check database URL configuration
+            db_url = Config.DATABASE_URL
+            if not db_url:
+                return {
+                    'success': False,
+                    'error': 'DATABASE_URL is not configured',
+                    'config_check': 'DATABASE_URL is None or empty'
+                }
+            
+            # Show partial URL for debugging (hide password)
+            url_parts = db_url.split('@')
+            if len(url_parts) > 1:
+                safe_url = f"{url_parts[0].split(':')[0]}://***:***@{url_parts[1]}"
+            else:
+                safe_url = "Invalid URL format"
+            
+            # Test direct psycopg connection
+            try:
+                import psycopg
+                from psycopg.rows import dict_row
                 
-                results = {}
-                
-                # Step 1: Test basic query
+                # Try direct connection
+                with psycopg.connect(db_url, row_factory=dict_row) as conn:
+                    with conn.cursor() as cursor:
+                        cursor.execute('SELECT 1')
+                        result = cursor.fetchone()
+                        
+                        return {
+                            'success': True,
+                            'message': 'Direct psycopg connection successful',
+                            'database_url_format': safe_url,
+                            'test_result': result[0] if result else 'No result',
+                            'connection_method': 'Direct psycopg'
+                        }
+                        
+            except Exception as direct_error:
+                # Try using the Database class method
                 try:
-                    cursor.execute('SELECT 1')
-                    result = cursor.fetchone()
-                    results['step1_basic_query'] = f'SUCCESS: {result[0] if result else "No result"}'
-                except Exception as e:
-                    results['step1_basic_query'] = f'FAILED: {str(e)}'
+                    with self.db.get_connection() as conn:
+                        cursor = conn.cursor()
+                        cursor.execute('SELECT 1')
+                        result = cursor.fetchone()
+                        
+                        return {
+                            'success': True,
+                            'message': 'Database class connection successful',
+                            'database_url_format': safe_url,
+                            'test_result': result[0] if result else 'No result',
+                            'connection_method': 'Database class',
+                            'direct_connection_error': str(direct_error)
+                        }
+                        
+                except Exception as class_error:
                     return {
                         'success': False,
-                        'error': 'Basic SELECT 1 query failed',
-                        'results': results,
-                        'traceback': traceback.format_exc()
+                        'error': 'Both connection methods failed',
+                        'database_url_format': safe_url,
+                        'direct_connection_error': str(direct_error),
+                        'class_connection_error': str(class_error),
+                        'direct_traceback': traceback.format_exc(),
+                        'database_url_length': len(db_url),
+                        'database_url_starts_with': db_url[:20] if len(db_url) > 20 else db_url
                     }
-                
-                # Step 2: Test current database name
-                try:
-                    cursor.execute('SELECT current_database()')
-                    db_name = cursor.fetchone()[0]
-                    results['step2_database_name'] = f'SUCCESS: {db_name}'
-                except Exception as e:
-                    results['step2_database_name'] = f'FAILED: {str(e)}'
-                
-                # Step 3: Check if moods table exists
-                try:
-                    cursor.execute("""
-                        SELECT EXISTS (
-                            SELECT FROM information_schema.tables 
-                            WHERE table_schema = 'public' 
-                            AND table_name = 'moods'
-                        )
-                    """)
-                    table_exists = cursor.fetchone()[0]
-                    results['step3_moods_table_exists'] = f'SUCCESS: {table_exists}'
-                except Exception as e:
-                    results['step3_moods_table_exists'] = f'FAILED: {str(e)}'
-                
-                # Step 4: If table exists, count records
-                if 'SUCCESS: True' in results.get('step3_moods_table_exists', ''):
-                    try:
-                        cursor.execute('SELECT COUNT(*) FROM moods')
-                        count = cursor.fetchone()[0]
-                        results['step4_moods_count'] = f'SUCCESS: {count} records'
-                    except Exception as e:
-                        results['step4_moods_count'] = f'FAILED: {str(e)}'
-                else:
-                    results['step4_moods_count'] = 'SKIPPED: moods table does not exist'
-                
-                # Step 5: List all tables
-                try:
-                    cursor.execute("""
-                        SELECT table_name 
-                        FROM information_schema.tables 
-                        WHERE table_schema = 'public'
-                        ORDER BY table_name
-                    """)
-                    tables = [row[0] for row in cursor.fetchall()]
-                    results['step5_all_tables'] = f'SUCCESS: {", ".join(tables) if tables else "No tables found"}'
-                except Exception as e:
-                    results['step5_all_tables'] = f'FAILED: {str(e)}'
-                
-                return {
-                    'success': True,
-                    'message': 'Database connection test completed',
-                    'results': results
-                }
                 
         except Exception as e:
             return {
                 'success': False,
-                'error': f'Connection failed: {str(e)}',
+                'error': f'Configuration error: {str(e)}',
                 'traceback': traceback.format_exc()
             }
 
