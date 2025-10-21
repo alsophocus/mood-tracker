@@ -240,68 +240,87 @@ class DatabaseMigrationService:
     
     def migrate_mood_triggers(self) -> Dict[str, Any]:
         """Add mood triggers and context tables"""
+        steps_completed = []
+        
         try:
             with self.db.get_connection() as conn:
                 cursor = conn.cursor()
                 
-                steps_completed = []
-                
                 # Step 1: Create tags table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS tags (
-                        id SERIAL PRIMARY KEY,
-                        name VARCHAR(50) UNIQUE NOT NULL,
-                        category VARCHAR(30) NOT NULL,
-                        color VARCHAR(7) DEFAULT '#6750A4',
-                        icon VARCHAR(50),
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        is_active BOOLEAN DEFAULT TRUE
-                    )
-                ''')
-                steps_completed.append("Created tags table")
+                try:
+                    cursor.execute('''
+                        CREATE TABLE IF NOT EXISTS tags (
+                            id SERIAL PRIMARY KEY,
+                            name VARCHAR(50) UNIQUE NOT NULL,
+                            category VARCHAR(30) NOT NULL,
+                            color VARCHAR(7) DEFAULT '#6750A4',
+                            icon VARCHAR(50),
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            is_active BOOLEAN DEFAULT TRUE
+                        )
+                    ''')
+                    steps_completed.append("✅ Created tags table")
+                except Exception as e:
+                    steps_completed.append(f"❌ Failed to create tags table: {str(e)}")
+                    raise e
                 
                 # Step 2: Create mood_tags junction table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS mood_tags (
-                        id SERIAL PRIMARY KEY,
-                        mood_id INTEGER NOT NULL REFERENCES moods(id) ON DELETE CASCADE,
-                        tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        UNIQUE(mood_id, tag_id)
-                    )
-                ''')
-                steps_completed.append("Created mood_tags junction table")
+                try:
+                    cursor.execute('''
+                        CREATE TABLE IF NOT EXISTS mood_tags (
+                            id SERIAL PRIMARY KEY,
+                            mood_id INTEGER NOT NULL REFERENCES moods(id) ON DELETE CASCADE,
+                            tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            UNIQUE(mood_id, tag_id)
+                        )
+                    ''')
+                    steps_completed.append("✅ Created mood_tags junction table")
+                except Exception as e:
+                    steps_completed.append(f"❌ Failed to create mood_tags table: {str(e)}")
+                    raise e
                 
-                # Step 3: Add context columns to moods table
+                # Step 3: Add context columns to moods table (one by one for better error handling)
                 context_columns = [
-                    'context_location VARCHAR(100)',
-                    'context_activity VARCHAR(100)', 
-                    'context_weather VARCHAR(50)',
-                    'context_sleep_hours DECIMAL(3,1)',
-                    'context_energy_level INTEGER CHECK (context_energy_level >= 1 AND context_energy_level <= 5)'
+                    ('context_location', 'VARCHAR(100)'),
+                    ('context_activity', 'VARCHAR(100)'), 
+                    ('context_weather', 'VARCHAR(50)'),
+                    ('context_sleep_hours', 'DECIMAL(3,1)'),
+                    ('context_energy_level', 'INTEGER CHECK (context_energy_level >= 1 AND context_energy_level <= 5)')
                 ]
                 
-                for column in context_columns:
+                for column_name, column_type in context_columns:
                     try:
-                        cursor.execute(f'ALTER TABLE moods ADD COLUMN IF NOT EXISTS {column}')
+                        # Check if column exists first
+                        cursor.execute('''
+                            SELECT column_name FROM information_schema.columns 
+                            WHERE table_name = 'moods' AND column_name = %s
+                        ''', (column_name,))
+                        
+                        if not cursor.fetchone():
+                            cursor.execute(f'ALTER TABLE moods ADD COLUMN {column_name} {column_type}')
+                            steps_completed.append(f"✅ Added column {column_name}")
+                        else:
+                            steps_completed.append(f"ℹ️ Column {column_name} already exists")
                     except Exception as e:
-                        # Column might already exist, continue
-                        pass
+                        steps_completed.append(f"❌ Failed to add column {column_name}: {str(e)}")
+                        # Continue with other columns
                 
-                steps_completed.append("Added context columns to moods table")
-                
-                # Step 4: Create indexes
+                # Step 4: Create indexes (with individual error handling)
                 indexes = [
-                    'CREATE INDEX IF NOT EXISTS idx_mood_tags_mood_id ON mood_tags(mood_id)',
-                    'CREATE INDEX IF NOT EXISTS idx_mood_tags_tag_id ON mood_tags(tag_id)',
-                    'CREATE INDEX IF NOT EXISTS idx_tags_category ON tags(category)',
-                    'CREATE INDEX IF NOT EXISTS idx_moods_context_activity ON moods(context_activity)'
+                    ('idx_mood_tags_mood_id', 'mood_tags(mood_id)'),
+                    ('idx_mood_tags_tag_id', 'mood_tags(tag_id)'),
+                    ('idx_tags_category', 'tags(category)'),
+                    ('idx_moods_context_activity', 'moods(context_activity)')
                 ]
                 
-                for index_sql in indexes:
-                    cursor.execute(index_sql)
-                
-                steps_completed.append("Created performance indexes")
+                for index_name, index_def in indexes:
+                    try:
+                        cursor.execute(f'CREATE INDEX IF NOT EXISTS {index_name} ON {index_def}')
+                        steps_completed.append(f"✅ Created index {index_name}")
+                    except Exception as e:
+                        steps_completed.append(f"❌ Failed to create index {index_name}: {str(e)}")
+                        # Continue with other indexes
                 
                 # Step 5: Insert default tags
                 default_tags = [
@@ -321,17 +340,22 @@ class DatabaseMigrationService:
                 
                 tags_inserted = 0
                 for name, category, color, icon in default_tags:
-                    cursor.execute('''
-                        INSERT INTO tags (name, category, color, icon)
-                        VALUES (%s, %s, %s, %s)
-                        ON CONFLICT (name) DO NOTHING
-                    ''', (name, category, color, icon))
-                    if cursor.rowcount > 0:
-                        tags_inserted += 1
+                    try:
+                        cursor.execute('''
+                            INSERT INTO tags (name, category, color, icon)
+                            VALUES (%s, %s, %s, %s)
+                            ON CONFLICT (name) DO NOTHING
+                        ''', (name, category, color, icon))
+                        if cursor.rowcount > 0:
+                            tags_inserted += 1
+                    except Exception as e:
+                        steps_completed.append(f"❌ Failed to insert tag {name}: {str(e)}")
                 
-                steps_completed.append(f"Inserted {tags_inserted} default tags")
+                steps_completed.append(f"✅ Inserted {tags_inserted} default tags")
                 
+                # Commit all changes
                 conn.commit()
+                steps_completed.append("✅ All changes committed to database")
                 
                 # Verify migration
                 cursor.execute('SELECT COUNT(*) FROM tags')
@@ -354,10 +378,13 @@ class DatabaseMigrationService:
                 }
                 
         except Exception as e:
+            import traceback
             return {
                 'success': False,
                 'error': f'Migration failed: {str(e)}',
-                'steps_completed': steps_completed if 'steps_completed' in locals() else []
+                'steps_completed': steps_completed,
+                'traceback': traceback.format_exc(),
+                'error_type': type(e).__name__
             }
 
 class DatabaseTestService:
