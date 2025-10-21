@@ -843,8 +843,11 @@
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             min-height: 100px;
+            min-width: 44px; /* Minimum touch target size */
             position: relative;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlight */
+            user-select: none; /* Prevent text selection */
         }
 
         .mood-card::before {
@@ -1366,8 +1369,11 @@
             cursor: pointer;
             transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
             min-height: 70px;
+            min-width: 44px; /* Minimum touch target size */
             position: relative;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlight */
+            user-select: none; /* Prevent text selection */
         }
 
         .trigger-tag::before {
@@ -1579,19 +1585,57 @@
         /* Material Design 3 Responsive Design */
         @media (max-width: 768px) {
             .container {
-                padding: 12px;
+                padding: 8px;
             }
             
             .md-grid-2 {
                 grid-template-columns: 1fr;
+                gap: 16px;
             }
             
             .mood-grid {
-                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .mood-card {
+                min-height: 80px;
+                padding: 12px 8px;
+            }
+            
+            .mood-icon {
+                font-size: 24px;
+            }
+            
+            .mood-label {
+                font-size: 10px;
+            }
+            
+            .triggers-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 6px !important;
+            }
+            
+            .trigger-tag {
+                padding: 8px 4px !important;
+                font-size: 10px !important;
+            }
+            
+            .trigger-tag i {
+                font-size: 12px !important;
             }
             
             .metrics-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .metric-card {
+                padding: 12px;
+            }
+            
+            .metric-value {
+                font-size: 20px;
             }
             
             .controls-container {
@@ -1605,28 +1649,192 @@
             
             .chart-container {
                 height: 250px;
+                padding: 12px;
+            }
+            
+            .history-item {
+                padding: 12px;
+            }
+            
+            .top-app-bar {
+                padding: 0 8px;
             }
             
             .top-app-bar-content {
                 flex-direction: column;
-                gap: 12px;
+                gap: 8px;
                 min-height: auto;
                 padding: 8px 0;
+            }
+            
+            .app-bar-title {
+                font-size: 18px;
+            }
+            
+            .md-card {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+            
+            .md-card-title {
+                font-size: 18px;
+            }
+            
+            .md-text-field-input, .md-select {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .md-button {
+                padding: 8px 16px;
+                font-size: 12px;
             }
         }
 
         @media (max-width: 480px) {
+            .container {
+                padding: 4px;
+            }
+            
             .mood-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            
+            .mood-card {
+                min-height: 70px;
+                padding: 8px 4px;
+            }
+            
+            .mood-icon {
+                font-size: 20px;
+            }
+            
+            .mood-label {
+                font-size: 9px;
+            }
+            
+            .triggers-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 4px !important;
+            }
+            
+            .trigger-tag {
+                padding: 6px 2px !important;
+                font-size: 9px !important;
+            }
+            
+            .trigger-tag i {
+                font-size: 10px !important;
             }
             
             .metrics-grid {
                 grid-template-columns: 1fr;
+                gap: 8px;
             }
             
             .chart-container {
                 height: 200px;
+                padding: 8px;
+            }
+            
+            .md-card {
                 padding: 12px;
+                margin-bottom: 8px;
+            }
+            
+            .md-card-title {
+                font-size: 16px;
+            }
+            
+            .top-app-bar-content {
+                gap: 4px;
+            }
+            
+            .app-bar-title {
+                font-size: 16px;
+            }
+            
+            .md-text-field-input, .md-select {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .md-button {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            
+            .status-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .status-item {
+                justify-content: space-between;
+            }
+        }
+
+        /* Extra small screens (iPhone SE, small Android phones) */
+        @media (max-width: 375px) {
+            .container {
+                padding: 2px;
+            }
+            
+            .mood-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+            
+            .mood-card {
+                min-height: 60px;
+                padding: 6px 2px;
+            }
+            
+            .mood-icon {
+                font-size: 18px;
+            }
+            
+            .mood-label {
+                font-size: 8px;
+            }
+            
+            .triggers-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 3px !important;
+            }
+            
+            .trigger-tag {
+                padding: 4px 1px !important;
+                font-size: 8px !important;
+                min-height: 50px !important;
+            }
+            
+            .trigger-tag i {
+                font-size: 9px !important;
+            }
+            
+            .md-card {
+                padding: 8px;
+                margin-bottom: 6px;
+            }
+            
+            .md-card-title {
+                font-size: 14px;
+            }
+            
+            .app-bar-title {
+                font-size: 14px;
+            }
+            
+            .md-text-field-input, .md-select {
+                padding: 8px;
+                font-size: 13px;
+            }
+            
+            .md-button {
+                padding: 4px 8px;
+                font-size: 10px;
             }
         }
 
@@ -1785,7 +1993,7 @@
                             What's affecting your mood? (optional)
                         </h3>
                         
-                        <div class="triggers-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 16px;">
+                        <div class="triggers-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
                             <!-- Work Category -->
                             <div class="trigger-tag" data-trigger="work">
                                 <i class="fas fa-briefcase"></i>
@@ -1907,11 +2115,6 @@
                     <button type="submit" class="md-button md-button-filled">
                         <i class="fas fa-save"></i>
                         <span>Save Mood</span>
-                    </button>
-                    
-                    <button type="button" class="md-button md-button-outlined" onclick="openQuickEntry()" style="margin-left: 12px;">
-                        <i class="fas fa-bolt"></i>
-                        <span>Quick Entry</span>
                     </button>
                 </form>
             </div>
@@ -3693,21 +3896,6 @@
             const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const fileName = `mood-analytics-report-${timestamp}.pdf`;
             pdf.save(fileName);
-        }
-
-        // Quick Entry Widget
-        function openQuickEntry() {
-            const popup = window.open(
-                '/features/quick-entry',
-                'quickEntry',
-                'width=450,height=600,scrollbars=no,resizable=no,toolbar=no,location=no,directories=no,status=no,menubar=no'
-            );
-            
-            if (popup) {
-                popup.focus();
-            } else {
-                alert('Please allow popups for quick entry widget');
-            }
         }
 
         // Initialize everything when DOM loads
