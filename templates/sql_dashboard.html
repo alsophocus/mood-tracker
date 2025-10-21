@@ -417,7 +417,7 @@
                 }
                 
                 // Reload stats if it was a data operation
-                if (['cleanup_until_date', 'clear_all_data', 'generate_fake_data', 'generate_current_week'].includes(operationId)) {
+                if (['cleanup_until_date', 'clear_all_data', 'generate_fake_data', 'generate_current_week', 'test_connection'].includes(operationId)) {
                     setTimeout(loadStats, 1000);
                 }
                 

@@ -253,6 +253,68 @@ class DataGenerationService:
                 'verification': 'PASSED' if count_after >= count_before else 'WARNING - No new records added'
             }
 
+class DatabaseTestService:
+    """Database testing operations - Single Responsibility Principle"""
+    
+    def __init__(self, db: Database):
+        self.db = db
+    
+    def test_connection(self) -> Dict[str, Any]:
+        """Test basic database connectivity"""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Test basic query
+                cursor.execute('SELECT 1 as test')
+                test_result = cursor.fetchone()[0]
+                
+                # Get database info
+                cursor.execute('SELECT version()')
+                db_version = cursor.fetchone()[0]
+                
+                # Check tables exist
+                cursor.execute("""
+                    SELECT table_name 
+                    FROM information_schema.tables 
+                    WHERE table_schema = 'public'
+                """)
+                tables = [row[0] for row in cursor.fetchall()]
+                
+                # Check moods table structure
+                cursor.execute("""
+                    SELECT column_name, data_type 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'moods'
+                """)
+                mood_columns = [f"{row[0]} ({row[1]})" for row in cursor.fetchall()]
+                
+                # Get sample mood data
+                cursor.execute('SELECT COUNT(*) FROM moods')
+                total_moods = cursor.fetchone()[0]
+                
+                sample_moods = []
+                if total_moods > 0:
+                    cursor.execute('SELECT id, user_id, date, mood, notes FROM moods LIMIT 5')
+                    sample_moods = [dict(row) for row in cursor.fetchall()]
+                
+                return {
+                    'success': True,
+                    'message': 'Database connection successful',
+                    'test_query_result': test_result,
+                    'database_version': db_version,
+                    'tables': tables,
+                    'moods_table_columns': mood_columns,
+                    'total_moods': total_moods,
+                    'sample_moods': sample_moods
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Database connection failed: {str(e)}'
+            }
+
 class DatabaseAnalyticsService:
     """Database analytics operations - Single Responsibility Principle"""
     
@@ -303,10 +365,18 @@ class AdminService(AdminServiceInterface):
         self.cleanup_service = DatabaseCleanupService(db)
         self.generation_service = DataGenerationService(db)
         self.analytics_service = DatabaseAnalyticsService(db)
+        self.test_service = DatabaseTestService(db)
     
     def get_available_operations(self) -> List[Dict[str, Any]]:
         """Get list of available admin operations"""
         return [
+            {
+                'id': 'test_connection',
+                'name': 'Test Database Connection',
+                'description': 'Test basic database connectivity and show raw data',
+                'category': 'debug',
+                'params': []
+            },
             {
                 'id': 'cleanup_until_date',
                 'name': 'Cleanup Until Date',
@@ -354,7 +424,10 @@ class AdminService(AdminServiceInterface):
             params = {}
         
         try:
-            if operation_id == 'cleanup_until_date':
+            if operation_id == 'test_connection':
+                return self.test_service.test_connection()
+            
+            elif operation_id == 'cleanup_until_date':
                 target_date_str = params.get('target_date', '2025-10-19')
                 try:
                     from datetime import datetime
