@@ -275,7 +275,7 @@
                     <div class="operation-params">
                         {% for param in operation.params %}
                         <div class="param-label">{{ param.description }}</div>
-                        <input type="{{ 'number' if param.type == 'int' else 'text' }}" 
+                        <input type="{{ 'number' if param.type == 'int' else 'date' if param.type == 'date' else 'text' }}" 
                                class="param-input" 
                                id="param-{{ operation.id }}-{{ param.name }}"
                                placeholder="{{ param.default if param.default else param.name }}"
@@ -366,7 +366,7 @@
                 }
                 
                 // Reload stats if it was a data operation
-                if (['cleanup_until_oct19', 'clear_all_data', 'generate_fake_data', 'generate_current_week'].includes(operationId)) {
+                if (['cleanup_until_date', 'clear_all_data', 'generate_fake_data', 'generate_current_week'].includes(operationId)) {
                     setTimeout(loadStats, 1000);
                 }
                 

@@ -179,11 +179,13 @@ class AdminService(AdminServiceInterface):
         """Get list of available admin operations"""
         return [
             {
-                'id': 'cleanup_until_oct19',
-                'name': 'Cleanup Until Oct 19',
-                'description': 'Delete all mood data until October 19, 2025',
+                'id': 'cleanup_until_date',
+                'name': 'Cleanup Until Date',
+                'description': 'Delete all mood data until specified date (inclusive)',
                 'category': 'cleanup',
-                'params': []
+                'params': [
+                    {'name': 'target_date', 'type': 'date', 'default': '2025-10-19', 'description': 'Delete data until this date (YYYY-MM-DD)'}
+                ]
             },
             {
                 'id': 'clear_all_data',
@@ -223,18 +225,34 @@ class AdminService(AdminServiceInterface):
             params = {}
         
         try:
-            if operation_id == 'cleanup_until_oct19':
-                return self.cleanup_service.cleanup_until_date(date(2025, 10, 19))
+            if operation_id == 'cleanup_until_date':
+                target_date_str = params.get('target_date', '2025-10-19')
+                try:
+                    from datetime import datetime
+                    target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+                except ValueError:
+                    return {'success': False, 'error': f'Invalid date format: {target_date_str}. Use YYYY-MM-DD'}
+                
+                result = self.cleanup_service.cleanup_until_date(target_date)
+                result['success'] = True
+                result['target_date'] = str(target_date)
+                return result
             
             elif operation_id == 'clear_all_data':
-                return self.cleanup_service.clear_all_data()
+                result = self.cleanup_service.clear_all_data()
+                result['success'] = True
+                return result
             
             elif operation_id == 'generate_fake_data':
                 days = params.get('days', 30)
-                return self.generation_service.generate_fake_data(user_id, days)
+                result = self.generation_service.generate_fake_data(user_id, days)
+                result['success'] = True
+                return result
             
             elif operation_id == 'generate_current_week':
-                return self.generation_service.generate_current_week_data(user_id)
+                result = self.generation_service.generate_current_week_data(user_id)
+                result['success'] = True
+                return result
             
             elif operation_id == 'database_stats':
                 return self.analytics_service.get_database_stats()
