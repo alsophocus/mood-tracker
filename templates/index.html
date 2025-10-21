@@ -3623,50 +3623,42 @@
                 .catch(error => console.error('Error loading current year trends:', error));
         }
 
-        // Simple PDF Export Function
+        // Simple Working PDF Export
         function exportToPDF() {
             try {
-                console.log('Starting PDF export...');
-                
-                // Try different ways to access jsPDF
-                var pdf;
-                if (typeof window.jsPDF !== 'undefined') {
-                    pdf = new window.jsPDF();
-                } else if (typeof jsPDF !== 'undefined') {
-                    pdf = new jsPDF();
-                } else if (window.jspdf && window.jspdf.jsPDF) {
-                    pdf = new window.jspdf.jsPDF();
-                } else {
+                // Check for jsPDF
+                if (!window.jspdf || !window.jspdf.jsPDF) {
                     alert('PDF library not loaded. Please refresh the page.');
                     return;
                 }
                 
-                console.log('PDF created successfully');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
                 
-                // Simple PDF content
+                // Add content
                 pdf.setFontSize(20);
                 pdf.text('Mood Tracker Report', 20, 30);
                 
                 pdf.setFontSize(12);
-                pdf.text('Generated on: ' + new Date().toLocaleDateString(), 20, 50);
+                pdf.text('Generated: ' + new Date().toLocaleDateString(), 20, 50);
                 
-                // Get some basic metrics
-                var totalEntries = document.querySelector('.metric-value')?.textContent || '0';
-                pdf.text('Total Entries: ' + totalEntries, 20, 70);
+                // Get metrics
+                const metrics = document.querySelectorAll('.metric-value');
+                if (metrics.length > 0) {
+                    pdf.text('Total Entries: ' + (metrics[0].textContent || '0'), 20, 70);
+                }
                 
-                // Save the PDF
-                var fileName = 'mood-report-' + new Date().toISOString().slice(0, 10) + '.pdf';
-                pdf.save(fileName);
-                
-                console.log('PDF saved successfully');
-                showNotification('📄 PDF report generated successfully!', 'success');
+                // Save
+                pdf.save('mood-report.pdf');
+                showNotification('PDF exported successfully!', 'success');
                 
             } catch (error) {
-                console.error('PDF Export Error:', error);
-                alert('Failed to generate PDF: ' + error.message);
+                console.error('PDF Error:', error);
+                alert('PDF export failed: ' + error.message);
             }
         }
-            try {
+
+        // Notification system for user feedback
                 console.log('Starting PDF export...');
                 
                 // Check if jsPDF is available globally
