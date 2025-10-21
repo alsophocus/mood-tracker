@@ -375,6 +375,66 @@
                 padding: 8px 0;
             }
         }
+
+        /* Mobile responsive styles for top-app-bar */
+        @media (max-width: 768px) {
+            .top-app-bar {
+                padding: 4px 8px;
+            }
+            
+            .top-app-bar-content {
+                flex-direction: column;
+                gap: 8px;
+                min-height: auto;
+                padding: 8px 0;
+            }
+            
+            .app-bar-title {
+                font-size: 18px;
+            }
+            
+            .display-small {
+                font-size: 18px;
+            }
+            
+            .app-bar-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+            }
+            
+            .md-button {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: 80px;
+            }
+            
+            .theme-toggle {
+                order: 1;
+                margin: 8px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-bar-title {
+                font-size: 16px;
+            }
+            
+            .display-small {
+                font-size: 16px;
+            }
+            
+            .md-button {
+                padding: 6px 8px;
+                font-size: 11px;
+                min-width: 70px;
+            }
+            
+            .app-bar-actions {
+                gap: 4px;
+            }
+        }
     </style>
 </head>
 <body>

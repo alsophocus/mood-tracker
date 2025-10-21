@@ -1,0 +1,4283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- SOLID Chart Architecture -->
+    <script src="/static/js/chart-interfaces.js"></script>
+    <script src="/static/js/weekly-data-processor.js"></script>
+    <script src="/static/js/weekly-chart-config.js"></script>
+    <script src="/static/js/chart-renderer.js"></script>
+    <script src="/static/js/weekly-data-loader.js"></script>
+    <script src="/static/js/weekly-chart-service.js"></script>
+    <script src="/static/js/chart-factory.js"></script>
+    <style>
+        /* Material Design 3 (Material You) Design System */
+        :root {
+            /* Material Design 3 Color System - Light Theme */
+            --md-sys-color-primary: #6750a4;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #eaddff;
+            --md-sys-color-on-primary-container: #21005d;
+            
+            --md-sys-color-secondary: #625b71;
+            --md-sys-color-on-secondary: #ffffff;
+            --md-sys-color-secondary-container: #e8def8;
+            --md-sys-color-on-secondary-container: #1d192b;
+            
+            --md-sys-color-tertiary: #7d5260;
+            --md-sys-color-on-tertiary: #ffffff;
+            --md-sys-color-tertiary-container: #ffd8e4;
+            --md-sys-color-on-tertiary-container: #31111d;
+            
+            --md-sys-color-error: #ba1a1a;
+            --md-sys-color-on-error: #ffffff;
+            --md-sys-color-error-container: #ffdad6;
+            --md-sys-color-on-error-container: #410002;
+            
+            --md-sys-color-background: #fffbfe;
+            --md-sys-color-on-background: #1c1b1f;
+            --md-sys-color-surface: #fffbfe;
+            --md-sys-color-on-surface: #1c1b1f;
+            --md-sys-color-surface-variant: #e7e0ec;
+            --md-sys-color-on-surface-variant: #49454f;
+            --md-sys-color-outline: #79747e;
+            --md-sys-color-outline-variant: #cab6cf;
+            
+            --md-sys-color-surface-container-lowest: #ffffff;
+            --md-sys-color-surface-container-low: #f7f2fa;
+            --md-sys-color-surface-container: #f3edf7;
+            --md-sys-color-surface-container-high: #ece6f0;
+            --md-sys-color-surface-container-highest: #e6e0e9;
+            
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #f4eff4;
+            --md-sys-color-inverse-primary: #d0bcff;
+            
+            /* Material Design 3 Elevation */
+            --md-sys-elevation-level0: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level1: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level2: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level3: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level4: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+            --md-sys-elevation-level5: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 5px 8px 0px rgba(0, 0, 0, 0.14), 0px 1px 14px 0px rgba(0, 0, 0, 0.12);
+            
+            /* Material Design 3 Expanded Shape Library */
+            --md-sys-shape-corner-none: 0px;
+            --md-sys-shape-corner-extra-small: 4px;
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            --md-sys-shape-corner-full: 50%;
+            
+            /* Expressive Shape Variations */
+            --md-sys-shape-corner-extra-small-top: 4px 4px 0px 0px;
+            --md-sys-shape-corner-small-top: 8px 8px 0px 0px;
+            --md-sys-shape-corner-medium-top: 12px 12px 0px 0px;
+            --md-sys-shape-corner-large-top: 16px 16px 0px 0px;
+            --md-sys-shape-corner-extra-large-top: 28px 28px 0px 0px;
+            
+            /* Asymmetric Shapes for Expressive Design */
+            --md-sys-shape-asymmetric-1: 4px 16px 4px 16px;
+            --md-sys-shape-asymmetric-2: 8px 24px 8px 24px;
+            --md-sys-shape-asymmetric-3: 12px 28px 12px 28px;
+            
+            /* Material Design 3 Motion Physics */
+            --md-sys-motion-easing-linear: cubic-bezier(0, 0, 1, 1);
+            --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+            --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+            --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+            --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+            --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+            --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+            --md-sys-motion-easing-legacy: cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Motion Duration Tokens */
+            --md-sys-motion-duration-short1: 50ms;
+            --md-sys-motion-duration-short2: 100ms;
+            --md-sys-motion-duration-short3: 150ms;
+            --md-sys-motion-duration-short4: 200ms;
+            --md-sys-motion-duration-medium1: 250ms;
+            --md-sys-motion-duration-medium2: 300ms;
+            --md-sys-motion-duration-medium3: 350ms;
+            --md-sys-motion-duration-medium4: 400ms;
+            --md-sys-motion-duration-long1: 450ms;
+            --md-sys-motion-duration-long2: 500ms;
+            --md-sys-motion-duration-long3: 550ms;
+            --md-sys-motion-duration-long4: 600ms;
+            --md-sys-motion-duration-extra-long1: 700ms;
+            --md-sys-motion-duration-extra-long2: 800ms;
+            --md-sys-motion-duration-extra-long3: 900ms;
+            --md-sys-motion-duration-extra-long4: 1000ms;
+            
+            /* Material Design 3 State Layers */
+            --md-sys-state-hover-opacity: 0.08;
+            --md-sys-state-focus-opacity: 0.12;
+            --md-sys-state-pressed-opacity: 0.12;
+            --md-sys-state-dragged-opacity: 0.16;
+        }
+
+        [data-theme="dark"] {
+            /* Material Design 3 Color System - Dark Theme */
+            --md-sys-color-primary: #d0bcff;
+            --md-sys-color-on-primary: #381e72;
+            --md-sys-color-primary-container: #4f378b;
+            --md-sys-color-on-primary-container: #eaddff;
+            
+            --md-sys-color-secondary: #ccc2dc;
+            --md-sys-color-on-secondary: #332d41;
+            --md-sys-color-secondary-container: #4a4458;
+            --md-sys-color-on-secondary-container: #e8def8;
+            
+            --md-sys-color-tertiary: #efb8c8;
+            --md-sys-color-on-tertiary: #492532;
+            --md-sys-color-tertiary-container: #633b48;
+            --md-sys-color-on-tertiary-container: #ffd8e4;
+            
+            --md-sys-color-error: #ffb4ab;
+            --md-sys-color-on-error: #690005;
+            --md-sys-color-error-container: #93000a;
+            --md-sys-color-on-error-container: #ffdad6;
+            
+            --md-sys-color-background: #10090d;
+            --md-sys-color-on-background: #e6e0e9;
+            --md-sys-color-surface: #10090d;
+            --md-sys-color-on-surface: #e6e0e9;
+            --md-sys-color-surface-variant: #49454f;
+            --md-sys-color-on-surface-variant: #cab6cf;
+            --md-sys-color-outline: #938f99;
+            --md-sys-color-outline-variant: #49454f;
+            
+            --md-sys-color-surface-container-lowest: #0b0509;
+            --md-sys-color-surface-container-low: #1c1b1f;
+            --md-sys-color-surface-container: #201f23;
+            --md-sys-color-surface-container-high: #2b2930;
+            --md-sys-color-surface-container-highest: #36343b;
+            
+            --md-sys-color-inverse-surface: #e6e0e9;
+            --md-sys-color-inverse-on-surface: #313033;
+            --md-sys-color-inverse-primary: #6750a4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            line-height: 1.5;
+            font-size: 16px;
+            font-weight: 400;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Material Design 3 Expressive Typography Scale */
+        .display-large {
+            font-size: 57px;
+            font-weight: 400;
+            line-height: 64px;
+            letter-spacing: -0.25px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+
+        .display-medium {
+            font-size: 45px;
+            font-weight: 400;
+            line-height: 52px;
+            letter-spacing: 0px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 40;
+        }
+
+        .display-small {
+            font-size: 36px;
+            font-weight: 400;
+            line-height: 44px;
+            letter-spacing: 0px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 36;
+        }
+
+        .headline-large {
+            font-size: 32px;
+            font-weight: 400;
+            line-height: 40px;
+            letter-spacing: 0px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 32;
+        }
+
+        .headline-medium {
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+            letter-spacing: 0px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 28;
+        }
+
+        .headline-small {
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 32px;
+            letter-spacing: 0px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .title-large {
+            font-size: 22px;
+            font-weight: 400;
+            line-height: 28px;
+            letter-spacing: 0px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 22;
+        }
+
+        .title-medium {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 24px;
+            letter-spacing: 0.15px;
+            font-variation-settings: 'wght' 500, 'GRAD' 0, 'opsz' 16;
+        }
+
+        .title-small {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+            font-variation-settings: 'wght' 500, 'GRAD' 0, 'opsz' 14;
+        }
+
+        .body-large {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: 0.5px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 16;
+        }
+
+        .body-medium {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+            letter-spacing: 0.25px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 14;
+        }
+
+        .body-small {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 16px;
+            letter-spacing: 0.4px;
+            font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 12;
+        }
+
+        .label-large {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+            font-variation-settings: 'wght' 500, 'GRAD' 0, 'opsz' 14;
+        }
+
+        .label-medium {
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 16px;
+            letter-spacing: 0.5px;
+            font-variation-settings: 'wght' 500, 'GRAD' 0, 'opsz' 12;
+        }
+
+        .label-small {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 16px;
+            letter-spacing: 0.5px;
+            font-variation-settings: 'wght' 500, 'GRAD' 0, 'opsz' 11;
+        }
+
+        /* Material Design 3 Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        /* Material Design 3 Top App Bar */
+        .top-app-bar {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--md-sys-elevation-level2);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .top-app-bar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 64px;
+        }
+
+        .app-bar-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--md-sys-color-primary);
+        }
+
+        .app-bar-title i {
+            font-size: 32px;
+            animation: brainPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes brainPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .display-small {
+            font-family: var(--md-sys-typescale-display-small-font);
+            font-size: var(--md-sys-typescale-display-small-size);
+            font-weight: var(--md-sys-typescale-display-small-weight);
+            line-height: var(--md-sys-typescale-display-small-line-height);
+            letter-spacing: var(--md-sys-typescale-display-small-tracking);
+            color: var(--md-sys-color-primary);
+        }
+
+        .app-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-icon {
+            font-size: 20px;
+            color: var(--md-sys-color-on-surface-variant);
+            height: 32px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Material Design 3 Expressive Cards */
+        .md-card {
+            background-color: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-surface);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--md-sys-elevation-level1);
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .md-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-card:hover {
+            box-shadow: var(--md-sys-elevation-level3);
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .md-card:hover::before {
+            opacity: 0.03;
+        }
+
+        /* Expressive Mood Cards with Asymmetric Shapes */
+        .mood-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-asymmetric-1);
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            min-height: 100px;
+            position: relative;
+            overflow: hidden;
+            transform-origin: center;
+        }
+
+        .mood-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--md-sys-color-primary);
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+        }
+
+        .mood-card:hover {
+            transform: translateY(-8px) rotate(2deg) scale(1.05);
+            box-shadow: var(--md-sys-elevation-level4);
+            border-radius: var(--md-sys-shape-asymmetric-2);
+        }
+
+        .mood-card:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
+        }
+
+        .mood-card:active {
+            transform: translateY(-4px) rotate(1deg) scale(1.02);
+            transition-duration: var(--md-sys-motion-duration-short2);
+        }
+
+        .mood-card.selected {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-color: var(--md-sys-color-primary);
+            border-radius: var(--md-sys-shape-asymmetric-3);
+            transform: translateY(-6px) scale(1.08);
+            box-shadow: var(--md-sys-elevation-level5);
+        }
+
+        .mood-card.selected::before {
+            opacity: 0.1;
+        }
+
+        /* Expressive Buttons with Enhanced Motion */
+        .md-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            min-height: 40px;
+            position: relative;
+            overflow: hidden;
+            transform-origin: center;
+        }
+
+        .md-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: currentColor;
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--md-sys-elevation-level2);
+        }
+
+        .md-button:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
+        }
+
+        .md-button:focus::before {
+            opacity: var(--md-sys-state-focus-opacity);
+        }
+
+        .md-button:active {
+            transform: translateY(0px) scale(0.98);
+            transition-duration: var(--md-sys-motion-duration-short1);
+        }
+
+        .md-button:active::before {
+            opacity: var(--md-sys-state-pressed-opacity);
+        }
+
+        /* Expressive FAB with Morphing Animation */
+        .md-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: var(--md-sys-shape-corner-large);
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--md-sys-elevation-level3);
+            transition: all var(--md-sys-motion-duration-medium3) var(--md-sys-motion-easing-emphasized);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1000;
+        }
+
+        .md-fab:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: var(--md-sys-elevation-level4);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+        }
+
+        .md-fab:active {
+            transform: scale(0.95) rotate(-2deg);
+            transition-duration: var(--md-sys-motion-duration-short2);
+        }
+
+        /* Expressive Theme Toggle with Morphing */
+        .theme-switch {
+            width: 52px;
+            height: 32px;
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: var(--md-sys-shape-corner-large);
+            border: 2px solid var(--md-sys-color-outline);
+            cursor: pointer;
+            position: relative;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            overflow: hidden;
+        }
+
+        .theme-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-full);
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            box-shadow: var(--md-sys-elevation-level1);
+        }
+
+        .theme-switch:hover {
+            transform: scale(1.05);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+        }
+
+        [data-theme="dark"] .theme-switch {
+            background-color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+
+        [data-theme="dark"] .theme-switch::before {
+            transform: translateX(20px) rotate(180deg);
+            background-color: var(--md-sys-color-on-primary);
+        }
+
+        /* Expressive Text Fields with Floating Animation */
+        .md-text-field {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .md-text-field-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .md-text-field-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            transform: scale(1.02);
+            box-shadow: 0 0 0 8px rgba(103, 80, 164, 0.1);
+        }
+
+        .md-text-field-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            pointer-events: none;
+            background-color: var(--md-sys-color-surface);
+            padding: 0 4px;
+            transform-origin: left center;
+        }
+
+        .md-text-field-input:focus + .md-text-field-label,
+        .md-text-field-input:not(:placeholder-shown) + .md-text-field-label {
+            top: -8px;
+            font-size: 12px;
+            color: var(--md-sys-color-primary);
+            transform: scale(0.9) translateY(-2px);
+        }
+
+        /* Expressive Chart Containers with Breathing Animation */
+        .chart-container {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 16px;
+            height: 300px;
+            position: relative;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+            overflow: hidden;
+        }
+
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-long1) var(--md-sys-motion-easing-standard);
+        }
+
+        .chart-container:hover {
+            transform: scale(1.01);
+            box-shadow: var(--md-sys-elevation-level2);
+        }
+
+        .chart-container:hover::before {
+            opacity: 0.02;
+        }
+
+        /* Expressive Loading Animation */
+        @keyframes md-pulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.6; 
+                transform: scale(1.05);
+            }
+        }
+
+        .status-indicator.checking {
+            background-color: #ff9800;
+            animation: md-pulse var(--md-sys-motion-duration-extra-long2) var(--md-sys-motion-easing-emphasized) infinite;
+        }
+
+        /* Expressive Entrance Animations */
+        @keyframes md-fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes md-fade-in-scale {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotate(-5deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .md-card {
+            animation: md-fade-in-up var(--md-sys-motion-duration-long2) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .mood-card {
+            animation: md-fade-in-scale var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .mood-card:nth-child(1) { animation-delay: 0ms; }
+        .mood-card:nth-child(2) { animation-delay: 50ms; }
+        .mood-card:nth-child(3) { animation-delay: 100ms; }
+        .mood-card:nth-child(4) { animation-delay: 150ms; }
+        .mood-card:nth-child(5) { animation-delay: 200ms; }
+        .mood-card:nth-child(6) { animation-delay: 250ms; }
+        .mood-card:nth-child(7) { animation-delay: 300ms; }
+
+        .md-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .md-card-title {
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .md-card-icon {
+            color: var(--md-sys-color-primary);
+            font-size: 24px;
+        }
+
+        /* Material Design 3 Grid */
+        .md-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .md-grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+
+        /* Material Design 3 Buttons */
+        .md-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: var(--md-sys-shape-corner-large);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .md-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: currentColor;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .md-button:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
+        }
+
+        .md-button:focus::before {
+            opacity: var(--md-sys-state-focus-opacity);
+        }
+
+        .md-button:active::before {
+            opacity: var(--md-sys-state-pressed-opacity);
+        }
+
+        .md-button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .md-button-outlined {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .md-button-text {
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+        }
+
+        /* Material Design 3 Mood Selection */
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mood-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-large);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100px;
+            min-width: 44px; /* Minimum touch target size */
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlight */
+            user-select: none; /* Prevent text selection */
+        }
+
+        .mood-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--md-sys-color-primary);
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mood-card:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
+        }
+
+        .mood-card.selected {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .mood-icon {
+            font-size: 32px;
+            z-index: 1;
+        }
+
+        .mood-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* Material Design 3 Form Elements */
+        .md-text-field {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .md-text-field-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .md-text-field-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+        }
+
+        .md-text-field-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            background-color: var(--md-sys-color-surface);
+            padding: 0 4px;
+        }
+
+        .md-text-field-input:focus + .md-text-field-label,
+        .md-text-field-input:not(:placeholder-shown) + .md-text-field-label {
+            top: -8px;
+            font-size: 12px;
+            color: var(--md-sys-color-primary);
+        }
+
+        /* Material Design 3 Status Indicators */
+        .status-container {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 16px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-tertiary);
+        }
+
+        .status-indicator.healthy {
+            background-color: #4caf50;
+        }
+
+        .status-indicator.error {
+            background-color: var(--md-sys-color-error);
+        }
+
+        .status-indicator.checking {
+            background-color: #ff9800;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Material Design 3 Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 20px 16px;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border-radius: var(--md-sys-shape-corner-medium);
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 4px;
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+        }
+
+        /* Material Design 3 Chart Container */
+        .chart-container {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-medium);
+            padding: 16px;
+            height: 300px;
+            position: relative;
+        }
+
+        /* Material Design 3 Select Components */
+        .md-select-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .md-select {
+            width: 100%;
+            padding: 16px 48px 16px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            appearance: none;
+            cursor: pointer;
+            min-height: 56px;
+        }
+
+        .md-select:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            box-shadow: 0 0 0 8px rgba(103, 80, 164, 0.1);
+        }
+
+        .md-select:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+            transform: translateY(-1px);
+        }
+
+        .md-select-label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+            pointer-events: none;
+            background-color: var(--md-sys-color-surface);
+            padding: 0 4px;
+            transform-origin: left center;
+        }
+
+        .md-select:focus + .md-select-label,
+        .md-select:not([value=""]) + .md-select-label,
+        .md-select.has-value + .md-select-label {
+            top: -8px;
+            font-size: 12px;
+            color: var(--md-sys-color-primary);
+            transform: scale(0.9);
+        }
+
+        .md-select-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 20px;
+            pointer-events: none;
+            transition: transform var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .md-select:focus + .md-select-label + .md-select-icon {
+            transform: translateY(-50%) rotate(180deg);
+            color: var(--md-sys-color-primary);
+        }
+
+        /* Material Design 3 Date Picker */
+        .md-date-picker {
+            position: relative;
+            width: 100%;
+        }
+
+        .md-date-field {
+            position: relative;
+            width: 100%;
+        }
+
+        .md-date-input {
+            width: 100%;
+            padding: 16px 48px 16px 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            background-color: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-on-surface);
+            font-family: var(--md-sys-typescale-body-large-font);
+            font-size: var(--md-sys-typescale-body-large-size);
+            font-weight: var(--md-sys-typescale-body-large-weight);
+            line-height: var(--md-sys-typescale-body-large-line-height);
+            letter-spacing: var(--md-sys-typescale-body-large-tracking);
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            cursor: pointer;
+            box-sizing: border-box;
+            min-height: 56px;
+            height: 56px;
+        }
+
+        .md-date-input:hover {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .md-date-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .md-date-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 20px;
+            pointer-events: none;
+            transition: color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-date-field:hover .md-date-icon {
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .md-date-input:focus + .md-date-icon {
+            color: var(--md-sys-color-primary);
+        }
+
+        .md-date-calendar {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--md-sys-color-surface-container);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-medium);
+            box-shadow: var(--md-sys-elevation-level2);
+            z-index: 1000;
+            margin-top: 4px;
+            opacity: 0;
+            transform: translateY(-8px);
+            visibility: hidden;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate);
+        }
+
+        .md-date-calendar.open {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .md-calendar-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .md-calendar-nav {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 20px;
+            padding: 8px;
+            border-radius: var(--md-sys-shape-corner-full);
+            cursor: pointer;
+            transition: background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-calendar-nav:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .md-calendar-title {
+            font-family: var(--md-sys-typescale-title-medium-font);
+            font-size: var(--md-sys-typescale-title-medium-size);
+            font-weight: var(--md-sys-typescale-title-medium-weight);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .md-calendar-grid {
+            padding: 8px;
+            display: grid;
+            grid-template-columns: repeat(7, 40px);
+            justify-content: center;
+        }
+
+        .md-calendar-weekdays {
+            display: contents;
+        }
+
+        .md-calendar-weekday {
+            width: 40px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--md-sys-typescale-label-small-font);
+            font-size: var(--md-sys-typescale-label-small-size);
+            font-weight: var(--md-sys-typescale-label-small-weight);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .md-calendar-days {
+            display: contents;
+        }
+
+        .md-calendar-day {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--md-sys-shape-corner-full);
+            cursor: pointer;
+            font-family: var(--md-sys-typescale-body-medium-font);
+            font-size: var(--md-sys-typescale-body-medium-size);
+            font-weight: var(--md-sys-typescale-body-medium-weight);
+            color: var(--md-sys-color-on-surface);
+            transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-calendar-day:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .md-calendar-day.other-month {
+            color: var(--md-sys-color-on-surface-variant);
+            opacity: 0.6;
+        }
+
+        .md-calendar-day.selected {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .md-calendar-day.today {
+            border: 1px solid var(--md-sys-color-primary);
+        }
+
+        .md-calendar-popup {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            box-shadow: var(--md-sys-elevation-level3);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-8px) scale(0.95);
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            pointer-events: none;
+            margin-top: 8px;
+        }
+
+        .md-calendar-popup.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .md-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .md-calendar-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .md-calendar-nav {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-primary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--md-sys-shape-corner-full);
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+        }
+
+        .md-calendar-nav:hover {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            transform: scale(1.1);
+        }
+
+        .md-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            padding: 16px;
+        }
+
+        /* Material Design 3 Controls Container */
+        .controls-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            align-items: stretch;
+        }
+
+        /* Daily Patterns specific alignment */
+        .controls-container:has(.md-date-picker) {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .controls-container:has(.md-date-picker) .md-select-container {
+            flex: 1;
+        }
+
+        .controls-container:has(.md-date-picker) .md-date-picker {
+            flex: 2;
+        }
+
+        .controls-container:has(.md-date-picker) .md-button {
+            flex: 1;
+            min-height: 56px;
+        }
+
+        .md-date-picker {
+            position: relative;
+            width: 100%;
+            min-height: 56px;
+        }
+
+        /* Single input controls (like date picker or single select) */
+        .controls-container:has(input[type="date"]:only-child),
+        .controls-container:has(.md-select-container:only-child) {
+            grid-template-columns: 1fr;
+            max-width: 300px;
+        }
+
+        /* Material Design 3 Trigger Tags */
+        .trigger-tag {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 12px 8px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-medium);
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            min-height: 70px;
+            min-width: 44px; /* Minimum touch target size */
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlight */
+            user-select: none; /* Prevent text selection */
+        }
+
+        .trigger-tag::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--md-sys-color-tertiary);
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .trigger-tag:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--md-sys-elevation-level2);
+        }
+
+        .trigger-tag:hover::before {
+            opacity: var(--md-sys-state-hover-opacity);
+        }
+
+        .trigger-tag.selected {
+            background-color: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            border-color: var(--md-sys-color-tertiary);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--md-sys-elevation-level3);
+        }
+
+        .trigger-tag i {
+            font-size: 16px;
+            z-index: 1;
+        }
+
+        .trigger-tag span {
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 1;
+        }
+
+        /* Material Design 3 Mood History with Icons */
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 8px;
+        }
+
+        .history-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mood-icon-history {
+            font-size: 24px;
+            min-width: 32px;
+        }
+
+        .history-details {
+            flex: 1;
+        }
+
+        .trigger-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background-color: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-on-surface-variant);
+            border-radius: var(--md-sys-shape-corner-medium);
+            font-size: 10px;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 2px;
+        }
+
+        .trigger-chip i {
+            font-size: 8px;
+        }
+
+        /* Enhanced Analytics Styles */
+        .triggers-analytics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .trigger-analytics-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border-radius: var(--md-sys-shape-corner-medium);
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .trigger-analytics-item i {
+            font-size: 10px;
+            color: var(--md-sys-color-primary);
+        }
+
+        .trigger-count {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            padding: 2px 6px;
+            border-radius: var(--md-sys-shape-corner-small);
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .week-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border-radius: var(--md-sys-shape-corner-medium);
+        }
+
+        .week-stat {
+            text-align: center;
+        }
+
+        .week-label {
+            display: block;
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 4px;
+        }
+
+        .week-value {
+            display: block;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .week-value.positive {
+            color: #4caf50;
+        }
+
+        .week-value.negative {
+            color: var(--md-sys-color-error);
+        }
+
+        .insights-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: var(--md-sys-color-surface-container-high);
+            border-radius: var(--md-sys-shape-corner-medium);
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .insight-item i {
+            font-size: 16px;
+            min-width: 20px;
+        }
+
+        .loading-triggers {
+            text-align: center;
+            padding: 20px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+
+        .history-date {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 4px;
+        }
+
+        .history-mood {
+            font-weight: 400;
+            color: var(--md-sys-color-on-surface);
+            text-transform: capitalize;
+        }
+
+        .history-notes {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 4px;
+        }
+
+        .history-time {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 12px;
+        }
+
+        /* Material Design 3 Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 8px;
+            }
+            
+            .md-grid-2 {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .mood-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .mood-card {
+                min-height: 80px;
+                padding: 12px 8px;
+            }
+            
+            .mood-icon {
+                font-size: 24px;
+            }
+            
+            .mood-label {
+                font-size: 10px;
+            }
+            
+            .triggers-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 6px !important;
+            }
+            
+            .trigger-tag {
+                padding: 8px 4px !important;
+                font-size: 10px !important;
+            }
+            
+            .trigger-tag i {
+                font-size: 12px !important;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .metric-card {
+                padding: 12px;
+            }
+            
+            .metric-value {
+                font-size: 20px;
+            }
+            
+            .controls-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .md-select, .md-button {
+                width: 100%;
+            }
+            
+            .chart-container {
+                height: 250px;
+                padding: 12px;
+            }
+            
+            .history-item {
+                padding: 12px;
+            }
+            
+            .top-app-bar {
+                padding: 0 8px;
+            }
+            
+            .top-app-bar-content {
+                flex-direction: column;
+                gap: 8px;
+                min-height: auto;
+                padding: 8px 0;
+            }
+            
+            .app-bar-title {
+                font-size: 18px;
+            }
+            
+            .md-card {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+            
+            .md-card-title {
+                font-size: 18px;
+            }
+            
+            .md-text-field-input, .md-select {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .md-button {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 4px;
+            }
+            
+            .mood-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            
+            .mood-card {
+                min-height: 70px;
+                padding: 8px 4px;
+            }
+            
+            .mood-icon {
+                font-size: 20px;
+            }
+            
+            .mood-label {
+                font-size: 9px;
+            }
+            
+            .triggers-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 4px !important;
+            }
+            
+            .trigger-tag {
+                padding: 6px 2px !important;
+                font-size: 9px !important;
+            }
+            
+            .trigger-tag i {
+                font-size: 10px !important;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .chart-container {
+                height: 200px;
+                padding: 8px;
+            }
+            
+            .md-card {
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            
+            .md-card-title {
+                font-size: 16px;
+            }
+            
+            .top-app-bar-content {
+                gap: 4px;
+            }
+            
+            .app-bar-title {
+                font-size: 16px;
+            }
+            
+            .md-text-field-input, .md-select {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .md-button {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            
+            .status-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .status-item {
+                justify-content: space-between;
+            }
+        }
+
+        /* Extra small screens (iPhone SE, small Android phones) */
+        @media (max-width: 375px) {
+            .container {
+                padding: 2px;
+            }
+            
+            .mood-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+            
+            .mood-card {
+                min-height: 60px;
+                padding: 6px 2px;
+            }
+            
+            .mood-icon {
+                font-size: 18px;
+            }
+            
+            .mood-label {
+                font-size: 8px;
+            }
+            
+            .triggers-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 3px !important;
+            }
+            
+            .trigger-tag {
+                padding: 4px 1px !important;
+                font-size: 8px !important;
+                min-height: 50px !important;
+            }
+            
+            .trigger-tag i {
+                font-size: 9px !important;
+            }
+            
+            .md-card {
+                padding: 8px;
+                margin-bottom: 6px;
+            }
+            
+            .md-card-title {
+                font-size: 14px;
+            }
+            
+            .app-bar-title {
+                font-size: 14px;
+            }
+            
+            .md-text-field-input, .md-select {
+                padding: 8px;
+                font-size: 13px;
+            }
+            
+            .md-button {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+        }
+
+        /* Material Design 3 Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (prefers-contrast: high) {
+            .md-card, .mood-card, .md-text-field-input, .md-select {
+                border-width: 2px;
+            }
+        }
+        
+        /* Material Design 3 Snackbar */
+        .md-snackbar {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--md-sys-color-inverse-surface);
+            color: var(--md-sys-color-inverse-on-surface);
+            border-radius: 4px;
+            padding: 0;
+            min-width: 344px;
+            max-width: 672px;
+            box-shadow: var(--md-sys-elevation-level3);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+            z-index: 1000;
+        }
+        
+        .md-snackbar.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .md-snackbar-content {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .md-snackbar-text {
+            font-family: var(--md-sys-typescale-body-medium-font);
+            font-size: var(--md-sys-typescale-body-medium-size);
+            font-weight: var(--md-sys-typescale-body-medium-weight);
+            line-height: var(--md-sys-typescale-body-medium-line-height);
+        }
+    </style>
+</head>
+<body>
+    <!-- Material Design 3 Top App Bar -->
+    <header class="top-app-bar">
+        <div class="top-app-bar-content">
+            <div class="app-bar-title">
+                <i class="fas fa-brain"></i>
+                <span class="display-small">Mood Tracker</span>
+            </div>
+            <div class="app-bar-actions">
+                <a href="/insights" class="md-button md-button-text" style="margin-right: 8px;">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Insights</span>
+                </a>
+                <a href="/features/goals" class="md-button md-button-text" style="margin-right: 8px;">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/features/analytics" class="md-button md-button-text" style="margin-right: 16px;">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+                <div class="theme-toggle">
+                    <i class="fas fa-sun theme-icon"></i>
+                    <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                    <i class="fas fa-moon theme-icon"></i>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">Welcome, {{ user.name }}</span>
+                    <a href="/logout" class="md-button md-button-outlined">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- System Status -->
+        <div class="section">
+            <div class="status-container">
+                <div class="status-item">
+                    <i class="fas fa-database"></i>
+                    <span class="body-medium">Database</span>
+                    <div id="db-status" class="status-indicator checking"></div>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="body-medium">Analytics</span>
+                    <div id="analytics-status" class="status-indicator checking"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-grid md-grid-2">
+            <!-- Mood Entry Card -->
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-heart md-card-icon"></i>
+                    <h2 class="md-card-title headline-medium">How are you feeling today?</h2>
+                </div>
+                
+                <form class="mood-form" action="/save_mood" method="post">
+                    <div class="mood-grid">
+                        <button type="button" class="mood-card" data-mood="very bad">
+                            <i class="fas fa-face-frown-open mood-icon" style="color: var(--md-sys-color-error);"></i>
+                            <span class="mood-label">Very Bad</span>
+                        </button>
+                        <button type="button" class="mood-card" data-mood="bad">
+                            <i class="fas fa-face-frown mood-icon" style="color: #ff5722;"></i>
+                            <span class="mood-label">Bad</span>
+                        </button>
+                        <button type="button" class="mood-card" data-mood="slightly bad">
+                            <i class="fas fa-face-meh mood-icon" style="color: #ff9800;"></i>
+                            <span class="mood-label">Slightly Bad</span>
+                        </button>
+                        <button type="button" class="mood-card" data-mood="neutral">
+                            <i class="fas fa-face-meh-blank mood-icon" style="color: var(--md-sys-color-on-surface-variant);"></i>
+                            <span class="mood-label">Neutral</span>
+                        </button>
+                        <button type="button" class="mood-card" data-mood="slightly well">
+                            <i class="fas fa-face-smile mood-icon" style="color: #8bc34a;"></i>
+                            <span class="mood-label">Slightly Well</span>
+                        </button>
+                        <button type="button" class="mood-card" data-mood="well">
+                            <i class="fas fa-face-smile-beam mood-icon" style="color: #4caf50;"></i>
+                            <span class="mood-label">Well</span>
+                        </button>
+                        <button type="button" class="mood-card" data-mood="very well">
+                            <i class="fas fa-face-grin-stars mood-icon" style="color: var(--md-sys-color-tertiary);"></i>
+                            <span class="mood-label">Very Well</span>
+                        </button>
+                    </div>
+                    
+                    <input type="hidden" name="mood" id="selected-mood" required>
+                    
+                    <!-- Mood Triggers Section -->
+                    <div class="triggers-section" style="margin: 24px 0;">
+                        <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-tags" style="color: var(--md-sys-color-tertiary);"></i>
+                            What's affecting your mood? (optional)
+                        </h3>
+                        
+                        <div class="triggers-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+                            <!-- Work Category -->
+                            <div class="trigger-tag" data-trigger="work">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Work</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="meeting">
+                                <i class="fas fa-users"></i>
+                                <span>Meeting</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="deadline">
+                                <i class="fas fa-clock"></i>
+                                <span>Deadline</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="project">
+                                <i class="fas fa-tasks"></i>
+                                <span>Project</span>
+                            </div>
+                            
+                            <!-- Health Category -->
+                            <div class="trigger-tag" data-trigger="exercise">
+                                <i class="fas fa-dumbbell"></i>
+                                <span>Exercise</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="sleep">
+                                <i class="fas fa-bed"></i>
+                                <span>Sleep</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="food">
+                                <i class="fas fa-utensils"></i>
+                                <span>Food</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="medication">
+                                <i class="fas fa-pills"></i>
+                                <span>Medication</span>
+                            </div>
+                            
+                            <!-- Social Category -->
+                            <div class="trigger-tag" data-trigger="family">
+                                <i class="fas fa-home"></i>
+                                <span>Family</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="friends">
+                                <i class="fas fa-user-friends"></i>
+                                <span>Friends</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="party">
+                                <i class="fas fa-glass-cheers"></i>
+                                <span>Party</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="date">
+                                <i class="fas fa-heart"></i>
+                                <span>Date</span>
+                            </div>
+                            
+                            <!-- Activities Category -->
+                            <div class="trigger-tag" data-trigger="music">
+                                <i class="fas fa-music"></i>
+                                <span>Music</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="reading">
+                                <i class="fas fa-book"></i>
+                                <span>Reading</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="gaming">
+                                <i class="fas fa-gamepad"></i>
+                                <span>Gaming</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="cooking">
+                                <i class="fas fa-cookie-bite"></i>
+                                <span>Cooking</span>
+                            </div>
+                            
+                            <!-- Environment Category -->
+                            <div class="trigger-tag" data-trigger="weather">
+                                <i class="fas fa-cloud-sun"></i>
+                                <span>Weather</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="home">
+                                <i class="fas fa-house"></i>
+                                <span>Home</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="outdoors">
+                                <i class="fas fa-tree"></i>
+                                <span>Outdoors</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="travel">
+                                <i class="fas fa-plane"></i>
+                                <span>Travel</span>
+                            </div>
+                            
+                            <!-- Emotions Category -->
+                            <div class="trigger-tag" data-trigger="stress">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Stress</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="relaxation">
+                                <i class="fas fa-spa"></i>
+                                <span>Relaxation</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="excitement">
+                                <i class="fas fa-star"></i>
+                                <span>Excitement</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="anxiety">
+                                <i class="fas fa-dizzy"></i>
+                                <span>Anxiety</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="triggers" id="selected-triggers">
+                    </div>
+                    
+                    <div class="md-text-field">
+                        <textarea name="notes" class="md-text-field-input" rows="3" placeholder=" "></textarea>
+                        <label class="md-text-field-label">
+                            <i class="fas fa-comment"></i> Notes (optional)
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="md-button md-button-filled">
+                        <i class="fas fa-save"></i>
+                        <span>Save Mood</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Enhanced Analytics Card -->
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-bar md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Analytics Overview</h2>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ analytics.daily_average }}</div>
+                        <div class="metric-label">Daily Average</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="current-streak">0</div>
+                        <div class="metric-label">Current Streak</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="best-mood">-</div>
+                        <div class="metric-label">Best This Week</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">{{ analytics.total_entries }}</div>
+                        <div class="metric-label">Total Days</div>
+                    </div>
+                </div>
+
+                <!-- Mood Distribution Chart -->
+                <div style="margin: 24px 0;">
+                    <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
+                        <i class="fas fa-chart-pie" style="color: var(--md-sys-color-primary); margin-right: 8px;"></i>
+                        Mood Distribution (Last 30 Days)
+                    </h3>
+                    <div class="chart-container" style="height: 200px;">
+                        <canvas id="moodDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Triggers -->
+                <div style="margin: 24px 0;">
+                    <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
+                        <i class="fas fa-tags" style="color: var(--md-sys-color-tertiary); margin-right: 8px;"></i>
+                        Top Mood Triggers
+                    </h3>
+                    <div id="top-triggers" class="triggers-analytics">
+                        <div class="loading-triggers">Loading trigger analysis...</div>
+                    </div>
+                </div>
+
+                <!-- Weekly Trend -->
+                <div style="margin: 24px 0;">
+                    <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
+                        <i class="fas fa-chart-line" style="color: var(--md-sys-color-secondary); margin-right: 8px;"></i>
+                        This Week vs Last Week
+                    </h3>
+                    <div class="week-comparison">
+                        <div class="week-stat">
+                            <span class="week-label">This Week:</span>
+                            <span class="week-value" id="this-week-avg">-</span>
+                        </div>
+                        <div class="week-stat">
+                            <span class="week-label">Last Week:</span>
+                            <span class="week-value" id="last-week-avg">-</span>
+                        </div>
+                        <div class="week-stat">
+                            <span class="week-label">Change:</span>
+                            <span class="week-value" id="week-change">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="exportToPDF()" class="md-button md-button-outlined">
+                    <i class="fas fa-download"></i>
+                    <span>Export PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Insights Card -->
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-lightbulb md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Quick Insights</h2>
+                </div>
+                
+                <div id="quick-insights" class="insights-list">
+                    <div class="insight-item">
+                        <i class="fas fa-calendar-day" style="color: var(--md-sys-color-primary);"></i>
+                        <span>Loading personalized insights...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Patterns -->
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-calendar-week md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Weekly Patterns</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <div class="md-select-container">
+                        <select id="yearSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="monthSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="weekSelect" class="md-select" value="">
+                            <option value="">Week</option>
+                        </select>
+                        <label class="md-select-label">Week</label>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Daily Patterns -->
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-clock md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Daily Patterns</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <div class="md-select-container">
+                        <select id="dailyYearSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="dailyMonthSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-date-picker">
+                        <div class="md-date-field">
+                            <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
+                            <i class="fas fa-calendar-alt md-date-icon"></i>
+                        </div>
+                        <div class="md-date-calendar" id="dailyDateCalendar">
+                            <div class="md-calendar-header">
+                                <button type="button" class="md-calendar-nav" id="prevYear">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </button>
+                                <button type="button" class="md-calendar-nav" id="prevMonth">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div class="md-calendar-title" id="calendarTitle"></div>
+                                <button type="button" class="md-calendar-nav" id="nextMonth">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <button type="button" class="md-calendar-nav" id="nextYear">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </button>
+                            </div>
+                            <div class="md-calendar-grid">
+                                <div class="md-calendar-weekdays">
+                                    <div class="md-calendar-weekday">Sun</div>
+                                    <div class="md-calendar-weekday">Mon</div>
+                                    <div class="md-calendar-weekday">Tue</div>
+                                    <div class="md-calendar-weekday">Wed</div>
+                                    <div class="md-calendar-weekday">Thu</div>
+                                    <div class="md-calendar-weekday">Fri</div>
+                                    <div class="md-calendar-weekday">Sat</div>
+                                </div>
+                                <div class="md-calendar-days" id="calendarDays"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="md-button md-button-filled" onclick="loadAverageMoodData()" id="averageMoodBtn" style="height: 56px; min-height: 56px;">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Average Mood</span>
+                    </button>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Weekly Trends -->
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-bar md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Weekly Trends</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <div class="md-select-container">
+                        <select id="trendsYearSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                    <div class="md-select-container">
+                        <select id="trendsMonthSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="weeklyTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Monthly Trends -->
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-area md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Monthly Trends</h2>
+                </div>
+                
+                <div class="controls-container">
+                    <div class="md-select-container">
+                        <select id="monthlyYearSelect" class="md-select" value="">
+                        </select>
+                        <i class="fas fa-chevron-down md-select-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mood History -->
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-history md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">Recent Moods</h2>
+                </div>
+                
+                {% for mood in moods %}
+                <div class="history-item">
+                    <div class="history-content">
+                        <div class="mood-icon-history">
+                            {% if mood.mood == 'very bad' %}
+                                <i class="fas fa-face-frown-open" style="color: var(--md-sys-color-error);"></i>
+                            {% elif mood.mood == 'bad' %}
+                                <i class="fas fa-face-frown" style="color: #ff5722;"></i>
+                            {% elif mood.mood == 'slightly bad' %}
+                                <i class="fas fa-face-meh" style="color: #ff9800;"></i>
+                            {% elif mood.mood == 'neutral' %}
+                                <i class="fas fa-face-meh-blank" style="color: var(--md-sys-color-on-surface-variant);"></i>
+                            {% elif mood.mood == 'slightly well' %}
+                                <i class="fas fa-face-smile" style="color: #8bc34a;"></i>
+                            {% elif mood.mood == 'well' %}
+                                <i class="fas fa-face-smile-beam" style="color: #4caf50;"></i>
+                            {% elif mood.mood == 'very well' %}
+                                <i class="fas fa-face-grin-stars" style="color: var(--md-sys-color-tertiary);"></i>
+                            {% else %}
+                                <i class="fas fa-circle" style="color: var(--md-sys-color-on-surface-variant);"></i>
+                            {% endif %}
+                        </div>
+                        <div class="history-details">
+                            <div class="history-date body-medium">{{ mood.date }}</div>
+                            <div class="history-mood body-large">{{ mood.mood|title }}</div>
+                            {% if mood.triggers %}
+                            <div class="history-triggers" style="margin-top: 4px;">
+                                {% for trigger in mood.triggers.split(',') %}
+                                    {% if trigger.strip() %}
+                                    <span class="trigger-chip">
+                                        {% if trigger.strip() == 'work' %}
+                                            <i class="fas fa-briefcase"></i>
+                                        {% elif trigger.strip() == 'meeting' %}
+                                            <i class="fas fa-users"></i>
+                                        {% elif trigger.strip() == 'deadline' %}
+                                            <i class="fas fa-clock"></i>
+                                        {% elif trigger.strip() == 'project' %}
+                                            <i class="fas fa-tasks"></i>
+                                        {% elif trigger.strip() == 'exercise' %}
+                                            <i class="fas fa-dumbbell"></i>
+                                        {% elif trigger.strip() == 'sleep' %}
+                                            <i class="fas fa-bed"></i>
+                                        {% elif trigger.strip() == 'food' %}
+                                            <i class="fas fa-utensils"></i>
+                                        {% elif trigger.strip() == 'medication' %}
+                                            <i class="fas fa-pills"></i>
+                                        {% elif trigger.strip() == 'family' %}
+                                            <i class="fas fa-home"></i>
+                                        {% elif trigger.strip() == 'friends' %}
+                                            <i class="fas fa-user-friends"></i>
+                                        {% elif trigger.strip() == 'party' %}
+                                            <i class="fas fa-glass-cheers"></i>
+                                        {% elif trigger.strip() == 'date' %}
+                                            <i class="fas fa-heart"></i>
+                                        {% elif trigger.strip() == 'music' %}
+                                            <i class="fas fa-music"></i>
+                                        {% elif trigger.strip() == 'reading' %}
+                                            <i class="fas fa-book"></i>
+                                        {% elif trigger.strip() == 'gaming' %}
+                                            <i class="fas fa-gamepad"></i>
+                                        {% elif trigger.strip() == 'cooking' %}
+                                            <i class="fas fa-cookie-bite"></i>
+                                        {% elif trigger.strip() == 'weather' %}
+                                            <i class="fas fa-cloud-sun"></i>
+                                        {% elif trigger.strip() == 'home' %}
+                                            <i class="fas fa-house"></i>
+                                        {% elif trigger.strip() == 'outdoors' %}
+                                            <i class="fas fa-tree"></i>
+                                        {% elif trigger.strip() == 'travel' %}
+                                            <i class="fas fa-plane"></i>
+                                        {% elif trigger.strip() == 'stress' %}
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% elif trigger.strip() == 'relaxation' %}
+                                            <i class="fas fa-spa"></i>
+                                        {% elif trigger.strip() == 'excitement' %}
+                                            <i class="fas fa-star"></i>
+                                        {% elif trigger.strip() == 'anxiety' %}
+                                            <i class="fas fa-dizzy"></i>
+                                        {% else %}
+                                            <i class="fas fa-tag"></i>
+                                        {% endif %}
+                                        {{ trigger.strip()|title }}
+                                    </span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if mood.notes %}
+                            <div class="history-notes body-medium">{{ mood.notes }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if mood.timestamp %}
+                    <div class="history-time">
+                        {{ (mood.timestamp|utc_to_local).strftime('%H:%M') if mood.timestamp else 'Unknown time' }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                {% if not moods %}
+                <div style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 48px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <div class="body-large">No mood entries yet. Start tracking your mood above!</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Material Design 3 Expressive FAB -->
+    <button class="md-fab" onclick="scrollToTop()" aria-label="Scroll to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    <script>
+        // Expressive scroll to top function
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Enhanced mood selection with expressive feedback
+        document.querySelectorAll('.mood-card').forEach((card, index) => {
+            card.addEventListener('click', function() {
+                // Remove selection from all cards with staggered animation
+                document.querySelectorAll('.mood-card').forEach((c, i) => {
+                    c.classList.remove('selected');
+                    c.style.animationDelay = `${i * 50}ms`;
+                });
+                
+                // Add selection with enhanced animation
+                this.classList.add('selected');
+                document.getElementById('selected-mood').value = this.dataset.mood;
+                
+                // Haptic feedback simulation
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                
+                // Visual feedback with ripple effect
+                createRipple(this, event);
+            });
+            
+            // Add hover sound effect simulation
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = `translateY(-8px) rotate(${Math.random() * 4 - 2}deg) scale(1.05)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = '';
+                }
+            });
+        });
+
+        // Create ripple effect for Material Design 3 expressive interactions
+        function createRipple(element, event) {
+            const ripple = document.createElement('div');
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1);
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            
+            element.style.position = 'relative';
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        // Add ripple animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        /**
+         * Enhanced theme management following Single Responsibility Principle
+         * Handles theme detection, switching, persistence, and system preference sync
+         */
+        class ThemeManager {
+            constructor() {
+                this.initializeTheme();
+            }
+
+            /**
+             * Initialize theme based on system preference or stored preference
+             * Follows Open/Closed Principle - can be extended for more themes
+             */
+            initializeTheme() {
+                // Check for stored theme preference first
+                const storedTheme = localStorage.getItem('theme');
+                
+                if (storedTheme) {
+                    this.setTheme(storedTheme);
+                } else {
+                    // Use system preference as default
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    this.setTheme(prefersDark ? 'dark' : 'light');
+                }
+
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    // Only auto-switch if user hasn't manually set a preference
+                    if (!localStorage.getItem('theme')) {
+                        this.setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+
+            /**
+             * Set theme and update UI elements with smooth transitions
+             * @param {string} theme - 'light' or 'dark'
+             */
+            setTheme(theme) {
+                // Add transition class for smooth theme change
+                document.body.classList.add('theme-transitioning');
+                
+                document.documentElement.setAttribute('data-theme', theme);
+                
+                // Store user preference
+                localStorage.setItem('theme', theme);
+                
+                // Remove transition class after animation
+                setTimeout(() => {
+                    document.body.classList.remove('theme-transitioning');
+                }, 300);
+                
+                // Animate all cards with staggered effect
+                document.querySelectorAll('.md-card').forEach((card, index) => {
+                    card.style.animationDelay = `${index * 100}ms`;
+                    card.style.animation = 'none';
+                    setTimeout(() => {
+                        card.style.animation = 'md-fade-in-scale 400ms var(--md-sys-motion-easing-emphasized)';
+                    }, 10);
+                });
+                
+                console.log(`Theme switched to: ${theme}`);
+            }
+
+            /**
+             * Toggle between light and dark themes
+             */
+            toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+            }
+        }
+
+        // Initialize theme manager
+        const themeManager = new ThemeManager();
+
+        /**
+         * Global function for theme toggle button
+         * Delegates to ThemeManager following Single Responsibility Principle
+         */
+        function toggleTheme() {
+            themeManager.toggleTheme();
+        }
+
+        // Add theme transition styles
+        const themeStyle = document.createElement('style');
+        themeStyle.textContent = `
+            .theme-transitioning * {
+                transition: background-color 300ms var(--md-sys-motion-easing-emphasized),
+                           color 300ms var(--md-sys-motion-easing-emphasized),
+                           border-color 300ms var(--md-sys-motion-easing-emphasized) !important;
+            }
+        `;
+        document.head.appendChild(themeStyle);
+
+        // Form validation
+        document.querySelector('.mood-form').addEventListener('submit', function(e) {
+            const selectedMood = document.getElementById('selected-mood').value;
+            if (!selectedMood) {
+                e.preventDefault();
+                showSnackbar('Please select a mood before saving.');
+                return false;
+            }
+        });
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        // System status check
+        async function checkSystemStatus() {
+            const dbStatus = document.getElementById('db-status');
+            const analyticsStatus = document.getElementById('analytics-status');
+            
+            try {
+                const dbResponse = await fetch('/health');
+                const dbData = await dbResponse.json();
+                dbStatus.className = dbData.status === 'healthy' ? 'status-indicator healthy' : 'status-indicator error';
+            } catch (error) {
+                dbStatus.className = 'status-indicator error';
+            }
+            
+            try {
+                const analyticsResponse = await fetch('/analytics-health');
+                const analyticsData = await analyticsResponse.json();
+                analyticsStatus.className = analyticsData.status === 'healthy' ? 'status-indicator healthy' : 'status-indicator error';
+            } catch (error) {
+                analyticsStatus.className = 'status-indicator error';
+            }
+        }
+
+        // Material Design 3 Date Picker
+        class MD3DatePicker {
+            constructor(inputId, calendarId) {
+                this.input = document.getElementById(inputId);
+                this.calendar = document.getElementById(calendarId);
+                this.currentDate = new Date();
+                this.selectedDate = null;
+                
+                this.init();
+            }
+            
+            init() {
+                this.renderCalendar();
+                this.bindEvents();
+                
+                // Set today as default
+                const today = new Date();
+                this.selectDate(today);
+            }
+            
+            bindEvents() {
+                // Toggle calendar
+                this.input.addEventListener('click', () => this.toggleCalendar());
+                
+                // Navigation - use event delegation for dynamically created elements
+                this.calendar.addEventListener('click', (e) => {
+                    if (e.target.closest('#prevMonth')) {
+                        this.previousMonth();
+                    } else if (e.target.closest('#nextMonth')) {
+                        this.nextMonth();
+                    } else if (e.target.closest('#prevYear')) {
+                        this.previousYear();
+                    } else if (e.target.closest('#nextYear')) {
+                        this.nextYear();
+                    }
+                });
+                
+                // Close on outside click
+                document.addEventListener('click', (e) => {
+                    if (!this.input.closest('.md-date-picker').contains(e.target)) {
+                        this.closeCalendar();
+                    }
+                });
+            }
+            
+            toggleCalendar() {
+                this.calendar.classList.toggle('open');
+            }
+            
+            closeCalendar() {
+                this.calendar.classList.remove('open');
+            }
+            
+            previousMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.renderCalendar();
+            }
+            
+            nextMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.renderCalendar();
+            }
+            
+            previousYear() {
+                this.currentDate.setFullYear(this.currentDate.getFullYear() - 1);
+                this.renderCalendar();
+            }
+            
+            nextYear() {
+                this.currentDate.setFullYear(this.currentDate.getFullYear() + 1);
+                this.renderCalendar();
+            }
+            
+            renderCalendar() {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                
+                // Update title
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+                document.getElementById('calendarTitle').textContent = `${monthNames[month]} ${year}`;
+                
+                // Clear days
+                const daysContainer = document.getElementById('calendarDays');
+                daysContainer.innerHTML = '';
+                
+                // Get first day of month and number of days
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDayOfWeek = firstDay.getDay();
+                
+                // Add previous month's trailing days
+                const prevMonth = new Date(year, month - 1, 0);
+                for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+                    const day = prevMonth.getDate() - i;
+                    const dayElement = this.createDayElement(day, true);
+                    daysContainer.appendChild(dayElement);
+                }
+                
+                // Add current month's days
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayElement = this.createDayElement(day, false);
+                    const dayDate = new Date(year, month, day);
+                    
+                    // Mark today
+                    const today = new Date();
+                    if (dayDate.toDateString() === today.toDateString()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    // Mark selected
+                    if (this.selectedDate && dayDate.toDateString() === this.selectedDate.toDateString()) {
+                        dayElement.classList.add('selected');
+                    }
+                    
+                    dayElement.addEventListener('click', () => this.selectDate(dayDate));
+                    daysContainer.appendChild(dayElement);
+                }
+                
+                // Add next month's leading days
+                const totalCells = daysContainer.children.length;
+                const remainingCells = 42 - totalCells; // 6 rows × 7 days
+                for (let day = 1; day <= remainingCells && day <= 14; day++) {
+                    const dayElement = this.createDayElement(day, true);
+                    daysContainer.appendChild(dayElement);
+                }
+            }
+            
+            createDayElement(day, isOtherMonth) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'md-calendar-day';
+                dayElement.textContent = day;
+                
+                if (isOtherMonth) {
+                    dayElement.classList.add('other-month');
+                }
+                
+                return dayElement;
+            }
+            
+            selectDate(date) {
+                this.selectedDate = new Date(date);
+                this.input.value = this.formatDate(date);
+                this.renderCalendar();
+                this.closeCalendar();
+                
+                // Trigger change event for auto-loading
+                const changeEvent = new Event('change', { bubbles: true });
+                this.input.dispatchEvent(changeEvent);
+            }
+            
+            formatDate(date) {
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+            
+            getSelectedDateISO() {
+                return this.selectedDate ? this.selectedDate.toISOString().split('T')[0] : null;
+            }
+        }
+
+        // Initialize Material Design 3 select components
+        function initializeMaterialSelects() {
+            document.querySelectorAll('.md-select').forEach(select => {
+                // Handle floating label state
+                function updateLabel() {
+                    const label = select.nextElementSibling;
+                    if (select.value && select.value !== '') {
+                        select.classList.add('has-value');
+                    } else {
+                        select.classList.remove('has-value');
+                    }
+                }
+                
+                select.addEventListener('change', updateLabel);
+                select.addEventListener('blur', updateLabel);
+                
+                // Auto-load data when selectors change
+                select.addEventListener('change', function() {
+                    // Daily Patterns auto-load
+                    if (select.id === 'dailyYearSelect' || select.id === 'dailyMonthSelect') {
+                        const year = document.getElementById('dailyYearSelect').value;
+                        const month = document.getElementById('dailyMonthSelect').value;
+                        
+                        if (year && month) {
+                            // Update date picker to show selected month/year
+                            if (window.dailyDatePicker) {
+                                window.dailyDatePicker.currentDate = new Date(year, month - 1, 1);
+                                window.dailyDatePicker.renderCalendar();
+                            }
+                        }
+                    }
+                    
+                    // Weekly Patterns auto-load
+                    if (select.id === 'yearSelect' || select.id === 'monthSelect' || select.id === 'weekSelect') {
+                        const year = document.getElementById('yearSelect').value;
+                        const month = document.getElementById('monthSelect').value;
+                        const week = document.getElementById('weekSelect').value;
+                        
+                        if (year && month && week) {
+                            loadWeeklyPatterns();
+                        }
+                    }
+                    
+                    // Weekly Trends auto-load
+                    if (select.id === 'trendsYearSelect' || select.id === 'trendsMonthSelect') {
+                        const year = document.getElementById('trendsYearSelect').value;
+                        const month = document.getElementById('trendsMonthSelect').value;
+                        
+                        if (year && month) {
+                            loadWeeklyTrends();
+                        }
+                    }
+                    
+                    // Monthly Trends auto-load
+                    if (select.id === 'monthlyYearSelect') {
+                        const year = document.getElementById('monthlyYearSelect').value;
+                        
+                        if (year) {
+                            loadMonthlyTrends();
+                        }
+                    }
+                });
+                
+                // Initial state
+                updateLabel();
+            });
+            
+            // Auto-load for Material Design 3 date picker
+            window.dailyDatePicker = new MD3DatePicker('dailyDatePicker', 'dailyDateCalendar');
+            
+            // Auto-load current day data using Chile timezone (UTC-3)
+            const now = new Date();
+            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtract 3 hours for Chile timezone
+            const today = chileTime.toISOString().split('T')[0];
+            console.log('Loading daily patterns for Chile date:', today);
+            
+            // Set the date picker to show current Chile date and listen for changes
+            const dailyDateInput = document.getElementById('dailyDatePicker');
+            if (dailyDateInput) {
+                dailyDateInput.value = today;
+                
+                // Listen for date changes
+                dailyDateInput.addEventListener('change', function() {
+                    const selectedDate = window.dailyDatePicker.getSelectedDateISO();
+                    if (selectedDate) {
+                        loadDailyPatterns(selectedDate);
+                    }
+                });
+            }
+            
+            loadDailyPatterns(today);
+        }
+
+        // Initialize dropdowns with Material Design 3 enhancements
+        function initializeDropdowns() {
+            const selectors = {
+                year: document.getElementById('yearSelect'),
+                month: document.getElementById('monthSelect'),
+                week: document.getElementById('weekSelect'),
+                trendsYear: document.getElementById('trendsYearSelect'),
+                trendsMonth: document.getElementById('trendsMonthSelect'),
+                monthlyYear: document.getElementById('monthlyYearSelect'),
+                dailyYear: document.getElementById('dailyYearSelect'),
+                dailyMonth: document.getElementById('dailyMonthSelect')
+            };
+            
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1;
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            // Populate years
+            [selectors.year, selectors.trendsYear, selectors.monthlyYear, selectors.dailyYear].forEach(select => {
+                if (select) {
+                    // Clear existing options
+                    select.innerHTML = '';
+                    for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        if (year === currentYear) option.selected = true;
+                        select.appendChild(option);
+                    }
+                }
+            });
+            
+            // Populate months
+            [selectors.month, selectors.trendsMonth, selectors.dailyMonth].forEach(select => {
+                if (select) {
+                    // Clear existing options
+                    select.innerHTML = '';
+                    months.forEach((month, index) => {
+                        const option = document.createElement('option');
+                        option.value = index + 1;
+                        option.textContent = month;
+                        if (index + 1 === currentMonth) option.selected = true;
+                        select.appendChild(option);
+                    });
+                }
+            });
+            
+            // Add event listeners for week updates
+            if (selectors.year && selectors.month && selectors.week) {
+                selectors.year.addEventListener('change', updateWeekOptions);
+                selectors.month.addEventListener('change', updateWeekOptions);
+                updateWeekOptions();
+            }
+        }
+
+        function updateWeekOptions() {
+            const yearSelect = document.getElementById('yearSelect');
+            const monthSelect = document.getElementById('monthSelect');
+            const weekSelect = document.getElementById('weekSelect');
+            
+            if (!yearSelect || !monthSelect || !weekSelect) return;
+            
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
+            
+            weekSelect.innerHTML = '';
+            
+            if (!year || !month) return;
+            
+            // Use Chile timezone for current date calculation
+            const now = new Date();
+            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // Subtract 3 hours for Chile timezone
+            const today = chileTime;
+            
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+            
+            // Find the first Sunday that affects this month (could be in previous month)
+            let weekStart = new Date(firstDay);
+            weekStart.setDate(firstDay.getDate() - firstDay.getDay()); // Go back to Sunday
+            
+            let weekCount = 1;
+            let currentWeekSelected = false;
+            
+            // Continue while the week overlaps with the target month
+            while (weekStart <= lastDay) {
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6); // Saturday
+                
+                // Only include weeks that have at least one day in the target month
+                if (weekEnd >= firstDay) {
+                    const option = document.createElement('option');
+                    option.value = weekCount;
+                    
+                    // Format dates for better readability
+                    const startDate = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const endDate = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    option.textContent = `${startDate} - ${endDate}`;
+                    
+                    // Select current week if we're in current month and year using Chile timezone
+                    if (year === today.getFullYear() && month === today.getMonth() + 1) {
+                        if (today >= weekStart && today <= weekEnd) {
+                            option.selected = true;
+                            currentWeekSelected = true;
+                            console.log('Selected current week:', option.textContent);
+                        }
+                    }
+                    
+                    weekSelect.appendChild(option);
+                    weekCount++;
+                }
+                
+                // Move to next week
+                weekStart.setDate(weekStart.getDate() + 7);
+                
+                // Safety break to prevent infinite loop
+                if (weekCount > 10) break;
+            }
+            
+            // If no current week was selected and we have weeks, select the first one
+            if (!currentWeekSelected && weekSelect.children.length > 0) {
+                weekSelect.children[0].selected = true;
+                console.log('Fallback: Selected first week');
+            }
+            
+            // Auto-load if all values are selected
+            if (year && month && weekSelect.value) {
+                console.log('Auto-loading weekly patterns for selected week');
+                loadWeeklyPatterns();
+            }
+        }
+
+        // Chart initialization with Material Design 3 colors
+        function initializeCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                family: 'Roboto',
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(103, 80, 164, 0.8)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                const moodLabels = {
+                                    1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                    4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
+                                };
+                                const moodLabel = moodLabels[Math.round(value)] || 'Unknown';
+                                return `${moodLabel} (${value.toFixed(2)})`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 1,
+                        max: 7,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                const labels = {
+                                    1: 'Very Bad', 2: 'Bad', 3: 'Slightly Bad',
+                                    4: 'Neutral', 5: 'Slightly Well', 6: 'Well', 7: 'Very Well'
+                                };
+                                return labels[value] || value;
+                            },
+                            font: {
+                                family: 'Roboto',
+                                size: 11
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                family: 'Roboto',
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Daily Chart
+            const dailyCtx = document.getElementById('dailyChart');
+            if (dailyCtx) {
+                const hourLabels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+                
+                window.dailyChart = new Chart(dailyCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: hourLabels,
+                        datasets: [{
+                            label: 'Loading...',
+                            data: new Array(24).fill(null),
+                            borderColor: '#6750a4',
+                            backgroundColor: 'rgba(103, 80, 164, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            spanGaps: true
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+            
+            // Initialize charts using SOLID architecture
+            initializeWeeklyChart();
+            
+            // Weekly Chart (Legacy - will be replaced by SOLID service)
+            const weeklyCtx = document.getElementById('weeklyChart');
+            if (weeklyCtx && !weeklyChartService) {
+                // Fallback to legacy chart if SOLID service fails
+                window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            borderColor: '#625b71',
+                            backgroundColor: 'rgba(98, 91, 113, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            spanGaps: false  // Don't connect lines across missing data (null values)
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+            
+            // Weekly Trends Chart
+            const weeklyTrendCtx = document.getElementById('weeklyTrendChart');
+            if (weeklyTrendCtx) {
+                window.weeklyTrendChart = new Chart(weeklyTrendCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: [0, 0, 0, 0],
+                            backgroundColor: 'rgba(125, 82, 96, 0.6)',
+                            borderColor: '#7d5260',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                min: 0
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Monthly Trends Chart
+            const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
+            if (monthlyTrendCtx) {
+                window.monthlyTrendChart = new Chart(monthlyTrendCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: new Array(12).fill(0),
+                            backgroundColor: 'rgba(103, 80, 164, 0.6)',
+                            borderColor: '#6750a4',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y: {
+                                ...chartOptions.scales.y,
+                                min: 0
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function loadAverageMoodData() {
+            fetch('/hourly_average_mood')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.dailyChart) {
+                        window.dailyChart.data.labels = data.labels || [];
+                        window.dailyChart.data.datasets[0].data = data.data || [];
+                        window.dailyChart.data.datasets[0].label = 'Average Mood Per Hour (All Time)';
+                        window.dailyChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading hourly average mood data:', error));
+        }
+
+        // Data loading functions
+        function loadDailyPatterns(selectedDate) {
+            const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.dailyChart) {
+                        window.dailyChart.data.labels = data.labels || [];
+                        window.dailyChart.data.datasets[0].data = data.data || [];
+                        window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
+                        window.dailyChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading daily patterns:', error));
+        }
+
+        // SOLID Chart Implementation
+        let weeklyChartService = null;
+        
+        function initializeWeeklyChart() {
+            try {
+                // Check if SOLID classes are available
+                if (typeof ChartFactory === 'undefined') {
+                    console.warn('SOLID chart classes not loaded, using legacy chart');
+                    initializeLegacyWeeklyChart();
+                    return;
+                }
+                
+                // Create chart service using factory (SOLID principles)
+                weeklyChartService = ChartFactory.createWeeklyChartService();
+                
+                // Initialize with chart element
+                weeklyChartService.initialize('weeklyChart');
+                
+                console.log('Weekly chart service initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize weekly chart service:', error);
+                // Fall back to legacy chart initialization
+                initializeLegacyWeeklyChart();
+            }
+        }
+        
+        function initializeLegacyWeeklyChart() {
+            const weeklyCtx = document.getElementById('weeklyChart');
+            if (weeklyCtx) {
+                window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            borderColor: '#625b71',
+                            backgroundColor: 'rgba(98, 91, 113, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            spanGaps: false
+                        }]
+                    },
+                    options: chartOptions
+                });
+                console.log('Legacy weekly chart initialized');
+            }
+        }
+        
+        function loadWeeklyPatterns() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const week = document.getElementById('weekSelect').value;
+            
+            console.log('Loading weekly patterns:', {year, month, week});
+            
+            if (!year || !month || !week) {
+                showSnackbar('Please select Year, Month, and Week');
+                return;
+            }
+            
+            if (weeklyChartService) {
+                // Use SOLID service
+                weeklyChartService.loadWeeklyPatterns({
+                    year: parseInt(year),
+                    month: parseInt(month),
+                    week: parseInt(week)
+                });
+            } else if (window.weeklyChart) {
+                // Fallback to legacy method
+                loadWeeklyPatternsLegacy();
+            }
+        }
+        
+        function loadCurrentWeek() {
+            if (weeklyChartService) {
+                weeklyChartService.loadCurrentWeek();
+            } else if (window.weeklyChart) {
+                loadCurrentWeekLegacy();
+            }
+        }
+        
+        function loadWeeklyPatternsLegacy() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const week = document.getElementById('weekSelect').value;
+            
+            fetch(`/weekly_patterns?year=${year}&month=${month}&week=${week}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.labels = data.days || data.labels || [];
+                        window.weeklyChart.data.datasets[0].data = data.data || [];
+                        window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+                        window.weeklyChart.update('none');
+                    }
+                })
+                .catch(error => console.error('Error loading weekly patterns:', error));
+        }
+        
+        function loadCurrentWeekLegacy() {
+            fetch('/weekly_patterns')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.labels = data.days || data.labels || [];
+                        window.weeklyChart.data.datasets[0].data = data.data || [];
+                        window.weeklyChart.data.datasets[0].label = 'Current Week';
+                        window.weeklyChart.update('none');
+                    }
+                })
+                .catch(error => console.error('Error loading current week:', error));
+        }
+
+        function processWeeklyData(data) {
+            // Convert 0 values to null for line breaks, but keep backend data safe
+            const processedData = (data.data || []).map(value => {
+                // If value is 0 (no data), convert to null for Chart.js line breaks
+                // If value is between 1-7 (valid mood), keep it
+                return (value === 0) ? null : value;
+            });
+            
+            return {
+                ...data,
+                data: processedData
+            };
+        }
+
+        function updateWeeklyChart(rawData) {
+            console.log('DEBUG: updateWeeklyChart called with:', rawData);
+            
+            if (!window.weeklyChart) {
+                console.error('DEBUG: weeklyChart not found, cannot update');
+                return;
+            }
+            
+            // Process data to convert 0s to nulls for line breaks
+            const data = processWeeklyData(rawData);
+            console.log('DEBUG: Processed data:', data);
+            
+            try {
+                // Method 1: Try normal update
+                window.weeklyChart.data.labels = data.days || data.labels || [];
+                window.weeklyChart.data.datasets[0].data = data.data || [];
+                window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+                
+                // Force immediate update without animation
+                window.weeklyChart.update('none');
+                window.weeklyChart.render();
+                
+                console.log('DEBUG: Chart updated successfully');
+                
+            } catch (error) {
+                console.error('DEBUG: Chart update failed, trying recreation:', error);
+                
+                // Method 2: Destroy and recreate chart if update fails
+                try {
+                    window.weeklyChart.destroy();
+                    
+                    const weeklyCtx = document.getElementById('weeklyChart');
+                    if (weeklyCtx) {
+                        window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: data.days || data.labels || [],
+                                datasets: [{
+                                    label: data.period || 'Weekly Patterns',
+                                    data: data.data || [],
+                                    borderColor: '#6750A4',
+                                    backgroundColor: 'rgba(103, 80, 164, 0.1)',
+                                    tension: 0.4,
+                                    fill: true,
+                                    borderWidth: 2,
+                                    pointRadius: 4,
+                                    spanGaps: false  // Don't connect lines across missing data
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 7,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        console.log('DEBUG: Chart recreated successfully');
+                    }
+                } catch (recreateError) {
+                    console.error('DEBUG: Chart recreation also failed:', recreateError);
+                }
+            }
+        }
+
+        function loadWeeklyPatterns() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const week = document.getElementById('weekSelect').value;
+            
+            console.log('DEBUG: Loading weekly patterns', {year, month, week});
+            
+            if (!year || !month || !week) {
+                showSnackbar('Please select Year, Month, and Week');
+                return;
+            }
+            
+            const url = `/weekly_patterns?year=${year}&month=${month}&week=${week}`;
+            console.log('DEBUG: Fetching URL:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('DEBUG: Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('DEBUG: Received data:', data);
+                    updateWeeklyChart(data);
+                })
+                .catch(error => {
+                    console.error('Error loading weekly patterns:', error);
+                    console.error('DEBUG: Full error details:', error);
+                });
+        }
+
+        function loadCurrentWeek() {
+            fetch('/weekly_patterns')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('DEBUG: Current week data:', data);
+                    
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.labels = data.days || data.labels || [];
+                        window.weeklyChart.data.datasets[0].data = data.data || [];
+                        window.weeklyChart.data.datasets[0].label = 'Current Week';
+                        
+                        // Force chart to redraw completely
+                        window.weeklyChart.update('none');
+                        window.weeklyChart.render();
+                        
+                        console.log('DEBUG: Current week chart updated');
+                    }
+                })
+                .catch(error => console.error('Error loading current week:', error));
+        }
+
+        function loadWeeklyTrends() {
+            const year = document.getElementById('trendsYearSelect').value;
+            const month = document.getElementById('trendsMonthSelect').value;
+            
+            if (!year || !month) {
+                showSnackbar('Please select Year and Month');
+                return;
+            }
+            
+            fetch(`/weekly_trends?year=${year}&month=${month}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyTrendChart) {
+                        window.weeklyTrendChart.data.labels = data.labels || [];
+                        window.weeklyTrendChart.data.datasets[0].data = data.data || [];
+                        window.weeklyTrendChart.data.datasets[0].label = data.period || 'Weekly Trends';
+                        window.weeklyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading weekly trends:', error));
+        }
+
+        function loadCurrentMonthTrends() {
+            fetch('/weekly_trends')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyTrendChart) {
+                        window.weeklyTrendChart.data.labels = data.labels || [];
+                        window.weeklyTrendChart.data.datasets[0].data = data.data || [];
+                        window.weeklyTrendChart.data.datasets[0].label = 'Current Month Trends';
+                        window.weeklyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading current month trends:', error));
+        }
+
+        function loadMonthlyTrends() {
+            const year = document.getElementById('monthlyYearSelect').value;
+            
+            if (!year) {
+                showSnackbar('Please select a Year');
+                return;
+            }
+            
+            fetch(`/monthly_trends?year=${year}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.monthlyTrendChart) {
+                        window.monthlyTrendChart.data.labels = data.labels || [];
+                        window.monthlyTrendChart.data.datasets[0].data = data.data || [];
+                        window.monthlyTrendChart.data.datasets[0].label = data.period || 'Monthly Trends';
+                        window.monthlyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading monthly trends:', error));
+        }
+
+        function loadCurrentYearTrends() {
+            fetch('/monthly_trends')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.monthlyTrendChart) {
+                        window.monthlyTrendChart.data.labels = data.labels || [];
+                        window.monthlyTrendChart.data.datasets[0].data = data.data || [];
+                        window.monthlyTrendChart.data.datasets[0].label = 'Current Year Trends';
+                        window.monthlyTrendChart.update();
+                    }
+                })
+                .catch(error => console.error('Error loading current year trends:', error));
+        }
+
+        // Enhanced Material Design 3 PDF Export
+        function exportToPDF() {
+            try {
+                console.log('Starting PDF export...');
+                
+                // Check if jsPDF is available globally
+                if (typeof window.jsPDF !== 'undefined') {
+                    var pdf = new window.jsPDF('p', 'mm', 'a4');
+                } else if (typeof jsPDF !== 'undefined') {
+                    var pdf = new jsPDF('p', 'mm', 'a4');
+                } else if (window.jspdf && window.jspdf.jsPDF) {
+                    var pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+                } else {
+                    console.error('jsPDF not found');
+                    alert('PDF library not loaded. Please refresh the page and try again.');
+                    return;
+                }
+                
+                console.log('PDF instance created successfully');
+            
+            // Material Design 3 Color Palette
+            const colors = {
+                primary: [103, 80, 164],
+                onPrimary: [255, 255, 255],
+                primaryContainer: [234, 221, 255],
+                onPrimaryContainer: [33, 0, 93],
+                secondary: [98, 91, 113],
+                secondaryContainer: [232, 222, 248],
+                tertiary: [125, 82, 96],
+                tertiaryContainer: [255, 216, 228],
+                surface: [255, 251, 254],
+                surfaceContainer: [243, 237, 247],
+                surfaceContainerHigh: [236, 230, 240],
+                onSurface: [28, 27, 31],
+                onSurfaceVariant: [73, 69, 79],
+                outline: [121, 116, 126]
+            };
+            
+            let yPosition = 20;
+            
+            // Material Design 3 Header with rounded corners
+            pdf.setFillColor(...colors.primary);
+            pdf.roundedRect(15, 15, 180, 40, 8, 8, 'F');
+            
+            // Header content
+            pdf.setTextColor(...colors.onPrimary);
+            pdf.setFontSize(24);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Mood Analytics Report', 25, 35);
+            
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'normal');
+            const userName = '{{ user.name if user and user.name else "User" }}';
+            pdf.text(`Generated for ${userName}`, 25, 45);
+            
+            yPosition = 70;
+            
+            // Material Design 3 Card for report info
+            pdf.setFillColor(...colors.surfaceContainer);
+            pdf.roundedRect(15, yPosition - 5, 180, 25, 6, 6, 'F');
+            
+            pdf.setTextColor(...colors.onSurfaceVariant);
+            pdf.setFontSize(11);
+            const now = new Date();
+            const reportDate = now.toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+            pdf.text(`Report generated on ${reportDate} at ${now.toLocaleTimeString()}`, 20, yPosition + 8);
+            yPosition += 35;
+            
+            // Analytics Overview Section
+            pdf.setFillColor(...colors.primaryContainer);
+            pdf.roundedRect(15, yPosition - 5, 180, 20, 4, 4, 'F');
+            
+            pdf.setTextColor(...colors.onPrimaryContainer);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Analytics Overview', 20, yPosition + 7);
+            yPosition += 25;
+            
+            // Metrics Cards in Material Design 3 style
+            const metrics = [
+                { label: 'Daily Average', value: '{{ analytics.daily_average }}', icon: '📊' },
+                { label: 'Current Streak', value: document.getElementById('current-streak').textContent, icon: '🔥' },
+                { label: 'Best This Week', value: document.getElementById('best-mood').textContent, icon: '⭐' },
+                { label: 'Total Days', value: '{{ analytics.total_entries }}', icon: '📅' }
+            ];
+            
+            // Create 2x2 grid for metrics
+            for (let i = 0; i < metrics.length; i++) {
+                const col = i % 2;
+                const row = Math.floor(i / 2);
+                const x = 20 + (col * 85);
+                const y = yPosition + (row * 35);
+                
+                // Metric card background
+                pdf.setFillColor(...colors.surfaceContainerHigh);
+                pdf.roundedRect(x, y, 80, 30, 4, 4, 'F');
+                
+                // Metric value
+                pdf.setTextColor(...colors.primary);
+                pdf.setFontSize(18);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(metrics[i].value, x + 40, y + 12, { align: 'center' });
+                
+                // Metric label
+                pdf.setTextColor(...colors.onSurfaceVariant);
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(metrics[i].label, x + 40, y + 22, { align: 'center' });
+            }
+            yPosition += 80;
+            
+            // Charts Section
+            if (yPosition > 200) {
+                pdf.addPage();
+                yPosition = 20;
+            }
+            
+            // Charts header
+            pdf.setFillColor(...colors.secondaryContainer);
+            pdf.roundedRect(15, yPosition - 5, 180, 20, 4, 4, 'F');
+            
+            pdf.setTextColor(...colors.onSurface);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Analytics Charts', 20, yPosition + 7);
+            yPosition += 30;
+            
+            // Export mood distribution chart
+            const moodDistChart = document.getElementById('moodDistributionChart');
+            if (moodDistChart) {
+                try {
+                    const chartCanvas = moodDistChart.querySelector('canvas');
+                    if (chartCanvas) {
+                        const chartImg = chartCanvas.toDataURL('image/png', 1.0);
+                        
+                        // Chart card background
+                        pdf.setFillColor(...colors.surfaceContainer);
+                        pdf.roundedRect(15, yPosition - 5, 180, 70, 6, 6, 'F');
+                        
+                        pdf.setTextColor(...colors.onSurface);
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.text('Mood Distribution (Last 30 Days)', 20, yPosition + 8);
+                        
+                        // Add chart with proper sizing
+                        pdf.addImage(chartImg, 'PNG', 25, yPosition + 12, 150, 45);
+                        yPosition += 80;
+                    }
+                } catch (error) {
+                    console.warn('Could not export mood distribution chart:', error);
+                }
+            }
+            
+            // Export existing charts with better spacing
+            const existingCharts = [
+                { id: 'weeklyChart', title: 'Weekly Patterns' },
+                { id: 'weeklyTrendChart', title: 'Weekly Trends' },
+                { id: 'monthlyTrendChart', title: 'Monthly Trends' }
+            ];
+            
+            for (const chartInfo of existingCharts) {
+                const chart = window[chartInfo.id];
+                if (chart) {
+                    // Add new page if needed
+                    if (yPosition > 200) {
+                        pdf.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    const canvas = chart.canvas;
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Better dimensions to prevent stretching
+                    tempCanvas.width = 600;
+                    tempCanvas.height = 300;
+                    
+                    tempCtx.drawImage(canvas, 0, 0, 600, 300);
+                    const imgData = tempCanvas.toDataURL('image/png');
+                    
+                    // Chart card background
+                    pdf.setFillColor(...colors.surfaceContainer);
+                    pdf.roundedRect(15, yPosition - 5, 180, 70, 6, 6, 'F');
+                    
+                    pdf.setTextColor(...colors.onSurface);
+                    pdf.setFontSize(14);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text(chartInfo.title, 20, yPosition + 8);
+                    
+                    // Add chart with proper sizing
+                    pdf.addImage(imgData, 'PNG', 25, yPosition + 12, 150, 45);
+                    yPosition += 80;
+                }
+            }
+            
+            // Top Triggers Section
+            if (yPosition > 200) {
+                pdf.addPage();
+                yPosition = 20;
+            }
+            
+            pdf.setFillColor(...colors.tertiaryContainer);
+            pdf.roundedRect(15, yPosition - 5, 180, 20, 4, 4, 'F');
+            
+            pdf.setTextColor(...colors.onSurface);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Top Mood Triggers', 20, yPosition + 7);
+            yPosition += 25;
+            
+            // Get trigger data from the page
+            const triggerElements = document.querySelectorAll('.trigger-analytics-item');
+            triggerElements.forEach((element, index) => {
+                if (index < 8) { // Limit to top 8 triggers
+                    const triggerName = element.querySelector('span').textContent;
+                    const triggerCount = element.querySelector('.trigger-count').textContent;
+                    
+                    // Trigger item background
+                    pdf.setFillColor(...colors.surfaceContainerHigh);
+                    pdf.roundedRect(20 + (index % 2) * 85, yPosition + Math.floor(index / 2) * 15, 80, 12, 3, 3, 'F');
+                    
+                    pdf.setTextColor(...colors.onSurface);
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text(`${triggerName}: ${triggerCount}`, 25 + (index % 2) * 85, yPosition + Math.floor(index / 2) * 15 + 8);
+                }
+            });
+            yPosition += 70;
+            
+            // Quick Insights Section
+            if (yPosition > 200) {
+                pdf.addPage();
+                yPosition = 20;
+            }
+            
+            pdf.setFillColor(...colors.primaryContainer);
+            pdf.roundedRect(15, yPosition - 5, 180, 20, 4, 4, 'F');
+            
+            pdf.setTextColor(...colors.onPrimaryContainer);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Key Insights', 20, yPosition + 7);
+            yPosition += 25;
+            
+            // Get insights from the page
+            const insightElements = document.querySelectorAll('.insight-item span');
+            insightElements.forEach((element, index) => {
+                if (index < 4) { // Limit to 4 insights
+                    const insightText = element.textContent;
+                    
+                    // Insight card
+                    pdf.setFillColor(...colors.surfaceContainer);
+                    pdf.roundedRect(15, yPosition - 2, 180, 18, 4, 4, 'F');
+                    
+                    pdf.setTextColor(...colors.onSurface);
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'normal');
+                    
+                    // Split long text
+                    const splitText = pdf.splitTextToSize(insightText, 170);
+                    pdf.text(splitText, 20, yPosition + 6);
+                    yPosition += 22;
+                }
+            });
+            
+            // Material Design 3 Footer
+            const pageCount = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                pdf.setPage(i);
+                
+                // Footer background
+                pdf.setFillColor(...colors.surfaceContainer);
+                pdf.roundedRect(15, 280, 180, 15, 4, 4, 'F');
+                
+                pdf.setFontSize(9);
+                pdf.setTextColor(...colors.onSurfaceVariant);
+                pdf.text(`Mood Tracker Report - Page ${i} of ${pageCount}`, 105, 289, { align: 'center' });
+                pdf.text('Generated with Material Design 3', 105, 285, { align: 'center' });
+            }
+            
+            // Save with Material Design 3 naming convention
+            const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const fileName = `mood-analytics-report-${timestamp}.pdf`;
+            console.log('Saving PDF with filename:', fileName);
+            
+            pdf.save(fileName);
+            console.log('PDF save command executed');
+            
+            // Show success message
+            showNotification('📄 PDF report generated successfully!', 'success');
+            
+        } catch (error) {
+            console.error('PDF Export Error:', error);
+            showNotification('❌ Failed to generate PDF report. Please try again.', 'error');
+        }
+    }
+
+        // Notification system for user feedback
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.md-snackbar');
+            existingNotifications.forEach(notification => notification.remove());
+            
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = 'md-snackbar';
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 16px; cursor: pointer;">✕</button>
+            `;
+            
+            // Style based on type
+            if (type === 'success') {
+                notification.style.backgroundColor = 'var(--md-sys-color-tertiary-container)';
+                notification.style.color = 'var(--md-sys-color-on-tertiary-container)';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = 'var(--md-sys-color-error-container)';
+                notification.style.color = 'var(--md-sys-color-on-error-container)';
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize everything when DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            initializeMaterialSelects();
+            initializeDropdowns();
+            initializeCharts();
+            initializeMoodForm();
+            
+            // Load initial data
+            setTimeout(() => {
+                // Don't load daily patterns here as it's already loaded with current day
+                loadCurrentWeek();
+                loadCurrentMonthTrends();
+                loadCurrentYearTrends();
+                loadEnhancedAnalytics();
+            }, 500);
+            
+            // Check system status
+            checkSystemStatus();
+            setInterval(checkSystemStatus, 10000);
+        });
+
+        // Initialize mood form functionality
+        function initializeMoodForm() {
+            const moodCards = document.querySelectorAll('.mood-card');
+            const triggerTags = document.querySelectorAll('.trigger-tag');
+            const selectedMoodInput = document.getElementById('selected-mood');
+            const selectedTriggersInput = document.getElementById('selected-triggers');
+            const moodForm = document.querySelector('.mood-form');
+            
+            // Mood selection (existing functionality)
+            moodCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    moodCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedMoodInput.value = this.dataset.mood;
+                    createRipple(this, event);
+                });
+            });
+            
+            // Trigger selection (new functionality)
+            triggerTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                    updateSelectedTriggers();
+                    createRipple(this, event);
+                });
+            });
+            
+            function updateSelectedTriggers() {
+                const selectedTriggers = Array.from(document.querySelectorAll('.trigger-tag.selected'))
+                    .map(tag => tag.dataset.trigger);
+                selectedTriggersInput.value = selectedTriggers.join(',');
+            }
+            
+            // Form submission (existing functionality with triggers)
+            if (moodForm) {
+                moodForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!selectedMoodInput.value) {
+                        showSnackbar('Please select a mood before saving.');
+                        return;
+                    }
+                    
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
+                    submitBtn.disabled = true;
+                    
+                    const formData = new FormData(this);
+                    fetch('/save_mood', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.ok ? response.json() : Promise.reject('Network error'))
+                    .then(data => {
+                        if (data.success) {
+                            // Reset form
+                            moodCards.forEach(c => c.classList.remove('selected'));
+                            triggerTags.forEach(t => t.classList.remove('selected'));
+                            selectedMoodInput.value = '';
+                            selectedTriggersInput.value = '';
+                            this.querySelector('textarea').value = '';
+                            showSnackbar('Mood saved successfully!');
+                            
+                            // Refresh data
+                            const now = new Date();
+                            const chileTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+                            const today = chileTime.toISOString().split('T')[0];
+                            loadDailyPatterns(today);
+                            loadCurrentWeek();
+                            loadCurrentMonthTrends();
+                            loadCurrentYearTrends();
+                            loadAverageMoodData();
+                            refreshRecentMoods();
+                        } else {
+                            showSnackbar(data.error || 'Error saving mood - please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showSnackbar('Error saving mood - please try again.');
+                    })
+                    .finally(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    });
+                });
+            }
+        }
+        
+        // Material Design 3 Snackbar function
+        function showSnackbar(message) {
+            const snackbar = document.getElementById('snackbar');
+            const text = snackbar.querySelector('.md-snackbar-text');
+            text.textContent = message;
+            
+            snackbar.classList.add('show');
+            
+            setTimeout(() => {
+                snackbar.classList.remove('show');
+            }, 4000);
+        }
+        
+        // Function to refresh Recent Moods section
+        function refreshRecentMoods() {
+            fetch('/recent_moods')
+                .then(response => response.json())
+                .then(data => {
+                    const historyContainer = document.querySelector('.history-container');
+                    if (historyContainer && data.moods) {
+                        let html = '';
+                        data.moods.forEach(mood => {
+                            const date = new Date(mood.date).toLocaleDateString();
+                            html += `
+                                <div class="history-item">
+                                    <div class="history-date">${date}</div>
+                                    <div class="history-mood">${mood.mood}</div>
+                                    ${mood.notes ? `<div class="history-notes">${mood.notes}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        historyContainer.innerHTML = html;
+                    }
+                })
+                .catch(error => console.error('Error refreshing recent moods:', error));
+        }
+        
+        // Enhanced Analytics Functions
+        function loadEnhancedAnalytics() {
+            loadMoodDistribution();
+            loadTopTriggers();
+            loadWeekComparison();
+            loadQuickInsights();
+        }
+        
+        function loadMoodDistribution() {
+            fetch('/api/analytics/mood-distribution')
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('moodDistributionChart');
+                    if (ctx && data.success) {
+                        const moodOrder = ['very well', 'well', 'slightly well', 'neutral', 'slightly bad', 'bad', 'very bad'];
+                        const moodColors = ['#7d5260', '#4caf50', '#8bc34a', '#79747e', '#ff9800', '#ff5722', '#ba1a1a'];
+                        
+                        // Create ordered data
+                        const orderedData = moodOrder.map(mood => {
+                            const found = data.distribution.find(d => d.mood === mood);
+                            return found ? found.count : 0;
+                        });
+                        
+                        const orderedLabels = moodOrder.map(mood => 
+                            mood.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+                        );
+                        
+                        new Chart(ctx.getContext('2d'), {
+                            type: 'doughnut',
+                            data: {
+                                labels: orderedLabels,
+                                datasets: [{
+                                    data: orderedData,
+                                    backgroundColor: moodColors,
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: { 
+                                            font: { family: 'Roboto', size: 10 }, 
+                                            padding: 8, 
+                                            usePointStyle: true,
+                                            boxWidth: 12
+                                        }
+                                    }
+                                },
+                                layout: {
+                                    padding: {
+                                        top: 10,
+                                        bottom: 10,
+                                        left: 10,
+                                        right: 10
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        // Show message if no data
+                        ctx.getContext('2d').font = '14px Roboto';
+                        ctx.getContext('2d').fillStyle = '#79747e';
+                        ctx.getContext('2d').textAlign = 'center';
+                        ctx.getContext('2d').fillText('No mood data available yet', ctx.width/2, ctx.height/2);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading mood distribution:', error);
+                });
+        }
+        
+        function loadTopTriggers() {
+            fetch('/api/analytics/triggers')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('top-triggers');
+                    if (data.success && data.triggers.length > 0) {
+                        const triggerIcons = {
+                            'work': 'fa-briefcase', 'meeting': 'fa-users', 'deadline': 'fa-clock', 'project': 'fa-tasks',
+                            'exercise': 'fa-dumbbell', 'sleep': 'fa-bed', 'food': 'fa-utensils', 'medication': 'fa-pills',
+                            'family': 'fa-home', 'friends': 'fa-user-friends', 'party': 'fa-glass-cheers', 'date': 'fa-heart',
+                            'music': 'fa-music', 'reading': 'fa-book', 'gaming': 'fa-gamepad', 'cooking': 'fa-cookie-bite',
+                            'weather': 'fa-cloud-sun', 'home': 'fa-house', 'outdoors': 'fa-tree', 'travel': 'fa-plane',
+                            'stress': 'fa-exclamation-triangle', 'relaxation': 'fa-spa', 'excitement': 'fa-star', 'anxiety': 'fa-dizzy'
+                        };
+                        
+                        container.innerHTML = data.triggers.slice(0, 5).map(trigger => `
+                            <div class="trigger-analytics-item">
+                                <i class="fas ${triggerIcons[trigger.name] || 'fa-tag'}"></i>
+                                <span>${trigger.name}</span>
+                                <span class="trigger-count">${trigger.count}</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<div class="loading-triggers">No trigger data available yet</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading triggers:', error);
+                    document.getElementById('top-triggers').innerHTML = '<div class="loading-triggers">Error loading triggers</div>';
+                });
+        }
+        
+        function loadWeekComparison() {
+            fetch('/api/analytics/week-comparison')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const thisWeek = data.this_week;
+                        const lastWeek = data.last_week;
+                        const change = thisWeek - lastWeek;
+                        
+                        document.getElementById('this-week-avg').textContent = thisWeek.toFixed(1);
+                        document.getElementById('last-week-avg').textContent = lastWeek.toFixed(1);
+                        
+                        const changeElement = document.getElementById('week-change');
+                        const changeText = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+                        changeElement.textContent = changeText;
+                        changeElement.className = `week-value ${change > 0 ? 'positive' : change < 0 ? 'negative' : ''}`;
+                        
+                        document.getElementById('current-streak').textContent = data.streak;
+                        
+                        // Update best mood based on this week's data
+                        const bestMood = thisWeek >= 6.5 ? 'Very Well' : thisWeek >= 5.5 ? 'Well' : 
+                                        thisWeek >= 4.5 ? 'Slightly Well' : thisWeek >= 3.5 ? 'Neutral' : 'Below Average';
+                        document.getElementById('best-mood').textContent = bestMood;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading week comparison:', error);
+                });
+        }
+        
+        function loadQuickInsights() {
+            fetch('/api/analytics/quick-insights')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('quick-insights');
+                    if (data.success && data.insights.length > 0) {
+                        container.innerHTML = data.insights.map(insight => `
+                            <div class="insight-item">
+                                <i class="fas ${insight.icon}"></i>
+                                <span>${insight.text}</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = `
+                            <div class="insight-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Keep logging moods to see personalized insights!</span>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading insights:', error);
+                    document.getElementById('quick-insights').innerHTML = `
+                        <div class="insight-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Error loading insights</span>
+                        </div>
+                    `;
+                });
+        }
+    </script>
+    
+    <!-- Material Design 3 Snackbar -->
+    <div id="snackbar" class="md-snackbar">
+        <div class="md-snackbar-content">
+            <span class="md-snackbar-text"></span>
+        </div>
+    </div>
+</body>
+</html>
