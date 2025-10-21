@@ -412,6 +412,46 @@
             transform: scale(1.1);
         }
 
+        /* Mobile Hamburger Row */
+        .mobile-hamburger-row {
+            display: none;
+            padding: 8px 16px;
+        }
+
+        /* Theme Icon Button */
+        .theme-icon-button {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 20px;
+            padding: 8px;
+            border-radius: var(--md-sys-shape-corner-full);
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+            position: relative;
+        }
+
+        .theme-icon-button:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        /* Show sun icon in light theme, moon icon in dark theme */
+        .theme-icon-light {
+            display: block;
+        }
+
+        .theme-icon-dark {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-icon-light {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-icon-dark {
+            display: block;
+        }
+
         .mobile-nav-overlay {
             display: none;
             position: fixed;
@@ -2027,6 +2067,10 @@
                 display: none;
             }
             
+            .mobile-hamburger-row {
+                display: block;
+            }
+            
             .hamburger-menu {
                 display: block;
             }
@@ -2177,11 +2221,11 @@
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
                 </a>
-                <button class="hamburger-menu" onclick="toggleMobileNav()" aria-label="Open navigation menu">
-                    <i class="fas fa-bars"></i>
-                </button>
                 <div class="theme-toggle">
-                    <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                    <button class="theme-icon-button" onclick="toggleTheme(); return false;" aria-label="Toggle theme">
+                        <i class="fas fa-sun theme-icon-light"></i>
+                        <i class="fas fa-moon theme-icon-dark"></i>
+                    </button>
                 </div>
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <span class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">Welcome, {{ user.name }}</span>
@@ -2191,6 +2235,11 @@
                     </a>
                 </div>
             </div>
+        </div>
+        <div class="mobile-hamburger-row">
+            <button class="hamburger-menu" onclick="toggleMobileNav()" aria-label="Open navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </header>
 
