@@ -88,6 +88,15 @@ class PDFExporter:
         
         story = []
         
+        # Mood distribution chart
+        distribution_chart_path = self._create_mood_distribution_chart()
+        if distribution_chart_path:
+            story.extend([
+                Paragraph("🎯 Mood Distribution (Last 30 Days)", self._get_heading_style()),
+                Image(distribution_chart_path, width=6*inch, height=4*inch),
+                Spacer(1, 20)
+            ])
+        
         # Weekly patterns chart
         weekly_chart_path = self._create_weekly_chart()
         if weekly_chart_path:
@@ -106,7 +115,74 @@ class PDFExporter:
                 Spacer(1, 20)
             ])
         
+        # Daily patterns chart
+        daily_chart_path = self._create_daily_patterns_chart()
+        if daily_chart_path:
+            story.extend([
+                Paragraph("🕐 Daily Patterns", self._get_heading_style()),
+                Image(daily_chart_path, width=6*inch, height=3*inch),
+                Spacer(1, 20)
+            ])
+        
         return story
+    
+    def _create_mood_distribution_chart(self):
+        """Create mood distribution pie chart"""
+        try:
+            from datetime import datetime, timedelta
+            from collections import Counter
+            
+            # Get last 30 days of moods
+            thirty_days_ago = datetime.now().date() - timedelta(days=30)
+            recent_moods = [mood for mood in self.moods if mood['date'] >= thirty_days_ago]
+            
+            if not recent_moods:
+                return None
+            
+            # Count mood occurrences
+            mood_counts = Counter(mood['mood'] for mood in recent_moods)
+            
+            # Define colors for each mood
+            mood_colors = {
+                'very bad': '#dc2626',
+                'bad': '#ff5722', 
+                'slightly bad': '#ff9800',
+                'neutral': '#6b7280',
+                'slightly well': '#8bc34a',
+                'well': '#4caf50',
+                'very well': '#7d5260'
+            }
+            
+            # Prepare data
+            moods = list(mood_counts.keys())
+            counts = list(mood_counts.values())
+            colors = [mood_colors.get(mood, '#6b7280') for mood in moods]
+            
+            # Create pie chart
+            fig, ax = plt.subplots(figsize=(8, 6), facecolor='white')
+            wedges, texts, autotexts = ax.pie(counts, labels=[mood.title() for mood in moods], 
+                                            colors=colors, autopct='%1.1f%%', startangle=90,
+                                            textprops={'fontsize': 10})
+            
+            # Style the chart
+            ax.set_title('Mood Distribution (Last 30 Days)', fontsize=14, fontweight='bold', 
+                        color='#1e293b', pad=20)
+            
+            # Make percentage text bold and white
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_fontweight('bold')
+                autotext.set_fontsize(9)
+            
+            plt.tight_layout()
+            
+            chart_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+            plt.savefig(chart_file.name, dpi=150, bbox_inches='tight', facecolor='white')
+            plt.close()
+            
+            return chart_file.name
+        except Exception:
+            return None
     
     def _create_weekly_chart(self):
         """Create weekly patterns chart"""
@@ -155,6 +231,33 @@ class PDFExporter:
             ax.grid(True, alpha=0.3)
             ax.set_facecolor('#f8fafc')
             plt.xticks(rotation=45)
+            plt.tight_layout()
+            
+            chart_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+            plt.savefig(chart_file.name, dpi=150, bbox_inches='tight', facecolor='white')
+            plt.close()
+            
+            return chart_file.name
+        except Exception:
+            return None
+    
+    def _create_daily_patterns_chart(self):
+        """Create daily patterns (hourly) chart"""
+        try:
+            daily_data = self.analytics.get_daily_patterns()
+            
+            fig, ax = plt.subplots(figsize=(8, 4), facecolor='white')
+            ax.plot(daily_data['labels'], daily_data['data'], marker='o', linewidth=3, 
+                   markersize=6, color='#8b5cf6', markerfacecolor='#8b5cf6', 
+                   markeredgecolor='white', markeredgewidth=2)
+            ax.fill_between(daily_data['labels'], daily_data['data'], alpha=0.3, color='#8b5cf6')
+            ax.set_ylim(1, 7)
+            ax.set_ylabel('Average Mood', fontsize=12, color='#374151')
+            ax.set_xlabel('Hour of Day', fontsize=12, color='#374151')
+            ax.set_title('Daily Patterns (Average Mood by Hour)', fontsize=14, fontweight='bold', color='#1e293b', pad=20)
+            ax.grid(True, alpha=0.3)
+            ax.set_facecolor('#f8fafc')
+            plt.xticks(range(0, 24, 2))  # Show every 2 hours
             plt.tight_layout()
             
             chart_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
