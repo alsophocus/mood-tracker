@@ -7,6 +7,12 @@ from pdf_export import PDFExporter
 
 main_bp = Blueprint('main', __name__)
 
+@main_bp.route('/')
+@login_required
+def dashboard():
+    """Main dashboard page"""
+    return render_template('index.html')
+
 @main_bp.route('/triggers')
 @login_required
 def mood_triggers():
