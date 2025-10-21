@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Mood Tracker</title>
+    
+    <!-- Material Design 3 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-success: #006D3B;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.6;
+        }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .admin-header {
+            margin-bottom: 32px;
+        }
+        
+        .admin-title {
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 8px;
+        }
+        
+        .admin-subtitle {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 1rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid var(--md-sys-color-surface-variant);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--md-sys-color-surface-variant);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--md-sys-color-primary);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 4px;
+        }
+        
+        .operations-section {
+            margin-bottom: 32px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface);
+            text-transform: capitalize;
+        }
+        
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .operation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            transition: all 0.2s ease;
+        }
+        
+        .operation-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .operation-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .operation-description {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+        }
+        
+        .operation-params {
+            margin-bottom: 16px;
+        }
+        
+        .param-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--md-sys-color-surface-variant);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 8px;
+        }
+        
+        .param-label {
+            font-size: 0.75rem;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 4px;
+        }
+        
+        .execute-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .execute-btn:hover {
+            background: #5A4A94;
+        }
+        
+        .execute-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result-area {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: none;
+        }
+        
+        .result-success {
+            background: #E8F5E8;
+            color: var(--md-sys-color-success);
+            border: 1px solid var(--md-sys-color-success);
+        }
+        
+        .result-error {
+            background: #FFEBEE;
+            color: var(--md-sys-color-error);
+            border: 1px solid var(--md-sys-color-error);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--md-sys-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--md-sys-color-primary);
+            text-decoration: none;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <a href="/" class="back-link">
+            <span class="material-icons" style="margin-right: 8px;">arrow_back</span>
+            Back to Mood Tracker
+        </a>
+        
+        <div class="admin-header">
+            <h1 class="admin-title">Admin Dashboard</h1>
+            <p class="admin-subtitle">Manage database operations and view system statistics</p>
+        </div>
+        
+        <!-- Database Statistics -->
+        <div class="stats-card">
+            <h2 class="section-title">Database Statistics</h2>
+            <div id="stats-loading">Loading statistics...</div>
+            <div id="stats-content" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-moods">-</div>
+                        <div class="stat-label">Total Moods</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-users">-</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="date-range">-</div>
+                        <div class="stat-label">Date Range</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Operations by Category -->
+        {% for category, ops in operations.items() %}
+        <div class="operations-section">
+            <h2 class="section-title">{{ category }} Operations</h2>
+            <div class="operations-grid">
+                {% for operation in ops %}
+                <div class="operation-card">
+                    <h3 class="operation-title">{{ operation.name }}</h3>
+                    <p class="operation-description">{{ operation.description }}</p>
+                    
+                    {% if operation.params %}
+                    <div class="operation-params">
+                        {% for param in operation.params %}
+                        <div class="param-label">{{ param.description }}</div>
+                        <input type="{{ 'number' if param.type == 'int' else 'text' }}" 
+                               class="param-input" 
+                               id="param-{{ operation.id }}-{{ param.name }}"
+                               placeholder="{{ param.default if param.default else param.name }}"
+                               value="{{ param.default if param.default else '' }}">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <button class="execute-btn" onclick="executeOperation('{{ operation.id }}')">
+                        Execute {{ operation.name }}
+                    </button>
+                    
+                    <div class="result-area" id="result-{{ operation.id }}"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script>
+        // Load database statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('/admin/api/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.stats;
+                    document.getElementById('total-moods').textContent = stats.total_moods;
+                    document.getElementById('total-users').textContent = stats.total_users;
+                    
+                    const dateRange = stats.date_range;
+                    if (dateRange.start && dateRange.end) {
+                        document.getElementById('date-range').textContent = 
+                            `${dateRange.start} to ${dateRange.end}`;
+                    } else {
+                        document.getElementById('date-range').textContent = 'No data';
+                    }
+                    
+                    document.getElementById('stats-loading').style.display = 'none';
+                    document.getElementById('stats-content').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('stats-loading').textContent = 'Error loading statistics';
+            }
+        }
+        
+        // Execute admin operation
+        async function executeOperation(operationId) {
+            const button = event.target;
+            const resultDiv = document.getElementById(`result-${operationId}`);
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span>Executing...';
+            
+            // Collect parameters
+            const params = {};
+            const paramInputs = document.querySelectorAll(`[id^="param-${operationId}-"]`);
+            paramInputs.forEach(input => {
+                const paramName = input.id.split('-').pop();
+                if (input.value) {
+                    params[paramName] = input.type === 'number' ? parseInt(input.value) : input.value;
+                }
+            });
+            
+            try {
+                const response = await fetch(`/admin/api/execute/${operationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(params)
+                });
+                
+                const result = await response.json();
+                
+                // Show result
+                resultDiv.style.display = 'block';
+                if (result.success) {
+                    resultDiv.className = 'result-area result-success';
+                    resultDiv.textContent = result.message || 'Operation completed successfully';
+                } else {
+                    resultDiv.className = 'result-area result-error';
+                    resultDiv.textContent = result.error || 'Operation failed';
+                }
+                
+                // Reload stats if it was a data operation
+                if (['cleanup_until_oct19', 'clear_all_data', 'generate_fake_data', 'generate_current_week'].includes(operationId)) {
+                    setTimeout(loadStats, 1000);
+                }
+                
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result-area result-error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            } finally {
+                // Re-enable button
+                button.disabled = false;
+                button.textContent = `Execute ${button.textContent.split('Execute ')[1]?.split('...')[0] || 'Operation'}`;
+            }
+        }
+        
+        // Load stats on page load
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>
