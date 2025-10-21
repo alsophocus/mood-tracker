@@ -3625,8 +3625,14 @@
 
         // Enhanced Material Design 3 PDF Export
         async function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    alert('PDF library not loaded. Please refresh the page and try again.');
+                    return;
+                }
+                
+                const pdf = new jsPDF('p', 'mm', 'a4');
             
             // Material Design 3 Color Palette
             const colors = {
@@ -3737,32 +3743,30 @@
             pdf.text('Analytics Charts', 20, yPosition + 7);
             yPosition += 30;
             
-            // Export mood distribution chart (new analytics chart)
+            // Export mood distribution chart
             const moodDistChart = document.getElementById('moodDistributionChart');
             if (moodDistChart) {
-                const chartCanvas = document.createElement('canvas');
-                const chartCtx = chartCanvas.getContext('2d');
-                
-                // Set proper dimensions to prevent overlapping
-                chartCanvas.width = 400;
-                chartCanvas.height = 300;
-                
-                // Draw chart with proper scaling
-                chartCtx.drawImage(moodDistChart, 0, 0, 400, 300);
-                const chartImg = chartCanvas.toDataURL('image/png');
-                
-                // Chart card background
-                pdf.setFillColor(...colors.surfaceContainer);
-                pdf.roundedRect(15, yPosition - 5, 180, 70, 6, 6, 'F');
-                
-                pdf.setTextColor(...colors.onSurface);
-                pdf.setFontSize(14);
-                pdf.setFont('helvetica', 'bold');
-                pdf.text('Mood Distribution (Last 30 Days)', 20, yPosition + 8);
-                
-                // Add chart with proper sizing to prevent overlap
-                pdf.addImage(chartImg, 'PNG', 25, yPosition + 12, 150, 45);
-                yPosition += 80;
+                try {
+                    const chartCanvas = moodDistChart.querySelector('canvas');
+                    if (chartCanvas) {
+                        const chartImg = chartCanvas.toDataURL('image/png', 1.0);
+                        
+                        // Chart card background
+                        pdf.setFillColor(...colors.surfaceContainer);
+                        pdf.roundedRect(15, yPosition - 5, 180, 70, 6, 6, 'F');
+                        
+                        pdf.setTextColor(...colors.onSurface);
+                        pdf.setFontSize(14);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.text('Mood Distribution (Last 30 Days)', 20, yPosition + 8);
+                        
+                        // Add chart with proper sizing
+                        pdf.addImage(chartImg, 'PNG', 25, yPosition + 12, 150, 45);
+                        yPosition += 80;
+                    }
+                } catch (error) {
+                    console.warn('Could not export mood distribution chart:', error);
+                }
             }
             
             // Export existing charts with better spacing
@@ -3896,6 +3900,47 @@
             const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const fileName = `mood-analytics-report-${timestamp}.pdf`;
             pdf.save(fileName);
+            
+            // Show success message
+            showNotification('📄 PDF report generated successfully!', 'success');
+            
+        } catch (error) {
+            console.error('PDF Export Error:', error);
+            showNotification('❌ Failed to generate PDF report. Please try again.', 'error');
+        }
+    }
+
+        // Notification system for user feedback
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.md-snackbar');
+            existingNotifications.forEach(notification => notification.remove());
+            
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = 'md-snackbar';
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 16px; cursor: pointer;">✕</button>
+            `;
+            
+            // Style based on type
+            if (type === 'success') {
+                notification.style.backgroundColor = 'var(--md-sys-color-tertiary-container)';
+                notification.style.color = 'var(--md-sys-color-on-tertiary-container)';
+            } else if (type === 'error') {
+                notification.style.backgroundColor = 'var(--md-sys-color-error-container)';
+                notification.style.color = 'var(--md-sys-color-on-error-container)';
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
         }
 
         // Initialize everything when DOM loads
