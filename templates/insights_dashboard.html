@@ -245,6 +245,81 @@
             min-height: calc(100vh - 64px);
         }
 
+        /* Theme Toggle Styles */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-icon {
+            font-size: 20px;
+            color: var(--md-sys-color-on-surface-variant);
+            height: 32px;
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 52px;
+            height: 32px;
+            background: var(--md-sys-color-outline);
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            transition: background-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .theme-switch::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--md-sys-color-outline-variant);
+            top: 6px;
+            left: 6px;
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+        }
+
+        [data-theme="dark"] .theme-switch {
+            background: var(--md-sys-color-primary);
+        }
+
+        [data-theme="dark"] .theme-switch::before {
+            background: var(--md-sys-color-on-primary);
+            transform: translateX(20px);
+        }
+
+        /* Mobile Theme Toggle */
+        .mobile-theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-theme-toggle .theme-icon {
+            font-size: 18px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .mobile-theme-toggle .theme-switch {
+            width: 52px;
+            height: 32px;
+        }
+
+        .mobile-theme-toggle .theme-switch::before {
+            width: 20px;
+            height: 20px;
+            top: 6px;
+            left: 6px;
+        }
+
+        [data-theme="dark"] .mobile-theme-toggle .theme-switch::before {
+            transform: translateX(20px) rotate(180deg);
+        }
+
         .app-bar-title i {
             font-size: 32px;
             animation: brainPulse 2s ease-in-out infinite;
