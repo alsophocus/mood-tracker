@@ -1895,32 +1895,45 @@
 
         /* Material Design 3 Responsive Design */
         @media (max-width: 768px) {
-            /* Fix title positioning - force left */
-            .top-app-bar-content {
-                justify-content: space-between;
+            /* FORCE mobile layout with maximum specificity */
+            header.top-app-bar .top-app-bar-content {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
             }
             
-            .app-bar-title {
-                order: 1;
-                flex: 0 0 auto;
+            header.top-app-bar .app-bar-title {
+                order: 1 !important;
+                flex: 0 0 auto !important;
             }
             
-            /* Fix theme button positioning - force right, same row as title */
-            .app-bar-actions {
-                order: 2;
-                display: flex;
-                align-items: center;
+            header.top-app-bar .app-bar-actions {
+                order: 2 !important;
+                display: flex !important;
+                align-items: center !important;
             }
             
-            /* Hide desktop elements */
-            .app-bar-actions .md-button,
-            .app-bar-actions > div:last-child {
-                display: none;
+            /* Hide ALL desktop navigation */
+            header.top-app-bar .app-bar-actions .md-button,
+            header.top-app-bar .app-bar-actions > div:last-child {
+                display: none !important;
             }
             
-            /* Show only theme toggle in app-bar-actions */
-            .theme-toggle {
-                display: block;
+            /* Show ONLY theme toggle */
+            header.top-app-bar .theme-toggle {
+                display: block !important;
+            }
+            
+            /* Show mobile second row */
+            header.top-app-bar .mobile-second-row {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 8px 16px !important;
+            }
+            
+            .hamburger-menu {
+                display: block !important;
             }
             
             /* Show mobile second row */
