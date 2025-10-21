@@ -543,11 +543,11 @@
         .mobile-nav-drawer {
             position: fixed;
             top: 0;
-            right: -300px;
+            right: -280px;
             width: 280px;
             height: 100vh;
             background-color: var(--md-sys-color-surface-container);
-            box-shadow: var(--md-sys-elevation-level3);
+            box-shadow: var(--md-sys-elevation-level1);
             z-index: 2001;
             transition: right var(--md-sys-motion-duration-medium3) var(--md-sys-motion-easing-emphasized);
             padding: 0;
@@ -2321,10 +2321,9 @@
                     <span>Analytics</span>
                 </a>
                 <div class="theme-toggle">
-                    <button class="theme-icon-button" onclick="toggleTheme(); return false;" aria-label="Toggle theme">
-                        <i class="fas fa-sun theme-icon-light"></i>
-                        <i class="fas fa-moon theme-icon-dark"></i>
-                    </button>
+                    <i class="fas fa-sun theme-icon"></i>
+                    <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                    <i class="fas fa-moon theme-icon"></i>
                 </div>
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <span class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">Welcome, {{ user.name }}</span>
