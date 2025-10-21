@@ -113,6 +113,13 @@ class Database:
                 query += f' LIMIT {limit}'
             cursor.execute(query, (user_id,))
             return cursor.fetchall()
+    
+    def get_all_moods(self):
+        """Get all moods from all users"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM moods ORDER BY date DESC')
+            return cursor.fetchall()
 
 # Global database instance
 db = Database()
