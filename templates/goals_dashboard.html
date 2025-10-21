@@ -646,12 +646,16 @@
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
                 </a>
+                <button class="hamburger-menu" onclick="toggleMobileNav()" aria-label="Open navigation menu">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <div class="theme-toggle">
                     <i class="fas fa-sun theme-icon"></i>
                     <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
                     <i class="fas fa-moon theme-icon"></i>
                 </div>
                 <div style="display: flex; align-items: center; gap: 16px;">
+                    <span class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">Welcome, {{ user.name }}</span>
                     <a href="/logout" class="md-button md-button-outlined">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
