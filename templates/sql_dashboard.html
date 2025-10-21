@@ -355,7 +355,15 @@
                     body: JSON.stringify(params)
                 });
                 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const result = await response.json();
+                console.log('Full API response:', result);
                 
                 // Show result
                 resultDiv.style.display = 'block';
@@ -410,10 +418,35 @@
                         message += `\n• Count with string comparison: ${debug.count_with_string_comparison}`;
                     }
                     
+                    // Add any other result properties
+                    Object.keys(result).forEach(key => {
+                        if (!['success', 'message', 'verification', 'total_before', 'total_after', 'deleted', 'generated', 'actual_increase', 'date_range_after', 'target_date', 'debug_info'].includes(key)) {
+                            message += `\n• ${key}: ${JSON.stringify(result[key])}`;
+                        }
+                    });
+                    
                     resultDiv.textContent = message;
                 } else {
                     resultDiv.className = 'result-area result-error';
-                    resultDiv.textContent = result.error || 'Operation failed';
+                    let errorMessage = result.error || 'Operation failed';
+                    
+                    // Add additional error details if available
+                    if (result.traceback) {
+                        errorMessage += `\n\nTraceback:\n${result.traceback}`;
+                    }
+                    
+                    if (result.error_type) {
+                        errorMessage += `\n\nError Type: ${result.error_type}`;
+                    }
+                    
+                    // Add any other error properties
+                    Object.keys(result).forEach(key => {
+                        if (!['success', 'error', 'traceback', 'error_type'].includes(key)) {
+                            errorMessage += `\n• ${key}: ${JSON.stringify(result[key])}`;
+                        }
+                    });
+                    
+                    resultDiv.textContent = errorMessage;
                 }
                 
                 // Reload stats if it was a data operation
