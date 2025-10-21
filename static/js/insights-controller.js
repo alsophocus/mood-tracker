@@ -30,13 +30,14 @@ class InsightsDashboardController {
                 this.renderer.renderInsights(data.insights);
                 this.renderer.renderCorrelations(data.correlations);
             } else {
-                this._showError('Failed to load dashboard data: ' + data.error);
+                console.error('Dashboard data error:', data);
+                this._showError('Failed to load dashboard data: ' + (data.error || 'Unknown error'));
             }
             
             this.renderer.hideLoading();
         } catch (error) {
             console.error('Dashboard loading error:', error);
-            this._showError('Error loading dashboard');
+            this._showError('Error loading dashboard. Please try refreshing the page.');
             this.renderer.hideLoading();
         }
     }

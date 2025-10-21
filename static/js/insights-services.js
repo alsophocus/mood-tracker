@@ -47,16 +47,16 @@ class InsightsRenderer extends InsightsRendererInterface {
         const container = document.getElementById('trendsGrid');
         container.innerHTML = '';
 
-        if (!trends.success) {
-            container.innerHTML = '<p>Unable to load trends</p>';
+        if (!trends || !trends.success) {
+            container.innerHTML = '<p class="body-medium" style="grid-column: 1 / -1; text-align: center; color: var(--md-sys-color-on-surface-variant);">Unable to load trends. Please add some mood entries first.</p>';
             return;
         }
 
         const trendData = [
-            { label: 'Average Mood', value: `${trends.average_mood}/7`, icon: 'mood' },
-            { label: 'Stability', value: `${trends.stability}/10`, icon: 'timeline' },
-            { label: 'Trend', value: trends.trend_direction, icon: 'trending_up' },
-            { label: 'Entries', value: trends.total_entries, icon: 'edit_note' }
+            { label: 'Average Mood', value: `${trends.average_mood || 0}/7`, icon: 'mood' },
+            { label: 'Stability', value: `${trends.stability || 0}/10`, icon: 'timeline' },
+            { label: 'Trend', value: trends.trend_direction || 'unknown', icon: 'trending_up' },
+            { label: 'Entries', value: trends.total_entries || 0, icon: 'edit_note' }
         ];
 
         trendData.forEach(item => {
@@ -70,7 +70,7 @@ class InsightsRenderer extends InsightsRendererInterface {
         container.innerHTML = '';
 
         if (!correlations || correlations.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant);">No trigger correlations found yet.</p>';
+            container.innerHTML = '<p class="body-medium" style="text-align: center; color: var(--md-sys-color-on-surface-variant);">No trigger correlations found yet. Try adding triggers to your mood entries!</p>';
             return;
         }
 

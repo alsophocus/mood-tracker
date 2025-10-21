@@ -19,6 +19,9 @@ class MoodAnalyzer(MoodAnalyzerInterface):
     def analyze_mood_patterns(self, user_id: int, days: int = 30) -> Dict[str, Any]:
         """Analyze mood patterns over specified period"""
         try:
+            if not user_id:
+                return {'success': False, 'error': 'Invalid user_id'}
+                
             with self.db.get_connection() as conn:
                 cursor = conn.cursor()
                 
@@ -34,7 +37,17 @@ class MoodAnalyzer(MoodAnalyzerInterface):
                 moods = cursor.fetchall()
                 
                 if not moods:
-                    return {'success': False, 'error': 'No mood data found'}
+                    return {
+                        'success': True,
+                        'period_days': days,
+                        'total_entries': 0,
+                        'average_mood': 0,
+                        'mood_stability': 0,
+                        'day_patterns': {},
+                        'location_patterns': {},
+                        'activity_patterns': {},
+                        'message': 'No mood data found for analysis'
+                    }
                 
                 # Convert mood strings to numeric values
                 mood_values = [self._mood_to_numeric(mood['mood']) for mood in moods]
@@ -64,11 +77,19 @@ class MoodAnalyzer(MoodAnalyzerInterface):
                 }
                 
         except Exception as e:
-            return {'success': False, 'error': str(e)}
+            import traceback
+            return {
+                'success': False, 
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }
     
     def get_trigger_correlations(self, user_id: int) -> List[Dict[str, Any]]:
         """Get correlations between triggers and mood levels"""
         try:
+            if not user_id:
+                return []
+                
             with self.db.get_connection() as conn:
                 cursor = conn.cursor()
                 
@@ -107,7 +128,7 @@ class MoodAnalyzer(MoodAnalyzerInterface):
                 # Calculate average impact for each tag
                 result = []
                 for tag_data in correlations.values():
-                    if tag_data['count'] >= 2:  # Need at least 2 data points
+                    if tag_data['count'] >= 1:  # Need at least 1 data point
                         avg_mood = statistics.mean(tag_data['mood_values'])
                         result.append({
                             'tag': tag_data['tag'],
@@ -122,7 +143,10 @@ class MoodAnalyzer(MoodAnalyzerInterface):
                 return result
                 
         except Exception as e:
-            return [{'error': str(e)}]
+            import traceback
+            print(f"Correlation error: {str(e)}")
+            print(traceback.format_exc())
+            return []
     
     def _mood_to_numeric(self, mood: str) -> float:
         """Convert mood string to numeric value"""
