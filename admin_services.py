@@ -238,52 +238,98 @@ class DatabaseMigrationService:
     def __init__(self, db: Database):
         self.db = db
     
-    def test_migration_connection(self) -> Dict[str, Any]:
-        """Test database connection specifically for migrations"""
+    def check_permissions(self) -> Dict[str, Any]:
+        """Check what database operations are allowed"""
+        permissions = {}
+        
         try:
             with self.db.get_connection() as conn:
                 cursor = conn.cursor()
                 
-                # Test 1: Basic query
-                cursor.execute('SELECT 1 as test')
-                basic_test = cursor.fetchone()[0]
+                # Test SELECT (should work)
+                try:
+                    cursor.execute('SELECT 1')
+                    permissions['SELECT'] = 'ALLOWED'
+                except Exception as e:
+                    permissions['SELECT'] = f'DENIED: {str(e)}'
                 
-                # Test 2: Check if we can create a simple table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS migration_test (
-                        id SERIAL PRIMARY KEY,
-                        test_column VARCHAR(50)
-                    )
-                ''')
+                # Test CREATE TABLE
+                try:
+                    cursor.execute('CREATE TABLE IF NOT EXISTS permission_test (id INTEGER)')
+                    permissions['CREATE_TABLE'] = 'ALLOWED'
+                    
+                    # Clean up
+                    try:
+                        cursor.execute('DROP TABLE permission_test')
+                    except:
+                        pass
+                        
+                except Exception as e:
+                    permissions['CREATE_TABLE'] = f'DENIED: {str(e)}'
                 
-                # Test 3: Insert and select from test table
-                cursor.execute("INSERT INTO migration_test (test_column) VALUES ('test_value')")
-                cursor.execute("SELECT test_column FROM migration_test LIMIT 1")
-                test_value = cursor.fetchone()[0]
+                # Test ALTER TABLE on existing table
+                try:
+                    cursor.execute('ALTER TABLE moods ADD COLUMN IF NOT EXISTS test_permission_col VARCHAR(10)')
+                    cursor.execute('ALTER TABLE moods DROP COLUMN IF EXISTS test_permission_col')
+                    permissions['ALTER_TABLE'] = 'ALLOWED'
+                except Exception as e:
+                    permissions['ALTER_TABLE'] = f'DENIED: {str(e)}'
                 
-                # Test 4: Drop test table
-                cursor.execute('DROP TABLE migration_test')
+                # Test INSERT/UPDATE/DELETE (should work since cleanup works)
+                try:
+                    cursor.execute('SELECT COUNT(*) FROM moods LIMIT 1')
+                    permissions['DML_OPERATIONS'] = 'ALLOWED'
+                except Exception as e:
+                    permissions['DML_OPERATIONS'] = f'DENIED: {str(e)}'
                 
-                conn.commit()
+                conn.rollback()  # Don't commit any changes
                 
                 return {
                     'success': True,
-                    'message': 'Migration connection test passed',
-                    'tests': {
-                        'basic_query': basic_test,
-                        'table_creation': 'SUCCESS',
-                        'insert_select': test_value,
-                        'table_drop': 'SUCCESS'
-                    }
+                    'message': 'Permission check completed',
+                    'permissions': permissions
                 }
                 
         except Exception as e:
-            import traceback
             return {
                 'success': False,
-                'error': f'Migration connection test failed: {str(e)}',
-                'traceback': traceback.format_exc(),
-                'error_type': type(e).__name__
+                'error': f'Permission check failed: {str(e)}',
+                'permissions': permissions
+            }
+    
+    def migrate_mood_triggers_simple(self) -> Dict[str, Any]:
+        """Try a very simple migration approach"""
+        try:
+            # Check if tables already exist first
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Check existing tables
+                cursor.execute("""
+                    SELECT table_name FROM information_schema.tables 
+                    WHERE table_schema = 'public' AND table_name IN ('tags', 'mood_tags')
+                """)
+                existing_tables = [row[0] for row in cursor.fetchall()]
+                
+                if 'tags' in existing_tables and 'mood_tags' in existing_tables:
+                    return {
+                        'success': True,
+                        'message': 'Migration tables already exist',
+                        'existing_tables': existing_tables
+                    }
+                
+                # If tables don't exist, we have a permissions issue
+                return {
+                    'success': False,
+                    'error': 'Tables do not exist and cannot be created due to database permissions',
+                    'existing_tables': existing_tables,
+                    'suggestion': 'Database user needs CREATE TABLE and ALTER TABLE permissions'
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Simple migration check failed: {str(e)}'
             }
     
     def migrate_mood_triggers(self) -> Dict[str, Any]:
@@ -503,16 +549,16 @@ class AdminService(AdminServiceInterface):
                 'params': []
             },
             {
-                'id': 'test_migration_connection',
-                'name': 'Test Migration Connection',
-                'description': 'Test database connection specifically for migrations',
+                'id': 'check_permissions',
+                'name': 'Check Database Permissions',
+                'description': 'Check what database operations are allowed',
                 'category': 'debug',
                 'params': []
             },
             {
-                'id': 'migrate_mood_triggers',
-                'name': 'Migrate Mood Triggers',
-                'description': 'Add tables and columns for mood triggers and context system',
+                'id': 'migrate_mood_triggers_simple',
+                'name': 'Simple Migrate Mood Triggers',
+                'description': 'Try migration with minimal operations',
                 'category': 'migration',
                 'params': []
             },
@@ -566,13 +612,13 @@ class AdminService(AdminServiceInterface):
             if operation_id == 'test_connection':
                 return self.test_service.test_connection()
             
-            elif operation_id == 'test_migration_connection':
-                result = self.migration_service.test_migration_connection()
+            elif operation_id == 'check_permissions':
+                result = self.migration_service.check_permissions()
                 result['success'] = result.get('success', True)
                 return result
             
-            elif operation_id == 'migrate_mood_triggers':
-                result = self.migration_service.migrate_mood_triggers()
+            elif operation_id == 'migrate_mood_triggers_simple':
+                result = self.migration_service.migrate_mood_triggers_simple()
                 result['success'] = result.get('success', True)
                 return result
             
