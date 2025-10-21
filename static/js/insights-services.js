@@ -100,11 +100,11 @@ class InsightsRenderer extends InsightsRendererInterface {
         card.innerHTML = `
             <div class="insight-header">
                 <div class="insight-icon">
-                    <span class="material-icons">${icon}</span>
+                    <i class="fas ${icon}"></i>
                 </div>
-                <div class="insight-title">${insight.title}</div>
+                <div class="insight-title title-medium">${insight.title}</div>
             </div>
-            <div class="insight-message">${insight.message}</div>
+            <div class="insight-message body-medium">${insight.message}</div>
         `;
 
         return card;
@@ -128,8 +128,8 @@ class InsightsRenderer extends InsightsRendererInterface {
         
         item.innerHTML = `
             <div class="correlation-tag">
-                <span class="material-icons">tag</span>
-                <span>${correlation.tag} (${correlation.frequency}x)</span>
+                <i class="fas fa-tag"></i>
+                <span class="body-medium">${correlation.tag} (${correlation.frequency}x)</span>
             </div>
             <div class="correlation-impact ${correlation.impact.toLowerCase()}">
                 ${correlation.impact} (${correlation.average_mood}/7)
@@ -141,13 +141,13 @@ class InsightsRenderer extends InsightsRendererInterface {
 
     _getInsightIcon(type) {
         const iconMap = {
-            positive: 'thumb_up',
-            warning: 'warning',
-            suggestion: 'lightbulb',
-            pattern: 'analytics',
-            error: 'error'
+            positive: 'fa-thumbs-up',
+            warning: 'fa-exclamation-triangle',
+            suggestion: 'fa-lightbulb',
+            pattern: 'fa-chart-line',
+            error: 'fa-exclamation-circle'
         };
-        return iconMap[type] || 'info';
+        return iconMap[type] || 'fa-info-circle';
     }
 }
 
@@ -155,28 +155,22 @@ class InsightsRenderer extends InsightsRendererInterface {
 class InsightsThemeManager extends InsightsThemeManagerInterface {
     toggleTheme() {
         const body = document.body;
-        const themeIcon = document.getElementById('themeIcon');
+        const themeIcons = document.querySelectorAll('.theme-icon');
         
         if (body.getAttribute('data-theme') === 'dark') {
             body.removeAttribute('data-theme');
-            themeIcon.textContent = 'light_mode';
             localStorage.setItem('theme', 'light');
         } else {
             body.setAttribute('data-theme', 'dark');
-            themeIcon.textContent = 'dark_mode';
             localStorage.setItem('theme', 'dark');
         }
     }
 
     initializeTheme() {
         const savedTheme = localStorage.getItem('theme');
-        const themeIcon = document.getElementById('themeIcon');
         
         if (savedTheme === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
-            themeIcon.textContent = 'dark_mode';
-        } else {
-            themeIcon.textContent = 'light_mode';
         }
     }
 }
