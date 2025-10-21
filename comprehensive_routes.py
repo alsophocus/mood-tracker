@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 from flask_login import login_required
 
 comprehensive_bp = Blueprint('features', __name__, url_prefix='/features')
@@ -6,9 +6,9 @@ comprehensive_bp = Blueprint('features', __name__, url_prefix='/features')
 @comprehensive_bp.route('/goals')
 @login_required
 def goals_dashboard():
-    return "Goals Dashboard - Working!"
+    return render_template('goals_dashboard.html')
 
 @comprehensive_bp.route('/analytics')
 @login_required
 def analytics_dashboard():
-    return "Analytics Dashboard - Working!"
+    return render_template('analytics_dashboard.html')
