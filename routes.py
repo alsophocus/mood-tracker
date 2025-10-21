@@ -140,6 +140,40 @@ def index():
     
     return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
+@main_bp.route('/debug-timestamps')
+@login_required
+def debug_timestamps():
+    """Debug mood timestamps for daily patterns"""
+    try:
+        moods = db.get_user_moods(current_user.id, limit=10)
+        
+        debug_data = []
+        for mood in moods:
+            debug_data.append({
+                'id': mood.get('id'),
+                'date': str(mood.get('date')),
+                'mood': mood.get('mood'),
+                'timestamp': str(mood.get('timestamp')),
+                'timestamp_type': type(mood.get('timestamp')).__name__,
+                'has_timestamp': mood.get('timestamp') is not None,
+                'timestamp_hour': mood.get('timestamp').hour if mood.get('timestamp') and hasattr(mood.get('timestamp'), 'hour') else 'N/A'
+            })
+        
+        return jsonify({
+            'success': True,
+            'total_moods': len(moods),
+            'moods_with_timestamps': len([m for m in moods if m.get('timestamp')]),
+            'sample_moods': debug_data
+        })
+        
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
+
 @main_bp.route('/fix-unique-constraint')
 @login_required
 def fix_unique_constraint():
