@@ -2,8 +2,9 @@
 Web endpoint for testing migrations directly on deployed Railway app
 """
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from admin_services import AdminService
+from database import db
 import traceback
 
 # Create blueprint for migration testing
@@ -13,14 +14,16 @@ migration_bp = Blueprint('migration_test', __name__, url_prefix='/migration-test
 def test_basic_migration():
     """Test basic migration operation via web endpoint"""
     try:
-        admin_service = AdminService()
+        # Initialize AdminService with database instance
+        admin_service = AdminService(db)
         result = admin_service.run_basic_migration()
         
         response = {
             'success': result.get('success', False),
             'result': result,
             'endpoint': 'basic_migration',
-            'method': request.method
+            'method': request.method,
+            'app_context': True
         }
         
         if result.get('success'):
@@ -39,7 +42,8 @@ def test_basic_migration():
             'traceback': traceback.format_exc(),
             'endpoint': 'basic_migration',
             'method': request.method,
-            'message': '❌ Migration exception'
+            'message': '❌ Migration exception',
+            'app_context': True
         }
         return jsonify(error_response), 500
 
@@ -52,5 +56,6 @@ def migration_status():
             'basic': '/migration-test/basic',
             'status': '/migration-test/status'
         },
-        'methods': ['GET', 'POST']
+        'methods': ['GET', 'POST'],
+        'database_connected': db is not None
     })
