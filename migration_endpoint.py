@@ -16,14 +16,16 @@ def test_basic_migration():
     try:
         # Initialize AdminService with database instance
         admin_service = AdminService(db)
-        result = admin_service.run_basic_migration()
+        # Use the correct method to execute basic migration
+        result = admin_service.execute_operation('migrate_basic')
         
         response = {
             'success': result.get('success', False),
             'result': result,
             'endpoint': 'basic_migration',
             'method': request.method,
-            'app_context': True
+            'app_context': True,
+            'operation_id': 'migrate_basic'
         }
         
         if result.get('success'):
@@ -57,5 +59,6 @@ def migration_status():
             'status': '/migration-test/status'
         },
         'methods': ['GET', 'POST'],
-        'database_connected': db is not None
+        'database_connected': db is not None,
+        'available_operations': ['migrate_basic', 'check_permissions']
     })
