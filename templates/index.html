@@ -447,11 +447,51 @@
         }
 
         .mobile-nav-header {
-            padding: 0 24px 24px;
+            padding: 16px 24px;
             border-bottom: 1px solid var(--md-sys-color-outline-variant);
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+
+        .mobile-nav-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            font-size: 18px;
+        }
+
+        .mobile-nav-title i {
+            font-size: 20px;
+        }
+
+        .mobile-nav-theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-nav-theme-toggle .theme-icon {
+            font-size: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .mobile-nav-theme-toggle .theme-switch {
+            width: 40px;
+            height: 24px;
+        }
+
+        .mobile-nav-theme-toggle .theme-switch::before {
+            width: 18px;
+            height: 18px;
+            top: 1px;
+            left: 1px;
+        }
+
+        [data-theme="dark"] .mobile-nav-theme-toggle .theme-switch::before {
+            transform: translateX(16px) rotate(180deg);
         }
 
         .mobile-nav-close {
@@ -2156,10 +2196,15 @@
     <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
     <div class="mobile-nav-drawer" id="mobileNavDrawer">
         <div class="mobile-nav-header">
-            <span style="font-weight: 500; color: var(--md-sys-color-primary);">Navigation</span>
-            <button class="mobile-nav-close" onclick="closeMobileNav()" aria-label="Close navigation">
-                <i class="fas fa-times"></i>
-            </button>
+            <div class="mobile-nav-title">
+                <i class="fas fa-brain"></i>
+                <span>Mood Tracker</span>
+            </div>
+            <div class="mobile-nav-theme-toggle">
+                <i class="fas fa-sun theme-icon"></i>
+                <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                <i class="fas fa-moon theme-icon"></i>
+            </div>
         </div>
         <div class="mobile-nav-items">
             <a href="/insights" class="mobile-nav-item">
@@ -2175,6 +2220,9 @@
                 <span>Analytics</span>
             </a>
             <div style="border-top: 1px solid var(--md-sys-color-outline-variant); margin: 16px 0; padding-top: 16px;">
+                <div style="padding: 16px 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">
+                    Welcome, {{ user.name }}
+                </div>
                 <a href="/logout" class="mobile-nav-item">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
