@@ -825,38 +825,46 @@
     <!-- Desktop Header -->
     <header class="top-app-bar desktop-header">
         <div class="top-app-bar-content">
-            <a href="/" class="app-bar-title" style="text-decoration: none; color: inherit;">
+            <div class="app-bar-title">
                 <i class="fas fa-brain"></i>
-                <span class="display-small">Mood Tracker</span>
-            </a>
+                <span>Mood Tracker</span>
+            </div>
             <div class="app-bar-actions">
-                <a href="/insights" class="md-button md-button-text">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Insights</span>
-                </a>
-                <a href="/features/goals" class="md-button md-button-text" style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
-                    <i class="fas fa-bullseye"></i>
-                    <span>Goals</span>
-                </a>
-                <a href="/features/analytics" class="md-button md-button-text">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Analytics</span>
-                </a>
                 <div class="theme-toggle">
                     <i class="fas fa-sun theme-icon"></i>
                     <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
                     <i class="fas fa-moon theme-icon"></i>
                 </div>
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <span class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">Welcome, {{ user.name }}</span>
-                    <a href="/logout" class="md-button md-button-outlined">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
+                <div class="user-menu">
+                    <button class="user-menu-button" onclick="toggleUserMenu()" aria-label="User menu">
+                        <div class="user-avatar">{{ user.name[0].upper() if user.name else 'U' }}</div>
+                        <span>{{ user.name }}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
                 </div>
+                <a href="/logout" class="md-button md-button-outlined">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
             </div>
         </div>
     </header>
+
+    <!-- Navigation Rail -->
+    <nav class="navigation-rail desktop-header">
+        <a href="/insights" class="navigation-rail-item" data-page="insights">
+            <i class="fas fa-chart-line"></i>
+            <span>Insights</span>
+        </a>
+        <a href="/features/goals" class="navigation-rail-item active" data-page="goals">
+            <i class="fas fa-bullseye"></i>
+            <span>Goals</span>
+        </a>
+        <a href="/features/analytics" class="navigation-rail-item" data-page="analytics">
+            <i class="fas fa-chart-bar"></i>
+            <span>Analytics</span>
+        </a>
+    </nav>
 
     <!-- Mobile Header -->
     <header class="mobile-header">
@@ -879,7 +887,8 @@
         </div>
     </header>
 
-    <div class="container">
+    <div class="main-content">
+        <div class="container">
 
         <div class="md-card">
             <div class="md-card-header">
@@ -893,6 +902,7 @@
 
         <div class="goals-grid" id="goals-grid" style="display: none;">
             <!-- Goals will be loaded here -->
+        </div>
         </div>
     </div>
 

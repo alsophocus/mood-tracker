@@ -426,6 +426,7 @@
             margin-bottom: 12px;
             transition: all var(--md-sys-motion-duration-short3);
             position: relative;
+            padding: 8px 4px;
         }
 
         .navigation-rail-item:hover {
@@ -440,7 +441,8 @@
 
         .navigation-rail-item i {
             font-size: 24px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            line-height: 1;
         }
 
         .navigation-rail-item span {
@@ -448,6 +450,10 @@
             font-weight: 500;
             text-align: center;
             line-height: 1;
+            max-width: 48px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* Main content with navigation rail */
