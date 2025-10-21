@@ -2624,13 +2624,31 @@
                 .catch(error => console.error('Error loading daily patterns:', error));
         }
 
-        function updateWeeklyChart(data) {
-            console.log('DEBUG: updateWeeklyChart called with:', data);
+        function processWeeklyData(data) {
+            // Convert 0 values to null for line breaks, but keep backend data safe
+            const processedData = (data.data || []).map(value => {
+                // If value is 0 (no data), convert to null for Chart.js line breaks
+                // If value is between 1-7 (valid mood), keep it
+                return (value === 0) ? null : value;
+            });
+            
+            return {
+                ...data,
+                data: processedData
+            };
+        }
+
+        function updateWeeklyChart(rawData) {
+            console.log('DEBUG: updateWeeklyChart called with:', rawData);
             
             if (!window.weeklyChart) {
                 console.error('DEBUG: weeklyChart not found, cannot update');
                 return;
             }
+            
+            // Process data to convert 0s to nulls for line breaks
+            const data = processWeeklyData(rawData);
+            console.log('DEBUG: Processed data:', data);
             
             try {
                 // Method 1: Try normal update
