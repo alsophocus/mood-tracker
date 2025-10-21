@@ -576,7 +576,23 @@ def debug_moods():
 def recent_moods():
     """Get recent moods as JSON for AJAX updates"""
     recent_moods = db.get_user_moods(current_user.id, limit=5)
-    return jsonify({'moods': recent_moods})
+    
+    # Add debug info
+    debug_info = []
+    for mood in recent_moods:
+        debug_info.append({
+            'id': mood.get('id'),
+            'date': str(mood.get('date')),
+            'mood': mood.get('mood'),
+            'timestamp': str(mood.get('timestamp')) if mood.get('timestamp') else None,
+            'has_timestamp': mood.get('timestamp') is not None
+        })
+    
+    return jsonify({
+        'moods': recent_moods,
+        'debug': debug_info,
+        'total_count': len(recent_moods)
+    })
 
 @main_bp.route('/mood_data')
 @login_required
@@ -725,6 +741,14 @@ def daily_patterns():
     else:
         result = analytics.get_daily_patterns()
     
+    # Add debug info
+    debug_info = {
+        'total_moods': len(moods),
+        'moods_with_timestamps': len([m for m in moods if m.get('timestamp')]),
+        'sample_timestamps': [str(m.get('timestamp')) for m in moods[:3] if m.get('timestamp')],
+        'hours_with_data': sum(1 for x in result.get('data', []) if x is not None)
+    }
+    
     # Ensure we always return a valid structure
     if not result.get('labels') or not result.get('data'):
         result = {
@@ -732,6 +756,9 @@ def daily_patterns():
             'data': [None] * 24,
             'period': 'No data available'
         }
+    
+    # Add debug info to result
+    result['debug'] = debug_info
     
     return jsonify(result)
 
