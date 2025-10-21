@@ -434,7 +434,9 @@
             box-shadow: var(--md-sys-elevation-level3);
             z-index: 2001;
             transition: right var(--md-sys-motion-duration-medium3) var(--md-sys-motion-easing-emphasized);
-            padding: 24px 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .mobile-nav-overlay.open {
@@ -506,6 +508,12 @@
 
         .mobile-nav-items {
             padding: 24px 0;
+            flex: 1;
+        }
+
+        .mobile-nav-footer {
+            margin-top: auto;
+            padding-bottom: 24px;
         }
 
         .mobile-nav-item {
@@ -2219,10 +2227,12 @@
                 <i class="fas fa-chart-bar"></i>
                 <span>Analytics</span>
             </a>
-            <div style="border-top: 1px solid var(--md-sys-color-outline-variant); margin: 16px 0; padding-top: 16px;">
-                <div style="padding: 16px 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px;">
-                    Welcome, {{ user.name }}
-                </div>
+        </div>
+        <div class="mobile-nav-footer">
+            <div style="padding: 16px 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px; text-align: right;">
+                Welcome, {{ user.name }}
+            </div>
+            <div style="border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 16px;">
                 <a href="/logout" class="mobile-nav-item">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
