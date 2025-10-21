@@ -264,103 +264,82 @@ class DatabaseTestService:
         import traceback
         
         try:
-            # First check if db object exists
-            if not self.db:
-                return {
-                    'success': False,
-                    'error': 'Database object is None'
-                }
-            
-            # Check if get_connection method exists
-            if not hasattr(self.db, 'get_connection'):
-                return {
-                    'success': False,
-                    'error': 'Database object has no get_connection method'
-                }
-            
-            # Try to get connection
-            try:
-                with self.db.get_connection() as conn:
-                    if not conn:
-                        return {
-                            'success': False,
-                            'error': 'get_connection() returned None'
-                        }
-                    
-                    # Try to get cursor
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                results = {}
+                
+                # Step 1: Test basic query
+                try:
+                    cursor.execute('SELECT 1')
+                    result = cursor.fetchone()
+                    results['step1_basic_query'] = f'SUCCESS: {result[0] if result else "No result"}'
+                except Exception as e:
+                    results['step1_basic_query'] = f'FAILED: {str(e)}'
+                    return {
+                        'success': False,
+                        'error': 'Basic SELECT 1 query failed',
+                        'results': results,
+                        'traceback': traceback.format_exc()
+                    }
+                
+                # Step 2: Test current database name
+                try:
+                    cursor.execute('SELECT current_database()')
+                    db_name = cursor.fetchone()[0]
+                    results['step2_database_name'] = f'SUCCESS: {db_name}'
+                except Exception as e:
+                    results['step2_database_name'] = f'FAILED: {str(e)}'
+                
+                # Step 3: Check if moods table exists
+                try:
+                    cursor.execute("""
+                        SELECT EXISTS (
+                            SELECT FROM information_schema.tables 
+                            WHERE table_schema = 'public' 
+                            AND table_name = 'moods'
+                        )
+                    """)
+                    table_exists = cursor.fetchone()[0]
+                    results['step3_moods_table_exists'] = f'SUCCESS: {table_exists}'
+                except Exception as e:
+                    results['step3_moods_table_exists'] = f'FAILED: {str(e)}'
+                
+                # Step 4: If table exists, count records
+                if 'SUCCESS: True' in results.get('step3_moods_table_exists', ''):
                     try:
-                        cursor = conn.cursor()
-                        if not cursor:
-                            return {
-                                'success': False,
-                                'error': 'cursor() returned None'
-                            }
-                        
-                        # Test basic query
-                        cursor.execute('SELECT 1 as test')
-                        test_result = cursor.fetchone()[0]
-                        
-                        # Get database info
-                        cursor.execute('SELECT version()')
-                        db_version = cursor.fetchone()[0]
-                        
-                        # Check tables exist
-                        cursor.execute("""
-                            SELECT table_name 
-                            FROM information_schema.tables 
-                            WHERE table_schema = 'public'
-                        """)
-                        tables = [row[0] for row in cursor.fetchall()]
-                        
-                        # Check moods table structure
-                        cursor.execute("""
-                            SELECT column_name, data_type 
-                            FROM information_schema.columns 
-                            WHERE table_name = 'moods'
-                        """)
-                        mood_columns = [f"{row[0]} ({row[1]})" for row in cursor.fetchall()]
-                        
-                        # Get sample mood data
                         cursor.execute('SELECT COUNT(*) FROM moods')
-                        total_moods = cursor.fetchone()[0]
-                        
-                        sample_moods = []
-                        if total_moods > 0:
-                            cursor.execute('SELECT id, user_id, date, mood, notes FROM moods LIMIT 5')
-                            sample_moods = [dict(row) for row in cursor.fetchall()]
-                        
-                        return {
-                            'success': True,
-                            'message': 'Database connection successful',
-                            'test_query_result': test_result,
-                            'database_version': db_version,
-                            'tables': tables,
-                            'moods_table_columns': mood_columns,
-                            'total_moods': total_moods,
-                            'sample_moods': sample_moods
-                        }
-                        
-                    except Exception as cursor_error:
-                        return {
-                            'success': False,
-                            'error': f'Cursor error: {str(cursor_error)}',
-                            'traceback': traceback.format_exc()
-                        }
-                        
-            except Exception as conn_error:
+                        count = cursor.fetchone()[0]
+                        results['step4_moods_count'] = f'SUCCESS: {count} records'
+                    except Exception as e:
+                        results['step4_moods_count'] = f'FAILED: {str(e)}'
+                else:
+                    results['step4_moods_count'] = 'SKIPPED: moods table does not exist'
+                
+                # Step 5: List all tables
+                try:
+                    cursor.execute("""
+                        SELECT table_name 
+                        FROM information_schema.tables 
+                        WHERE table_schema = 'public'
+                        ORDER BY table_name
+                    """)
+                    tables = [row[0] for row in cursor.fetchall()]
+                    results['step5_all_tables'] = f'SUCCESS: {", ".join(tables) if tables else "No tables found"}'
+                except Exception as e:
+                    results['step5_all_tables'] = f'FAILED: {str(e)}'
+                
                 return {
-                    'success': False,
-                    'error': f'Connection error: {str(conn_error)}',
-                    'traceback': traceback.format_exc()
+                    'success': True,
+                    'message': 'Database connection test completed',
+                    'results': results
                 }
                 
         except Exception as e:
             return {
                 'success': False,
-                'error': f'General error: {str(e)}',
-                'traceback': traceback.format_exc(),
-                'db_object_type': str(type(self.db)),
-                'db_object_str': str(self.db)
+                'error': f'Connection failed: {str(e)}',
+                'traceback': traceback.format_exc()
             }
 
 class DatabaseAnalyticsService:
