@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- SOLID Chart Architecture -->
+    <script src="/static/js/chart-interfaces.js"></script>
+    <script src="/static/js/weekly-data-processor.js"></script>
+    <script src="/static/js/weekly-chart-config.js"></script>
+    <script src="/static/js/chart-renderer.js"></script>
+    <script src="/static/js/weekly-data-loader.js"></script>
+    <script src="/static/js/weekly-chart-service.js"></script>
+    <script src="/static/js/chart-factory.js"></script>
     <style>
         /* Material Design 3 (Material You) Design System */
         :root {
@@ -2515,9 +2524,13 @@
                 });
             }
             
-            // Weekly Chart
+            // Initialize charts using SOLID architecture
+            initializeWeeklyChart();
+            
+            // Weekly Chart (Legacy - will be replaced by SOLID service)
             const weeklyCtx = document.getElementById('weeklyChart');
-            if (weeklyCtx) {
+            if (weeklyCtx && !weeklyChartService) {
+                // Fallback to legacy chart if SOLID service fails
                 window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
                     type: 'line',
                     data: {
