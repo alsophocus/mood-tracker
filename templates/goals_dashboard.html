@@ -550,7 +550,7 @@
             display: none;
             background-color: var(--md-sys-color-surface);
             border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            padding: 8px 16px;
+            padding: 6px 16px;
         }
         
         /* Mobile Header Layout */
@@ -558,7 +558,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
         
         .mobile-row-2 {
@@ -580,15 +580,31 @@
             font-size: 20px;
         }
         
-        .mobile-theme-btn {
-            background: none;
-            border: none;
-            color: var(--md-sys-color-on-surface);
-            font-size: 24px;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            background-color: var(--md-sys-color-surface-container);
+        .mobile-theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .mobile-theme-toggle .theme-icon {
+            font-size: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .mobile-theme-toggle .theme-switch {
+            width: 36px;
+            height: 20px;
+        }
+        
+        .mobile-theme-toggle .theme-switch::before {
+            width: 16px;
+            height: 16px;
+            top: 2px;
+            left: 2px;
+        }
+        
+        [data-theme="dark"] .mobile-theme-toggle .theme-switch::before {
+            transform: translateX(16px) rotate(180deg);
         }
         
         .mobile-hamburger {
@@ -848,10 +864,11 @@
                 <i class="fas fa-brain"></i>
                 <span>Mood Tracker</span>
             </a>
-            <button class="mobile-theme-btn" onclick="toggleTheme(); return false;" aria-label="Toggle theme">
-                <i class="fas fa-sun theme-icon-light"></i>
-                <i class="fas fa-moon theme-icon-dark"></i>
-            </button>
+            <div class="mobile-theme-toggle">
+                <i class="fas fa-sun theme-icon"></i>
+                <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                <i class="fas fa-moon theme-icon"></i>
+            </div>
         </div>
         <div class="mobile-row-2">
             <button class="mobile-hamburger" onclick="toggleMobileNav()" aria-label="Open navigation menu">
@@ -983,9 +1000,6 @@
             <div class="mobile-nav-title">
                 <i class="fas fa-brain"></i>
                 <span>Mood Tracker</span>
-            </div>
-            <div class="mobile-nav-theme-toggle">
-                <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
             </div>
         </div>
         <div class="mobile-nav-items">
