@@ -2623,6 +2623,70 @@
                 .catch(error => console.error('Error loading daily patterns:', error));
         }
 
+        function updateWeeklyChart(data) {
+            console.log('DEBUG: updateWeeklyChart called with:', data);
+            
+            if (!window.weeklyChart) {
+                console.error('DEBUG: weeklyChart not found, cannot update');
+                return;
+            }
+            
+            try {
+                // Method 1: Try normal update
+                window.weeklyChart.data.labels = data.days || data.labels || [];
+                window.weeklyChart.data.datasets[0].data = data.data || [];
+                window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+                
+                // Force immediate update without animation
+                window.weeklyChart.update('none');
+                window.weeklyChart.render();
+                
+                console.log('DEBUG: Chart updated successfully');
+                
+            } catch (error) {
+                console.error('DEBUG: Chart update failed, trying recreation:', error);
+                
+                // Method 2: Destroy and recreate chart if update fails
+                try {
+                    window.weeklyChart.destroy();
+                    
+                    const weeklyCtx = document.getElementById('weeklyChart');
+                    if (weeklyCtx) {
+                        window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: data.days || data.labels || [],
+                                datasets: [{
+                                    label: data.period || 'Weekly Patterns',
+                                    data: data.data || [],
+                                    borderColor: '#6750A4',
+                                    backgroundColor: 'rgba(103, 80, 164, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 7,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        console.log('DEBUG: Chart recreated successfully');
+                    }
+                } catch (recreateError) {
+                    console.error('DEBUG: Chart recreation also failed:', recreateError);
+                }
+            }
+        }
+
         function loadWeeklyPatterns() {
             const year = document.getElementById('yearSelect').value;
             const month = document.getElementById('monthSelect').value;
@@ -2645,23 +2709,7 @@
                 })
                 .then(data => {
                     console.log('DEBUG: Received data:', data);
-                    
-                    if (window.weeklyChart) {
-                        console.log('DEBUG: Updating chart with:', {
-                            labels: data.days || data.labels || [],
-                            data: data.data || [],
-                            label: data.period || 'Weekly Patterns'
-                        });
-                        
-                        window.weeklyChart.data.labels = data.days || data.labels || [];
-                        window.weeklyChart.data.datasets[0].data = data.data || [];
-                        window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
-                        window.weeklyChart.update();
-                        
-                        console.log('DEBUG: Chart updated successfully');
-                    } else {
-                        console.error('DEBUG: weeklyChart not found');
-                    }
+                    updateWeeklyChart(data);
                 })
                 .catch(error => {
                     console.error('Error loading weekly patterns:', error);
@@ -2673,11 +2721,18 @@
             fetch('/weekly_patterns')
                 .then(response => response.json())
                 .then(data => {
+                    console.log('DEBUG: Current week data:', data);
+                    
                     if (window.weeklyChart) {
                         window.weeklyChart.data.labels = data.days || data.labels || [];
                         window.weeklyChart.data.datasets[0].data = data.data || [];
                         window.weeklyChart.data.datasets[0].label = 'Current Week';
-                        window.weeklyChart.update();
+                        
+                        // Force chart to redraw completely
+                        window.weeklyChart.update('none');
+                        window.weeklyChart.render();
+                        
+                        console.log('DEBUG: Current week chart updated');
                     }
                 })
                 .catch(error => console.error('Error loading current week:', error));
