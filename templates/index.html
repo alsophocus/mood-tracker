@@ -1895,42 +1895,25 @@
 
         /* Material Design 3 Responsive Design */
         @media (max-width: 768px) {
-            .container {
-                padding: 8px;
-            }
-            
-            /* Mobile App Bar Layout */
-            .top-app-bar-content {
-                justify-content: space-between !important;
-            }
-            
-            .app-bar-title {
-                flex: 0 0 auto !important;
-            }
-            
-            .app-bar-actions {
-                gap: 4px;
-                justify-content: flex-end !important;
-            }
-            
-            .app-bar-actions .md-button {
-                display: none !important;
-            }
-            
+            /* Hide desktop elements */
+            .app-bar-actions .md-button,
             .app-bar-actions > div:last-child {
-                display: none !important;
+                display: none;
             }
             
-            .theme-toggle {
-                display: block !important;
-            }
-            
+            /* Show mobile elements */
             .mobile-second-row {
-                display: flex !important;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
             
             .hamburger-menu {
                 display: block;
+            }
+            
+            .container {
+                padding: 8px;
             }
             
             .md-grid-2 {
