@@ -68,7 +68,7 @@ class MoodAnalytics:
             'data': [
                 round(sum(weekly_patterns[day]) / len(weekly_patterns[day]), 2) 
                 if day in weekly_patterns and len(weekly_patterns[day]) > 0
-                else None  # Return null for days with no data to break line connections
+                else 0  # Use 0 instead of None to prevent JSON serialization issues
                 for day in days
             ]
         }
@@ -226,7 +226,7 @@ class MoodAnalytics:
         if 'labels' not in result:
             result['labels'] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         if 'data' not in result:
-            result['data'] = [None, None, None, None, None, None, None]  # Use null instead of 0
+            result['data'] = [0, 0, 0, 0, 0, 0, 0]  # Use 0 instead of None
         
         # Rename labels to days for consistency with frontend
         result['days'] = result['labels']
