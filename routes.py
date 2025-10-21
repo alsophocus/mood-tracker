@@ -215,6 +215,12 @@ def weekly_patterns():
     moods = db.get_user_moods(current_user.id)
     analytics = MoodAnalytics(moods)
     
+    # Debug: Log what we're working with
+    print(f"DEBUG: Weekly patterns request - year={year}, month={month}, week={week_of_month}")
+    print(f"DEBUG: Found {len(moods) if moods else 0} moods for user {current_user.id}")
+    if moods:
+        print(f"DEBUG: Sample mood: {dict(moods[0])}")
+    
     if year and month and week_of_month:
         # Calculate date range for specific week of month
         try:
@@ -232,16 +238,22 @@ def weekly_patterns():
             # Ensure we don't go outside the month boundaries
             last_day = date(year, month, calendar.monthrange(year, month)[1])
             
+            print(f"DEBUG: Week calculation - start={week_start}, end={week_end}")
+            
             if week_start.month == month:
                 start_date = week_start
                 end_date = min(week_end, last_day)
-                return jsonify(analytics.get_weekly_patterns_for_period(start_date, end_date, f"Week {week_of_month} of {calendar.month_name[month]} {year}"))
+                result = analytics.get_weekly_patterns_for_period(start_date, end_date, f"Week {week_of_month} of {calendar.month_name[month]} {year}")
+                print(f"DEBUG: Weekly patterns result: {result}")
+                return jsonify(result)
             else:
                 return jsonify({"error": "Week does not exist in this month"}), 400
         except Exception as e:
+            print(f"DEBUG: Error in weekly patterns: {str(e)}")
             return jsonify({"error": "Invalid date parameters"}), 400
     else:
         result = analytics.get_weekly_patterns()
+        print(f"DEBUG: Default weekly patterns result: {result}")
         
         # Ensure we always return a valid structure
         if not result.get('labels') and not result.get('days'):
