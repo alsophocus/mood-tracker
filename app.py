@@ -5,6 +5,7 @@ from database import db
 from auth import auth_bp, init_auth
 from routes import main_bp
 from admin_routes import sql_bp
+from migration_endpoint import migration_bp
 
 def create_app():
     """Application factory"""
@@ -44,6 +45,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(sql_bp)  # SQL operations blueprint
+    app.register_blueprint(migration_bp)  # Migration testing blueprint
     
     # Add timezone conversion filter
     @app.template_filter('utc_to_local')
