@@ -3623,58 +3623,16 @@
                 .catch(error => console.error('Error loading current year trends:', error));
         }
 
-        // Simple Working PDF Export
-        function exportToPDF() {
+        // Enhanced Material Design 3 PDF Export
+        async function exportToPDF() {
             try {
-                // Check for jsPDF
-                if (!window.jspdf || !window.jspdf.jsPDF) {
-                    alert('PDF library not loaded. Please refresh the page.');
-                    return;
-                }
-                
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF();
-                
-                // Add content
-                pdf.setFontSize(20);
-                pdf.text('Mood Tracker Report', 20, 30);
-                
-                pdf.setFontSize(12);
-                pdf.text('Generated: ' + new Date().toLocaleDateString(), 20, 50);
-                
-                // Get metrics
-                const metrics = document.querySelectorAll('.metric-value');
-                if (metrics.length > 0) {
-                    pdf.text('Total Entries: ' + (metrics[0].textContent || '0'), 20, 70);
-                }
-                
-                // Save
-                pdf.save('mood-report.pdf');
-                showNotification('PDF exported successfully!', 'success');
-                
-            } catch (error) {
-                console.error('PDF Error:', error);
-                alert('PDF export failed: ' + error.message);
-            }
-        }
-
-        // Notification system for user feedback
-                console.log('Starting PDF export...');
-                
-                // Check if jsPDF is available globally
-                if (typeof window.jsPDF !== 'undefined') {
-                    var pdf = new window.jsPDF('p', 'mm', 'a4');
-                } else if (typeof jsPDF !== 'undefined') {
-                    var pdf = new jsPDF('p', 'mm', 'a4');
-                } else if (window.jspdf && window.jspdf.jsPDF) {
-                    var pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-                } else {
-                    console.error('jsPDF not found');
+                if (!jsPDF) {
                     alert('PDF library not loaded. Please refresh the page and try again.');
                     return;
                 }
                 
-                console.log('PDF instance created successfully');
+                const pdf = new jsPDF('p', 'mm', 'a4');
             
             // Material Design 3 Color Palette
             const colors = {
@@ -3941,10 +3899,7 @@
             // Save with Material Design 3 naming convention
             const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const fileName = `mood-analytics-report-${timestamp}.pdf`;
-            console.log('Saving PDF with filename:', fileName);
-            
             pdf.save(fileName);
-            console.log('PDF save command executed');
             
             // Show success message
             showNotification('📄 PDF report generated successfully!', 'success');
