@@ -2637,6 +2637,121 @@
                 .catch(error => console.error('Error loading daily patterns:', error));
         }
 
+        // SOLID Chart Implementation
+        let weeklyChartService = null;
+        
+        function initializeWeeklyChart() {
+            try {
+                // Check if SOLID classes are available
+                if (typeof ChartFactory === 'undefined') {
+                    console.warn('SOLID chart classes not loaded, using legacy chart');
+                    initializeLegacyWeeklyChart();
+                    return;
+                }
+                
+                // Create chart service using factory (SOLID principles)
+                weeklyChartService = ChartFactory.createWeeklyChartService();
+                
+                // Initialize with chart element
+                weeklyChartService.initialize('weeklyChart');
+                
+                console.log('Weekly chart service initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize weekly chart service:', error);
+                // Fall back to legacy chart initialization
+                initializeLegacyWeeklyChart();
+            }
+        }
+        
+        function initializeLegacyWeeklyChart() {
+            const weeklyCtx = document.getElementById('weeklyChart');
+            if (weeklyCtx) {
+                window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Loading...',
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            borderColor: '#625b71',
+                            backgroundColor: 'rgba(98, 91, 113, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            spanGaps: false
+                        }]
+                    },
+                    options: chartOptions
+                });
+                console.log('Legacy weekly chart initialized');
+            }
+        }
+        
+        function loadWeeklyPatterns() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const week = document.getElementById('weekSelect').value;
+            
+            console.log('Loading weekly patterns:', {year, month, week});
+            
+            if (!year || !month || !week) {
+                showSnackbar('Please select Year, Month, and Week');
+                return;
+            }
+            
+            if (weeklyChartService) {
+                // Use SOLID service
+                weeklyChartService.loadWeeklyPatterns({
+                    year: parseInt(year),
+                    month: parseInt(month),
+                    week: parseInt(week)
+                });
+            } else if (window.weeklyChart) {
+                // Fallback to legacy method
+                loadWeeklyPatternsLegacy();
+            }
+        }
+        
+        function loadCurrentWeek() {
+            if (weeklyChartService) {
+                weeklyChartService.loadCurrentWeek();
+            } else if (window.weeklyChart) {
+                loadCurrentWeekLegacy();
+            }
+        }
+        
+        function loadWeeklyPatternsLegacy() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const week = document.getElementById('weekSelect').value;
+            
+            fetch(`/weekly_patterns?year=${year}&month=${month}&week=${week}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.labels = data.days || data.labels || [];
+                        window.weeklyChart.data.datasets[0].data = data.data || [];
+                        window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+                        window.weeklyChart.update('none');
+                    }
+                })
+                .catch(error => console.error('Error loading weekly patterns:', error));
+        }
+        
+        function loadCurrentWeekLegacy() {
+            fetch('/weekly_patterns')
+                .then(response => response.json())
+                .then(data => {
+                    if (window.weeklyChart) {
+                        window.weeklyChart.data.labels = data.days || data.labels || [];
+                        window.weeklyChart.data.datasets[0].data = data.data || [];
+                        window.weeklyChart.data.datasets[0].label = 'Current Week';
+                        window.weeklyChart.update('none');
+                    }
+                })
+                .catch(error => console.error('Error loading current week:', error));
+        }
+
         function processWeeklyData(data) {
             // Convert 0 values to null for line breaks, but keep backend data safe
             const processedData = (data.data || []).map(value => {
