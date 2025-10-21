@@ -399,6 +399,17 @@
                         }
                     }
                     
+                    // Add debug information if available
+                    if (result.debug_info) {
+                        message += `\n\nDEBUG INFO:`;
+                        const debug = result.debug_info;
+                        message += `\n• Total records in DB: ${debug.total_records_in_db}`;
+                        message += `\n• Sample dates: ${debug.sample_dates.join(', ')}`;
+                        message += `\n• Target date: ${debug.target_date} (${debug.target_date_type})`;
+                        message += `\n• Count with date comparison: ${debug.count_with_date_comparison}`;
+                        message += `\n• Count with string comparison: ${debug.count_with_string_comparison}`;
+                    }
+                    
                     resultDiv.textContent = message;
                 } else {
                     resultDiv.className = 'result-area result-error';

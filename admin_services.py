@@ -33,25 +33,50 @@ class DatabaseCleanupService:
         with self.db.get_connection() as conn:
             cursor = conn.cursor()
             
-            # Count records before deletion
+            # DEBUG: Check what data exists in the database
+            cursor.execute('SELECT COUNT(*) FROM moods')
+            total_records = cursor.fetchone()[0]
+            
+            # DEBUG: Get all dates in database to see format
+            cursor.execute('SELECT DISTINCT date FROM moods ORDER BY date LIMIT 10')
+            sample_dates = [str(row[0]) for row in cursor.fetchall()]
+            
+            # DEBUG: Check records with different date comparisons
             cursor.execute('SELECT COUNT(*) FROM moods WHERE date <= %s', (target_date,))
-            count_before = cursor.fetchone()[0]
+            count_with_date = cursor.fetchone()[0]
+            
+            cursor.execute('SELECT COUNT(*) FROM moods WHERE date::text <= %s', (str(target_date),))
+            count_with_string = cursor.fetchone()[0]
             
             # Get total records before
             cursor.execute('SELECT COUNT(*) FROM moods')
             total_before = cursor.fetchone()[0]
             
-            if count_before == 0:
+            debug_info = {
+                'total_records_in_db': total_records,
+                'sample_dates': sample_dates,
+                'target_date': str(target_date),
+                'target_date_type': str(type(target_date)),
+                'count_with_date_comparison': count_with_date,
+                'count_with_string_comparison': count_with_string,
+            }
+            
+            if count_with_date == 0:
                 return {
                     'deleted': 0, 
                     'message': f'No records found to delete until {target_date}',
                     'total_before': total_before,
                     'total_after': total_before,
-                    'target_date': str(target_date)
+                    'target_date': str(target_date),
+                    'debug_info': debug_info
                 }
             
-            # Delete records
-            cursor.execute('DELETE FROM moods WHERE date <= %s', (target_date,))
+            # Delete records using the method that found records
+            if count_with_date > 0:
+                cursor.execute('DELETE FROM moods WHERE date <= %s', (target_date,))
+            else:
+                cursor.execute('DELETE FROM moods WHERE date::text <= %s', (str(target_date),))
+                
             deleted = cursor.rowcount
             conn.commit()
             
@@ -78,7 +103,8 @@ class DatabaseCleanupService:
                     'start': str(date_range[0]) if date_range[0] else None,
                     'end': str(date_range[1]) if date_range[1] else None
                 },
-                'verification': 'PASSED' if remaining_until_date == 0 else f'FAILED - {remaining_until_date} records still exist until {target_date}'
+                'verification': 'PASSED' if remaining_until_date == 0 else f'FAILED - {remaining_until_date} records still exist until {target_date}',
+                'debug_info': debug_info
             }
     
     def clear_all_data(self) -> Dict[str, Any]:
