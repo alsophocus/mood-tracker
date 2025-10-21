@@ -7,6 +7,7 @@ from routes import main_bp
 from admin_routes import sql_bp
 from migration_endpoint import migration_bp
 from insights_routes import insights_bp
+from comprehensive_routes import comprehensive_bp
 
 def create_app():
     """Application factory"""
@@ -48,6 +49,7 @@ def create_app():
     app.register_blueprint(sql_bp)  # SQL operations blueprint
     app.register_blueprint(migration_bp)  # Migration testing blueprint
     app.register_blueprint(insights_bp)  # Insights dashboard blueprint
+    app.register_blueprint(comprehensive_bp)  # Comprehensive features blueprint
     
     # Add timezone conversion filter
     @app.template_filter('utc_to_local')

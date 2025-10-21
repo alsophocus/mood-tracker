@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Entry - Mood Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --md-sys-color-primary: #6750a4;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #eaddff;
+            --md-sys-color-on-primary-container: #21005d;
+            --md-sys-color-surface: #fffbfe;
+            --md-sys-color-on-surface: #1c1b1f;
+            --md-sys-color-surface-variant: #e7e0ec;
+            --md-sys-color-on-surface-variant: #49454f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .quick-entry-card {
+            background: var(--md-sys-color-surface);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.875rem;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mood-button {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mood-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        .mood-button.selected {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .mood-icon {
+            font-size: 1.5rem;
+        }
+
+        .notes-field {
+            margin-bottom: 24px;
+        }
+
+        .notes-field textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--md-sys-color-surface-variant);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--md-sys-color-primary);
+            border: 1px solid var(--md-sys-color-primary);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="quick-entry-card">
+        <div class="header">
+            <h1><i class="fas fa-heart" style="color: var(--md-sys-color-primary); margin-right: 8px;"></i>Quick Mood Check</h1>
+            <p>How are you feeling right now?</p>
+        </div>
+
+        <div class="mood-grid">
+            <button class="mood-button" data-mood="very bad">
+                <i class="fas fa-face-frown-open mood-icon" style="color: #D32F2F;"></i>
+                <span>Very Bad</span>
+            </button>
+            <button class="mood-button" data-mood="bad">
+                <i class="fas fa-face-frown mood-icon" style="color: #FF5722;"></i>
+                <span>Bad</span>
+            </button>
+            <button class="mood-button" data-mood="slightly bad">
+                <i class="fas fa-face-meh mood-icon" style="color: #FF9800;"></i>
+                <span>Slightly Bad</span>
+            </button>
+            <button class="mood-button" data-mood="neutral">
+                <i class="fas fa-face-meh mood-icon" style="color: #9E9E9E;"></i>
+                <span>Neutral</span>
+            </button>
+            <button class="mood-button" data-mood="slightly well">
+                <i class="fas fa-face-smile mood-icon" style="color: #8BC34A;"></i>
+                <span>Slightly Well</span>
+            </button>
+            <button class="mood-button" data-mood="well">
+                <i class="fas fa-face-smile mood-icon" style="color: #4CAF50;"></i>
+                <span>Well</span>
+            </button>
+            <button class="mood-button" data-mood="very well" style="grid-column: 2;">
+                <i class="fas fa-face-laugh mood-icon" style="color: #2E7D32;"></i>
+                <span>Very Well</span>
+            </button>
+        </div>
+
+        <div class="notes-field">
+            <textarea id="notes" placeholder="Any notes about your mood? (optional)"></textarea>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="window.close()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveMood()">Save Mood</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedMood = null;
+
+        // Mood selection
+        document.querySelectorAll('.mood-button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.mood-button').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedMood = this.dataset.mood;
+            });
+        });
+
+        async function saveMood() {
+            if (!selectedMood) {
+                alert('Please select a mood first!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/features/api/quick-mood', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mood: selectedMood,
+                        notes: document.getElementById('notes').value
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Mood saved successfully!');
+                    if (window.opener) {
+                        window.opener.location.reload();
+                    }
+                    window.close();
+                } else {
+                    alert('❌ Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Error saving mood');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
