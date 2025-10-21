@@ -47,15 +47,32 @@ def get_tags():
 @main_bp.route('/api/mood-context', methods=['POST'])
 @login_required
 def save_mood_context():
-    """Save mood context and tags"""
+    """Save mood context and tags for most recent mood or create new entry"""
     try:
         data = request.get_json()
-        mood_id = data.get('mood_id')
         tags = data.get('tags', [])
         context = data.get('context', {})
         
         with db.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # Get the most recent mood for this user
+            cursor.execute("""
+                SELECT id FROM moods 
+                WHERE user_id = %s 
+                ORDER BY date DESC, timestamp DESC 
+                LIMIT 1
+            """, (session['user_id'],))
+            
+            mood_result = cursor.fetchone()
+            
+            if not mood_result:
+                return jsonify({
+                    'success': False, 
+                    'error': 'No mood entries found. Please add a mood first.'
+                }), 400
+            
+            mood_id = mood_result['id']
             
             # Update mood with context
             cursor.execute("""
@@ -103,7 +120,12 @@ def save_mood_context():
             
             conn.commit()
             
-        return jsonify({'success': True, 'message': 'Context saved successfully'})
+        return jsonify({
+            'success': True, 
+            'message': 'Context saved successfully',
+            'mood_id': mood_id,
+            'tags_count': len(tags)
+        })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

@@ -24,6 +24,23 @@
             --md-sys-color-outline-variant: #CAC4D0;
         }
 
+        [data-theme="dark"] {
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+            --md-sys-color-secondary: #CCC2DC;
+            --md-sys-color-on-secondary: #332D41;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+            --md-sys-color-surface: #141218;
+            --md-sys-color-on-surface: #E6E0E9;
+            --md-sys-color-surface-variant: #49454F;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-outline-variant: #49454F;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -300,11 +317,16 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <a href="/" class="material-icons" style="font-size: 2rem; color: var(--md-sys-color-primary); text-decoration: none; margin-right: 8px;">arrow_back</a>
-            <span class="material-icons" style="font-size: 2rem; color: var(--md-sys-color-primary);">psychology</span>
-            <h1>Mood Triggers & Context</h1>
-        </div>
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <div class="header">
+                <a href="/" class="material-icons" style="font-size: 2rem; color: var(--md-sys-color-primary); text-decoration: none; margin-right: 8px;">arrow_back</a>
+                <span class="material-icons" style="font-size: 2rem; color: var(--md-sys-color-primary);">psychology</span>
+                <h1>Mood Triggers & Context</h1>
+            </div>
+            <button onclick="toggleTheme()" style="background: none; border: none; cursor: pointer; padding: 8px; border-radius: 50%; color: var(--md-sys-color-on-surface);">
+                <span class="material-icons" id="themeIcon">light_mode</span>
+            </button>
+        </header>
 
         <div class="tag-categories" id="tagCategories">
             <!-- Categories will be populated by JavaScript -->
@@ -468,8 +490,67 @@
                 saveButton.style.transform = 'scale(1)';
             }, 150);
             
-            console.log('Saving mood context:', context);
-            // TODO: Send to backend
+            // Get the most recent mood ID or create a new mood entry
+            fetch('/api/mood-context', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tags: context.tags,
+                    context: {
+                        location: context.location,
+                        activity: context.activity,
+                        weather: context.weather,
+                        notes: context.notes
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSnackbar('✅ Context saved successfully!');
+                    // Clear form
+                    selectedTags.clear();
+                    updateSelectedTagsList();
+                    document.getElementById('location').value = '';
+                    document.getElementById('activity').value = '';
+                    document.getElementById('weather').value = '';
+                    document.getElementById('notes').value = '';
+                } else {
+                    showSnackbar('❌ Failed to save context: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showSnackbar('❌ Error saving context');
+            });
+        }
+
+        function showSnackbar(message) {
+            // Create snackbar element
+            const snackbar = document.createElement('div');
+            snackbar.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--md-sys-color-surface-variant);
+                color: var(--md-sys-color-on-surface-variant);
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                font-size: 0.875rem;
+                font-weight: 500;
+            `;
+            snackbar.textContent = message;
+            document.body.appendChild(snackbar);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                snackbar.remove();
+            }, 3000);
         }
 
         function addCustomTag() {
@@ -488,6 +569,36 @@
                 emotionsContainer.appendChild(tagChip);
             }
         }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.textContent = 'light_mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = 'dark_mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.getElementById('themeIcon');
+            
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = 'dark_mode';
+            } else {
+                themeIcon.textContent = 'light_mode';
+            }
+            
+            initializeTagCategories();
+        });
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', initializeTagCategories);
