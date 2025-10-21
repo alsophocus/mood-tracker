@@ -986,7 +986,7 @@
             font-weight: 500;
             color: var(--md-sys-color-primary);
             margin-bottom: 4px;
-            font-family: 'Playfair Display', serif;
+            font-family: 'Roboto', sans-serif;
             text-align: center;
         }
 
@@ -1514,7 +1514,7 @@
             font-size: 18px;
             font-weight: 500;
             color: var(--md-sys-color-on-surface);
-            font-family: 'Playfair Display', serif;
+            font-family: 'Roboto', sans-serif;
         }
 
         .week-value.positive {
@@ -1925,19 +1925,19 @@
                 
                 <div class="metrics-grid">
                     <div class="metric-card">
-                        <div class="metric-value" style="font-family: 'Playfair Display', serif;">{{ analytics.daily_average }}</div>
+                        <div class="metric-value">{{ analytics.daily_average }}</div>
                         <div class="metric-label">Daily Average</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value" id="current-streak" style="font-family: 'Playfair Display', serif;">0</div>
+                        <div class="metric-value" id="current-streak">0</div>
                         <div class="metric-label">Current Streak</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value" id="best-mood" style="font-family: 'Playfair Display', serif;">-</div>
+                        <div class="metric-value" id="best-mood">-</div>
                         <div class="metric-label">Best This Week</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value" style="font-family: 'Playfair Display', serif;">{{ analytics.total_entries }}</div>
+                        <div class="metric-value">{{ analytics.total_entries }}</div>
                         <div class="metric-label">Total Days</div>
                     </div>
                 </div>
