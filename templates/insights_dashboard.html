@@ -382,25 +382,41 @@
         <div class="top-app-bar-content">
             <div class="app-bar-title">
                 <i class="fas fa-brain"></i>
-                <span class="display-small">Mood Insights</span>
+                <span class="display-small">Mood Tracker</span>
             </div>
             <div class="app-bar-actions">
+                <a href="/" class="md-button md-button-text" style="margin-right: 8px;">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/insights" class="md-button md-button-text" style="margin-right: 8px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Insights</span>
+                </a>
+                <a href="/features/goals" class="md-button md-button-text" style="margin-right: 8px;">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="/features/analytics" class="md-button md-button-text" style="margin-right: 16px;">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
                 <div class="theme-toggle">
-                    <i class="fas fa-sun"></i>
-                    <button class="theme-switch" onclick="toggleTheme()" aria-label="Toggle theme"></button>
-                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun theme-icon"></i>
+                    <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                    <i class="fas fa-moon theme-icon"></i>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <a href="/logout" class="md-button md-button-outlined">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
                 </div>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <div class="nav-links">
-            <a href="/">Dashboard</a>
-            <a href="/insights/" class="active">Insights</a>
-            <a href="/features/goals">Goals</a>
-            <a href="/features/analytics">Analytics</a>
-        </div>
 
         <div class="md-card">
             <div class="md-card-header">
