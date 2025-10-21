@@ -418,6 +418,19 @@
             padding: 8px 16px;
         }
 
+        /* Mobile Second Row */
+        .mobile-second-row {
+            display: none;
+            padding: 8px 16px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-user-name {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+
         /* Theme Icon Button */
         .theme-icon-button {
             background: none;
@@ -1886,6 +1899,40 @@
                 padding: 8px;
             }
             
+            /* Mobile App Bar Layout */
+            .top-app-bar-content {
+                justify-content: space-between !important;
+            }
+            
+            .app-bar-title {
+                flex: 0 0 auto !important;
+            }
+            
+            .app-bar-actions {
+                gap: 4px;
+                justify-content: flex-end !important;
+            }
+            
+            .app-bar-actions .md-button {
+                display: none !important;
+            }
+            
+            .app-bar-actions > div:last-child {
+                display: none !important;
+            }
+            
+            .theme-toggle {
+                display: block !important;
+            }
+            
+            .mobile-second-row {
+                display: flex !important;
+            }
+            
+            .hamburger-menu {
+                display: block;
+            }
+            
             .md-grid-2 {
                 grid-template-columns: 1fr;
                 gap: 16px;
@@ -2067,8 +2114,8 @@
                 display: none;
             }
             
-            .mobile-hamburger-row {
-                display: block;
+            .mobile-second-row {
+                display: flex !important;
             }
             
             .hamburger-menu {
@@ -2236,10 +2283,12 @@
                 </div>
             </div>
         </div>
-        <div class="mobile-hamburger-row">
+        <!-- Mobile Second Row -->
+        <div class="mobile-second-row">
             <button class="hamburger-menu" onclick="toggleMobileNav()" aria-label="Open navigation menu">
                 <i class="fas fa-bars"></i>
             </button>
+            <span class="mobile-user-name">Welcome, {{ user.name }}</span>
         </div>
     </header>
 
