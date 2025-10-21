@@ -154,23 +154,18 @@ class InsightsRenderer extends InsightsRendererInterface {
 // Theme management service - Single Responsibility
 class InsightsThemeManager extends InsightsThemeManagerInterface {
     toggleTheme() {
-        const body = document.body;
-        const themeIcons = document.querySelectorAll('.theme-icon');
-        
-        if (body.getAttribute('data-theme') === 'dark') {
-            body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
+        // This is now handled by the global toggleTheme function in the HTML
+        // to match the main page exactly
+        if (window.toggleTheme) {
+            window.toggleTheme();
         }
     }
 
     initializeTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        
-        if (savedTheme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
+        // This is now handled by the global initializeTheme function in the HTML
+        // to match the main page exactly
+        if (window.initializeTheme) {
+            window.initializeTheme();
         }
     }
 }
