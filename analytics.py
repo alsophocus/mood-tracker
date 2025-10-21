@@ -103,12 +103,13 @@ class MoodAnalytics:
             mood_value = MOOD_VALUES[mood_entry['mood']]
             
             if isinstance(timestamp, str):
-                # Parse timestamp string
                 from datetime import datetime
                 timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             
-            # Use the timestamp as-is (it's already in local time from database)
-            hour = timestamp.hour
+            # Convert UTC to UTC-3 (Chile timezone)
+            from datetime import timedelta
+            chile_time = timestamp - timedelta(hours=3)
+            hour = chile_time.hour
             
             hourly_moods[hour].append(mood_value)
         
@@ -369,8 +370,9 @@ class MoodAnalytics:
             if isinstance(timestamp, str):
                 timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             
-            # Use timestamp as-is (already in local time)
-            hour = timestamp.hour
+            # Convert UTC to UTC-3 (Chile timezone)
+            chile_time = timestamp - timedelta(hours=3)
+            hour = chile_time.hour
             
             hourly_totals[hour].append(mood_value)
         
