@@ -286,7 +286,7 @@ class DatabaseMigrationService:
                 
                 return {
                     'success': True,
-                    'message': 'Permission check completed',
+                    'message': f'Permission check completed:\n• SELECT: {permissions.get("SELECT", "UNKNOWN")}\n• CREATE_TABLE: {permissions.get("CREATE_TABLE", "UNKNOWN")}\n• ALTER_TABLE: {permissions.get("ALTER_TABLE", "UNKNOWN")}\n• DML_OPERATIONS: {permissions.get("DML_OPERATIONS", "UNKNOWN")}',
                     'permissions': permissions
                 }
                 
@@ -311,16 +311,27 @@ class DatabaseMigrationService:
                 """)
                 existing_tables = [row[0] for row in cursor.fetchall()]
                 
+                # Check existing columns
+                cursor.execute("""
+                    SELECT column_name FROM information_schema.columns 
+                    WHERE table_name = 'moods' AND column_name LIKE 'context_%'
+                """)
+                existing_context_columns = [row[0] for row in cursor.fetchall()]
+                
+                message = f'Migration check results:\n• Existing tables: {existing_tables}\n• Context columns: {existing_context_columns}'
+                
                 if 'tags' in existing_tables and 'mood_tags' in existing_tables:
                     return {
                         'success': True,
-                        'message': 'Migration tables already exist',
-                        'existing_tables': existing_tables
+                        'message': f'{message}\n• Status: Migration tables already exist!',
+                        'existing_tables': existing_tables,
+                        'existing_context_columns': existing_context_columns
                     }
                 
                 # If tables don't exist, we have a permissions issue
                 return {
                     'success': False,
+                    'message': f'{message}\n• Status: Tables missing, need CREATE permissions',
                     'error': 'Tables do not exist and cannot be created due to database permissions',
                     'existing_tables': existing_tables,
                     'suggestion': 'Database user needs CREATE TABLE and ALTER TABLE permissions'
@@ -329,7 +340,8 @@ class DatabaseMigrationService:
         except Exception as e:
             return {
                 'success': False,
-                'error': f'Simple migration check failed: {str(e)}'
+                'error': f'Simple migration check failed: {str(e)}',
+                'message': f'Failed to check migration status: {str(e)}'
             }
     
     def migrate_mood_triggers(self) -> Dict[str, Any]:
