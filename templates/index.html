@@ -1895,13 +1895,35 @@
 
         /* Material Design 3 Responsive Design */
         @media (max-width: 768px) {
+            /* Fix title positioning - force left */
+            .top-app-bar-content {
+                justify-content: space-between;
+            }
+            
+            .app-bar-title {
+                order: 1;
+                flex: 0 0 auto;
+            }
+            
+            /* Fix theme button positioning - force right, same row as title */
+            .app-bar-actions {
+                order: 2;
+                display: flex;
+                align-items: center;
+            }
+            
             /* Hide desktop elements */
             .app-bar-actions .md-button,
             .app-bar-actions > div:last-child {
                 display: none;
             }
             
-            /* Show mobile elements */
+            /* Show only theme toggle in app-bar-actions */
+            .theme-toggle {
+                display: block;
+            }
+            
+            /* Show mobile second row */
             .mobile-second-row {
                 display: flex;
                 justify-content: space-between;
