@@ -923,6 +923,38 @@
             justify-content: space-between;
         }
 
+        .mobile-nav-user-section {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mobile-nav-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background: var(--md-sys-color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--md-sys-color-on-primary);
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .mobile-nav-user-info {
+            flex: 1;
+        }
+
+        .mobile-nav-user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            line-height: 20px;
+        }
+
         .mobile-nav-title {
             display: flex;
             align-items: center;
@@ -930,6 +962,22 @@
             color: var(--md-sys-color-primary);
             font-weight: 500;
             font-size: 18px;
+        }
+
+        .logout-button {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+        }
+
+        .logout-button:hover {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
         }
 
         .mobile-nav-items {
@@ -967,13 +1015,25 @@
 
         /* Mobile responsive styles for top-app-bar */
         @media (max-width: 768px) {
-            /* Hide desktop header, show mobile header */
+            /* Hide desktop header and navigation rail, show mobile header */
             .desktop-header {
                 display: none !important;
             }
             
+            .navigation-rail {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
             .mobile-header {
-                display: block !important;
+                display: flex !important;
+            }
+            
+            .container {
+                padding: 8px;
             }
             
             .top-app-bar {

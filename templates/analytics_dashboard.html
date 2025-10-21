@@ -1073,13 +1073,25 @@
 
         /* Mobile responsive styles for top-app-bar */
         @media (max-width: 768px) {
-            /* Hide desktop header, show mobile header */
+            /* Hide desktop header and navigation rail, show mobile header */
             .desktop-header {
                 display: none !important;
             }
             
+            .navigation-rail {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
             .mobile-header {
-                display: block !important;
+                display: flex !important;
+            }
+            
+            .container {
+                padding: 8px;
             }
             
             .top-app-bar {
