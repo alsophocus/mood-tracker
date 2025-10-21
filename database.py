@@ -53,8 +53,7 @@ class Database:
                         date DATE NOT NULL,
                         mood TEXT NOT NULL,
                         notes TEXT,
-                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        UNIQUE(user_id, date)
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
                 
@@ -108,25 +107,12 @@ class Database:
                     # Column probably already exists, rollback and continue
                     conn.rollback()
                 
-                # Check if entry exists for this user and date
-                cursor.execute('SELECT id FROM moods WHERE user_id = %s AND date = %s', (user_id, date))
-                existing = cursor.fetchone()
-                
-                if existing:
-                    # Update existing entry
-                    cursor.execute('''
-                        UPDATE moods 
-                        SET mood = %s, notes = %s, triggers = %s, timestamp = CURRENT_TIMESTAMP
-                        WHERE user_id = %s AND date = %s
-                        RETURNING *
-                    ''', (mood, notes, triggers, user_id, date))
-                else:
-                    # Insert new entry
-                    cursor.execute('''
-                        INSERT INTO moods (user_id, date, mood, notes, triggers, timestamp)
-                        VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-                        RETURNING *
-                    ''', (user_id, date, mood, notes, triggers))
+                # Always insert new entry (no more unique constraint)
+                cursor.execute('''
+                    INSERT INTO moods (user_id, date, mood, notes, triggers, timestamp)
+                    VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    RETURNING *
+                ''', (user_id, date, mood, notes, triggers))
                 
                 conn.commit()
                 return cursor.fetchone()
