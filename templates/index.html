@@ -2529,7 +2529,8 @@
                             backgroundColor: 'rgba(98, 91, 113, 0.1)',
                             tension: 0.4,
                             borderWidth: 2,
-                            pointRadius: 4
+                            pointRadius: 4,
+                            spanGaps: false  // Don't connect lines across missing data (null values)
                         }]
                     },
                     options: chartOptions
@@ -2662,7 +2663,10 @@
                                     borderColor: '#6750A4',
                                     backgroundColor: 'rgba(103, 80, 164, 0.1)',
                                     tension: 0.4,
-                                    fill: true
+                                    fill: true,
+                                    borderWidth: 2,
+                                    pointRadius: 4,
+                                    spanGaps: false  // Don't connect lines across missing data
                                 }]
                             },
                             options: {
