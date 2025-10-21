@@ -136,10 +136,10 @@ class Database:
                 raise e
     
     def get_user_moods(self, user_id, limit=None):
-        """Get user's moods"""
+        """Get user's moods ordered by date and timestamp"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            query = 'SELECT * FROM moods WHERE user_id = %s ORDER BY date DESC'
+            query = 'SELECT * FROM moods WHERE user_id = %s ORDER BY date DESC, timestamp DESC'
             if limit:
                 query += f' LIMIT {limit}'
             cursor.execute(query, (user_id,))

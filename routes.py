@@ -535,6 +535,42 @@ def get_quick_insights():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@main_bp.route('/debug-moods')
+@login_required
+def debug_moods():
+    """Debug endpoint to check mood data integrity"""
+    try:
+        moods = db.get_user_moods(current_user.id, limit=10)
+        
+        debug_info = {
+            'total_moods': len(moods),
+            'recent_moods': []
+        }
+        
+        for mood in moods:
+            debug_info['recent_moods'].append({
+                'id': mood.get('id'),
+                'date': str(mood.get('date')),
+                'mood': mood.get('mood'),
+                'timestamp': str(mood.get('timestamp')),
+                'timestamp_type': type(mood.get('timestamp')).__name__,
+                'has_timestamp': mood.get('timestamp') is not None,
+                'notes': mood.get('notes', '')[:50] if mood.get('notes') else None
+            })
+        
+        # Test daily patterns
+        analytics = MoodAnalytics(moods)
+        daily_patterns = analytics.get_daily_patterns()
+        
+        debug_info['daily_patterns_summary'] = {
+            'total_hours_with_data': sum(1 for x in daily_patterns['data'] if x is not None),
+            'sample_hours': [(i, daily_patterns['data'][i]) for i in range(0, 24, 4)]
+        }
+        
+        return jsonify(debug_info)
+    except Exception as e:
+        return jsonify({'error': str(e), 'type': type(e).__name__}), 500
+
 @main_bp.route('/recent_moods')
 @login_required
 def recent_moods():
