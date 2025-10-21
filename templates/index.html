@@ -412,21 +412,65 @@
             transform: scale(1.1);
         }
 
-        /* Mobile Hamburger Row */
-        .mobile-hamburger-row {
-            display: none;
-            padding: 8px 16px;
+        /* Desktop/Mobile Header Control */
+        .desktop-header {
+            display: block;
         }
-
-        /* Mobile Second Row */
-        .mobile-second-row {
+        
+        .mobile-header {
             display: none;
-            padding: 8px 16px;
+            background-color: var(--md-sys-color-surface);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            padding: 16px;
+        }
+        
+        /* Mobile Header Layout */
+        .mobile-row-1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .mobile-row-2 {
+            display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
-        .mobile-user-name {
+        
+        .mobile-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            font-size: 18px;
+        }
+        
+        .mobile-title i {
+            font-size: 20px;
+        }
+        
+        .mobile-theme-btn {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .mobile-hamburger {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 24px;
+            padding: 8px;
+            cursor: pointer;
+        }
+        
+        .mobile-user-welcome {
             color: var(--md-sys-color-on-surface-variant);
             font-size: 14px;
         }
@@ -1895,45 +1939,17 @@
 
         /* Material Design 3 Responsive Design */
         @media (max-width: 768px) {
-            /* FORCE mobile layout with maximum specificity */
-            header.top-app-bar .top-app-bar-content {
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-            }
-            
-            header.top-app-bar .app-bar-title {
-                order: 1 !important;
-                flex: 0 0 auto !important;
-            }
-            
-            header.top-app-bar .app-bar-actions {
-                order: 2 !important;
-                display: flex !important;
-                align-items: center !important;
-            }
-            
-            /* Hide ALL desktop navigation */
-            header.top-app-bar .app-bar-actions .md-button,
-            header.top-app-bar .app-bar-actions > div:last-child {
+            /* Hide desktop header, show mobile header */
+            .desktop-header {
                 display: none !important;
             }
             
-            /* Show ONLY theme toggle */
-            header.top-app-bar .theme-toggle {
+            .mobile-header {
                 display: block !important;
             }
             
-            /* Show mobile second row */
-            header.top-app-bar .mobile-second-row {
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                padding: 8px 16px !important;
-            }
-            
-            .hamburger-menu {
-                display: block !important;
+            .container {
+                padding: 8px;
             }
             
             /* Show mobile second row */
@@ -2266,8 +2282,8 @@
     </style>
 </head>
 <body>
-    <!-- Material Design 3 Top App Bar -->
-    <header class="top-app-bar">
+    <!-- Desktop Header -->
+    <header class="top-app-bar desktop-header">
         <div class="top-app-bar-content">
             <div class="app-bar-title">
                 <i class="fas fa-brain"></i>
@@ -2301,12 +2317,25 @@
                 </div>
             </div>
         </div>
-        <!-- Mobile Second Row -->
-        <div class="mobile-second-row">
-            <button class="hamburger-menu" onclick="toggleMobileNav()" aria-label="Open navigation menu">
+    </header>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-row-1">
+            <div class="mobile-title">
+                <i class="fas fa-brain"></i>
+                <span>Mood Tracker</span>
+            </div>
+            <button class="mobile-theme-btn" onclick="toggleTheme(); return false;" aria-label="Toggle theme">
+                <i class="fas fa-sun theme-icon-light"></i>
+                <i class="fas fa-moon theme-icon-dark"></i>
+            </button>
+        </div>
+        <div class="mobile-row-2">
+            <button class="mobile-hamburger" onclick="toggleMobileNav()" aria-label="Open navigation menu">
                 <i class="fas fa-bars"></i>
             </button>
-            <span class="mobile-user-name">Welcome, {{ user.name }}</span>
+            <span class="mobile-user-welcome">Welcome, {{ user.name }}</span>
         </div>
     </header>
 
