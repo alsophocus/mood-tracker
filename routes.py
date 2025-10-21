@@ -7,6 +7,106 @@ from pdf_export import PDFExporter
 
 main_bp = Blueprint('main', __name__)
 
+@main_bp.route('/triggers')
+@login_required
+def mood_triggers():
+    """Mood triggers and context page"""
+    return render_template('mood_triggers.html')
+
+@main_bp.route('/api/tags')
+@login_required
+def get_tags():
+    """Get all available tags"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, name, category, color, icon 
+                FROM tags 
+                ORDER BY category, name
+            """)
+            tags = cursor.fetchall()
+            
+            # Group by category
+            categories = {}
+            for tag in tags:
+                category = tag['category']
+                if category not in categories:
+                    categories[category] = []
+                categories[category].append({
+                    'id': tag['id'],
+                    'name': tag['name'],
+                    'color': tag['color'],
+                    'icon': tag['icon']
+                })
+            
+            return jsonify({'success': True, 'categories': categories})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/api/mood-context', methods=['POST'])
+@login_required
+def save_mood_context():
+    """Save mood context and tags"""
+    try:
+        data = request.get_json()
+        mood_id = data.get('mood_id')
+        tags = data.get('tags', [])
+        context = data.get('context', {})
+        
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Update mood with context
+            cursor.execute("""
+                UPDATE moods 
+                SET context_location = %s,
+                    context_activity = %s,
+                    context_weather = %s,
+                    context_notes = %s
+                WHERE id = %s AND user_id = %s
+            """, (
+                context.get('location'),
+                context.get('activity'), 
+                context.get('weather'),
+                context.get('notes'),
+                mood_id,
+                session['user_id']
+            ))
+            
+            # Clear existing tags for this mood
+            cursor.execute("DELETE FROM mood_tags WHERE mood_id = %s", (mood_id,))
+            
+            # Add new tags
+            for tag_name in tags:
+                # Get or create tag
+                cursor.execute("SELECT id FROM tags WHERE name = %s", (tag_name,))
+                tag_result = cursor.fetchone()
+                
+                if tag_result:
+                    tag_id = tag_result['id']
+                else:
+                    # Create new tag in emotions category
+                    cursor.execute("""
+                        INSERT INTO tags (name, category, color, icon)
+                        VALUES (%s, 'emotions', '#6750A4', 'tag')
+                        RETURNING id
+                    """, (tag_name,))
+                    tag_id = cursor.fetchone()['id']
+                
+                # Link mood to tag
+                cursor.execute("""
+                    INSERT INTO mood_tags (mood_id, tag_id)
+                    VALUES (%s, %s)
+                    ON CONFLICT (mood_id, tag_id) DO NOTHING
+                """, (mood_id, tag_id))
+            
+            conn.commit()
+            
+        return jsonify({'success': True, 'message': 'Context saved successfully'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @main_bp.route('/')
 @login_required
 def index():

@@ -303,6 +303,7 @@ class DatabaseMigrationService:
         Dependency Inversion: depends on MigrationStrategyInterface abstractions
         """
         from migration_strategies import (
+            CompleteMoodTriggersStrategy,
             AutocommitMigrationStrategy,
             TransactionMigrationStrategy, 
             ReadOnlyTestStrategy,
@@ -311,6 +312,7 @@ class DatabaseMigrationService:
         
         # Dependency Injection - inject database dependency
         strategies = [
+            CompleteMoodTriggersStrategy(self.db),
             AutocommitMigrationStrategy(self.db),
             TransactionMigrationStrategy(self.db),
             ReadOnlyTestStrategy(self.db)

@@ -17,6 +17,90 @@ class MigrationStrategyInterface(ABC):
         pass
 
 
+class CompleteMoodTriggersStrategy(MigrationStrategyInterface):
+    """Single Responsibility - handles complete mood triggers schema creation"""
+    
+    def __init__(self, db: Database):
+        self.db = db
+    
+    def execute(self) -> Dict[str, Any]:
+        try:
+            conn = psycopg.connect(self.db.url, autocommit=True)
+            cursor = conn.cursor()
+            
+            # Create tags table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS public.tags (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(50) UNIQUE NOT NULL,
+                    category VARCHAR(30) NOT NULL,
+                    color VARCHAR(7) DEFAULT '#6750A4',
+                    icon VARCHAR(50) DEFAULT 'tag',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Create mood_tags junction table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS public.mood_tags (
+                    id SERIAL PRIMARY KEY,
+                    mood_id INTEGER REFERENCES moods(id) ON DELETE CASCADE,
+                    tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(mood_id, tag_id)
+                )
+            """)
+            
+            # Add context columns to moods table
+            cursor.execute("""
+                ALTER TABLE public.moods 
+                ADD COLUMN IF NOT EXISTS context_location VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS context_activity VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS context_weather VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS context_notes TEXT
+            """)
+            
+            # Insert default tags with Material Design 3 colors
+            default_tags = [
+                ('work', 'work', '#D32F2F', 'work'),
+                ('exercise', 'health', '#388E3C', 'fitness_center'),
+                ('sleep', 'health', '#1976D2', 'bedtime'),
+                ('family', 'social', '#F57C00', 'family_restroom'),
+                ('friends', 'social', '#7B1FA2', 'group'),
+                ('food', 'activities', '#689F38', 'restaurant'),
+                ('music', 'activities', '#0288D1', 'music_note'),
+                ('weather', 'environment', '#00796B', 'wb_sunny'),
+                ('stress', 'emotions', '#C62828', 'psychology'),
+                ('relaxation', 'emotions', '#2E7D32', 'spa')
+            ]
+            
+            for name, category, color, icon in default_tags:
+                cursor.execute("""
+                    INSERT INTO public.tags (name, category, color, icon)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (name) DO NOTHING
+                """, (name, category, color, icon))
+            
+            # Get counts
+            cursor.execute('SELECT COUNT(*) FROM public.tags')
+            tag_count = cursor.fetchone()[0]
+            
+            cursor.execute('SELECT COUNT(*) FROM public.mood_tags')
+            mood_tag_count = cursor.fetchone()[0]
+            
+            conn.close()
+            
+            return {
+                'success': True,
+                'message': f'✅ Complete mood triggers schema created! {tag_count} tags, {mood_tag_count} mood-tag links.',
+                'tag_count': tag_count,
+                'mood_tag_count': mood_tag_count,
+                'method': 'complete_schema'
+            }
+        except Exception as e:
+            return {'success': False, 'error': str(e), 'method': 'complete_schema'}
+
+
 class AutocommitMigrationStrategy(MigrationStrategyInterface):
     """Single Responsibility - handles autocommit DDL operations"""
     

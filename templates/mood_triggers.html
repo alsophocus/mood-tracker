@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Triggers - Mood Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            animation: slideInDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 400;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.14), 0 1px 18px rgba(0,0,0,0.12);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .tag-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .category-card {
+            background: var(--md-sys-color-surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .category-card:nth-child(1) { animation-delay: 0.1s; }
+        .category-card:nth-child(2) { animation-delay: 0.2s; }
+        .category-card:nth-child(3) { animation-delay: 0.3s; }
+        .category-card:nth-child(4) { animation-delay: 0.4s; }
+        .category-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .tags-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+        }
+
+        .tag-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        .tag-chip.selected {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .tag-chip .material-icons {
+            font-size: 18px;
+        }
+
+        .mood-entry-section {
+            background: var(--md-sys-color-surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .context-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .input-field {
+            position: relative;
+        }
+
+        .input-field input,
+        .input-field textarea {
+            width: 100%;
+            padding: 16px 12px 8px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 4px;
+            background: transparent;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .input-field input:focus,
+        .input-field textarea:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+        }
+
+        .input-field label {
+            position: absolute;
+            left: 12px;
+            top: 16px;
+            font-size: 1rem;
+            color: var(--md-sys-color-on-surface-variant);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+
+        .input-field input:focus + label,
+        .input-field input:not(:placeholder-shown) + label,
+        .input-field textarea:focus + label,
+        .input-field textarea:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 0.75rem;
+            color: var(--md-sys-color-primary);
+        }
+
+        .save-button {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-button:hover {
+            background-color: #5A4A94;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .selected-tags {
+            margin-bottom: 16px;
+        }
+
+        .selected-tags-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .selected-tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .ripple {
+            animation: pulse 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="material-icons" style="font-size: 2rem; color: var(--md-sys-color-primary);">psychology</span>
+            <h1>Mood Triggers & Context</h1>
+        </div>
+
+        <div class="tag-categories" id="tagCategories">
+            <!-- Categories will be populated by JavaScript -->
+        </div>
+
+        <div class="mood-entry-section">
+            <h2 class="section-title">
+                <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">edit_note</span>
+                Additional Context
+            </h2>
+            
+            <div class="selected-tags">
+                <div class="selected-tags-title">Selected Triggers:</div>
+                <div class="selected-tags-list" id="selectedTagsList">
+                    <!-- Selected tags will appear here -->
+                </div>
+            </div>
+
+            <div class="context-inputs">
+                <div class="input-field">
+                    <input type="text" id="location" placeholder=" ">
+                    <label for="location">Location</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="activity" placeholder=" ">
+                    <label for="activity">Activity</label>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="weather" placeholder=" ">
+                    <label for="weather">Weather</label>
+                </div>
+                <div class="input-field" style="grid-column: 1 / -1;">
+                    <textarea id="notes" rows="3" placeholder=" "></textarea>
+                    <label for="notes">Additional Notes</label>
+                </div>
+            </div>
+
+            <button class="save-button" onclick="saveMoodContext()">
+                <span class="material-icons">save</span>
+                Save Context
+            </button>
+        </div>
+    </div>
+
+    <button class="fab" onclick="addCustomTag()">
+        <span class="material-icons">add</span>
+    </button>
+
+    <script>
+        const tagCategories = {
+            work: { icon: 'work', color: '#D32F2F' },
+            health: { icon: 'fitness_center', color: '#388E3C' },
+            social: { icon: 'group', color: '#7B1FA2' },
+            activities: { icon: 'local_activity', color: '#0288D1' },
+            environment: { icon: 'wb_sunny', color: '#00796B' },
+            emotions: { icon: 'psychology', color: '#C62828' }
+        };
+
+        const defaultTags = {
+            work: ['work', 'meeting', 'deadline', 'project'],
+            health: ['exercise', 'sleep', 'food', 'medication'],
+            social: ['family', 'friends', 'party', 'date'],
+            activities: ['music', 'reading', 'gaming', 'cooking'],
+            environment: ['weather', 'home', 'outdoors', 'travel'],
+            emotions: ['stress', 'relaxation', 'excitement', 'anxiety']
+        };
+
+        let selectedTags = new Set();
+
+        function initializeTagCategories() {
+            const container = document.getElementById('tagCategories');
+            
+            Object.entries(tagCategories).forEach(([category, config]) => {
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'category-card';
+                
+                categoryCard.innerHTML = `
+                    <div class="category-header">
+                        <div class="category-icon" style="background-color: ${config.color}20; color: ${config.color};">
+                            <span class="material-icons">${config.icon}</span>
+                        </div>
+                        <h3 class="category-title">${category}</h3>
+                    </div>
+                    <div class="tags-grid" id="${category}Tags">
+                        ${defaultTags[category].map(tag => `
+                            <div class="tag-chip" onclick="toggleTag('${tag}', '${category}', '${config.color}')" data-tag="${tag}">
+                                <span class="material-icons">${getTagIcon(tag)}</span>
+                                ${tag}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(categoryCard);
+            });
+        }
+
+        function getTagIcon(tag) {
+            const iconMap = {
+                work: 'work', meeting: 'groups', deadline: 'schedule', project: 'assignment',
+                exercise: 'fitness_center', sleep: 'bedtime', food: 'restaurant', medication: 'medication',
+                family: 'family_restroom', friends: 'group', party: 'celebration', date: 'favorite',
+                music: 'music_note', reading: 'menu_book', gaming: 'sports_esports', cooking: 'restaurant_menu',
+                weather: 'wb_sunny', home: 'home', outdoors: 'park', travel: 'flight',
+                stress: 'psychology', relaxation: 'spa', excitement: 'star', anxiety: 'psychology_alt'
+            };
+            return iconMap[tag] || 'tag';
+        }
+
+        function toggleTag(tag, category, color) {
+            const tagElement = document.querySelector(`[data-tag="${tag}"]`);
+            
+            if (selectedTags.has(tag)) {
+                selectedTags.delete(tag);
+                tagElement.classList.remove('selected');
+            } else {
+                selectedTags.add(tag);
+                tagElement.classList.add('selected');
+                tagElement.classList.add('ripple');
+                setTimeout(() => tagElement.classList.remove('ripple'), 300);
+            }
+            
+            updateSelectedTagsList();
+        }
+
+        function updateSelectedTagsList() {
+            const container = document.getElementById('selectedTagsList');
+            container.innerHTML = '';
+            
+            selectedTags.forEach(tag => {
+                const tagChip = document.createElement('div');
+                tagChip.className = 'tag-chip selected';
+                tagChip.innerHTML = `
+                    <span class="material-icons">${getTagIcon(tag)}</span>
+                    ${tag}
+                    <span class="material-icons" onclick="removeTag('${tag}')" style="cursor: pointer; font-size: 16px;">close</span>
+                `;
+                container.appendChild(tagChip);
+            });
+        }
+
+        function removeTag(tag) {
+            selectedTags.delete(tag);
+            document.querySelector(`[data-tag="${tag}"]`).classList.remove('selected');
+            updateSelectedTagsList();
+        }
+
+        function saveMoodContext() {
+            const context = {
+                tags: Array.from(selectedTags),
+                location: document.getElementById('location').value,
+                activity: document.getElementById('activity').value,
+                weather: document.getElementById('weather').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            // Animate save button
+            const saveButton = document.querySelector('.save-button');
+            saveButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                saveButton.style.transform = 'scale(1)';
+            }, 150);
+            
+            console.log('Saving mood context:', context);
+            // TODO: Send to backend
+        }
+
+        function addCustomTag() {
+            const tagName = prompt('Enter custom tag name:');
+            if (tagName && tagName.trim()) {
+                // Add to emotions category by default
+                const emotionsContainer = document.getElementById('emotionsTags');
+                const tagChip = document.createElement('div');
+                tagChip.className = 'tag-chip';
+                tagChip.setAttribute('data-tag', tagName.trim());
+                tagChip.onclick = () => toggleTag(tagName.trim(), 'emotions', '#C62828');
+                tagChip.innerHTML = `
+                    <span class="material-icons">tag</span>
+                    ${tagName.trim()}
+                `;
+                emotionsContainer.appendChild(tagChip);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeTagCategories);
+    </script>
+</body>
+</html>
