@@ -538,8 +538,97 @@
             box-shadow: var(--md-sys-elevation-level1);
         }
 
+        /* Desktop/Mobile Header Control */
+        .desktop-header {
+            display: block;
+        }
+        
+        .mobile-header {
+            display: none;
+            background-color: var(--md-sys-color-surface);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            padding: 10px 16px;
+        }
+        
+        /* Mobile Header Layout */
+        .mobile-row-1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        
+        .mobile-row-2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .mobile-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            font-size: 18px;
+        }
+        
+        .mobile-title i {
+            font-size: 20px;
+        }
+        
+        .mobile-theme-btn {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .mobile-hamburger {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 24px;
+            padding: 8px;
+            cursor: pointer;
+        }
+        
+        .mobile-user-welcome {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+        }
+
+        /* Theme Icon Button */
+        .theme-icon-light {
+            display: block;
+        }
+
+        .theme-icon-dark {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-icon-light {
+            display: none;
+        }
+
+        [data-theme="dark"] .theme-icon-dark {
+            display: block;
+        }
+
         /* Mobile responsive styles for top-app-bar */
         @media (max-width: 768px) {
+            /* Hide desktop header, show mobile header */
+            .desktop-header {
+                display: none !important;
+            }
+            
+            .mobile-header {
+                display: block !important;
+            }
+            
             .top-app-bar {
                 padding: 4px 8px;
             }
@@ -614,7 +703,8 @@
     </style>
 </head>
 <body>
-    <header class="top-app-bar">
+    <!-- Desktop Header -->
+    <header class="top-app-bar desktop-header">
         <div class="top-app-bar-content">
             <a href="/" class="app-bar-title" style="text-decoration: none; color: inherit;">
                 <i class="fas fa-brain"></i>
@@ -633,9 +723,6 @@
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
                 </a>
-                <button class="hamburger-menu" onclick="toggleMobileNav()" aria-label="Open navigation menu">
-                    <i class="fas fa-bars"></i>
-                </button>
                 <div class="theme-toggle">
                     <i class="fas fa-sun theme-icon"></i>
                     <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
@@ -649,6 +736,26 @@
                     </a>
                 </div>
             </div>
+        </div>
+    </header>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-row-1">
+            <a href="/" class="mobile-title" style="text-decoration: none; color: inherit;">
+                <i class="fas fa-brain"></i>
+                <span>Mood Tracker</span>
+            </a>
+            <button class="mobile-theme-btn" onclick="toggleTheme(); return false;" aria-label="Toggle theme">
+                <i class="fas fa-sun theme-icon-light"></i>
+                <i class="fas fa-moon theme-icon-dark"></i>
+            </button>
+        </div>
+        <div class="mobile-row-2">
+            <button class="mobile-hamburger" onclick="toggleMobileNav()" aria-label="Open navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="mobile-user-welcome">Welcome, {{ user.name }}</span>
         </div>
     </header>
 
