@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insights - Mood Tracker</title>
+    <title>Goals - Mood Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -96,7 +96,6 @@
             background-color: var(--md-sys-color-background);
             color: var(--md-sys-color-on-background);
             line-height: 1.5;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .app-bar {
@@ -121,7 +120,6 @@
             cursor: pointer;
             padding: 8px;
             border-radius: 20px;
-            transition: background-color 0.2s ease;
         }
 
         .theme-toggle:hover {
@@ -140,7 +138,23 @@
             padding: 24px;
             margin-bottom: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            transition: background-color 0.3s ease;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.14);
         }
 
         .nav-links {
@@ -154,7 +168,6 @@
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 20px;
-            transition: background-color 0.2s ease;
         }
 
         .nav-links a:hover {
@@ -165,42 +178,11 @@
             background-color: var(--md-sys-color-secondary-container);
             color: var(--md-sys-color-on-secondary-container);
         }
-
-        .insights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 16px;
-            margin-top: 24px;
-        }
-
-        .insight-card {
-            background-color: var(--md-sys-color-surface-container);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-        }
-
-        .insight-card h3 {
-            color: var(--md-sys-color-on-surface);
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-
-        .insight-card p {
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 14px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--md-sys-color-on-surface-variant);
-        }
     </style>
 </head>
 <body>
     <div class="app-bar">
-        <h1>Mood Insights</h1>
+        <h1>Goals Dashboard</h1>
         <button class="theme-toggle" onclick="toggleTheme()">
             <span class="material-icons">brightness_6</span>
         </button>
@@ -209,22 +191,22 @@
     <div class="container">
         <div class="nav-links">
             <a href="/">Dashboard</a>
-            <a href="/features/insights" class="active">Insights</a>
-            <a href="/features/goals">Goals</a>
+            <a href="/features/insights">Insights</a>
+            <a href="/features/goals" class="active">Goals</a>
             <a href="/features/analytics">Analytics</a>
         </div>
 
         <div class="card">
-            <h2>Your Mood Patterns</h2>
-            <div id="insights-content" class="loading">
-                <p>Loading insights...</p>
+            <h2>Your Goals</h2>
+            <div id="goals-list">
+                <p>Loading goals...</p>
             </div>
         </div>
-
-        <div class="insights-grid" id="insights-grid" style="display: none;">
-            <!-- Insights will be loaded here -->
-        </div>
     </div>
+
+    <button class="fab" onclick="showAddGoalDialog()">
+        <span class="material-icons">add</span>
+    </button>
 
     <script>
         function toggleTheme() {
@@ -235,38 +217,32 @@
             localStorage.setItem('theme', newTheme);
         }
 
-        // Load saved theme on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.body.setAttribute('data-theme', savedTheme);
-            loadInsights();
-        });
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
 
-        function loadInsights() {
-            fetch('/api/insights')
-                .then(response => response.json())
-                .then(data => {
-                    const content = document.getElementById('insights-content');
-                    const grid = document.getElementById('insights-grid');
-                    
-                    if (data.success && data.insights) {
-                        content.style.display = 'none';
-                        grid.style.display = 'grid';
-                        
-                        grid.innerHTML = data.insights.map(insight => `
-                            <div class="insight-card">
-                                <h3>${insight.title}</h3>
-                                <p>${insight.description}</p>
-                            </div>
-                        `).join('');
-                    } else {
-                        content.innerHTML = '<p>No insights available yet. Log more moods to see patterns!</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading insights:', error);
-                    document.getElementById('insights-content').innerHTML = '<p>Error loading insights. Please try again later.</p>';
-                });
+        // Load goals
+        fetch('/features/api/goals')
+            .then(response => response.json())
+            .then(data => {
+                const goalsList = document.getElementById('goals-list');
+                if (data.success && data.goals.length > 0) {
+                    goalsList.innerHTML = data.goals.map(goal => `
+                        <div class="card">
+                            <h3>${goal.title}</h3>
+                            <p>${goal.description}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    goalsList.innerHTML = '<p>No goals yet. Click the + button to add your first goal!</p>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('goals-list').innerHTML = '<p>Error loading goals</p>';
+            });
+
+        function showAddGoalDialog() {
+            alert('Add goal functionality coming soon!');
         }
     </script>
 </body>

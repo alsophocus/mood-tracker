@@ -22,7 +22,7 @@ class InsightGenerator(InsightGeneratorInterface):
         # Get mood patterns
         patterns = self.mood_analyzer.analyze_mood_patterns(user_id, days=30)
         if not patterns.get('success'):
-            return [{'type': 'error', 'message': 'Unable to generate insights'}]
+            return [{'type': 'error', 'message': 'Unable to generate insights - no mood data available'}]
         
         # Get trigger correlations
         correlations = self.mood_analyzer.get_trigger_correlations(user_id)
