@@ -297,7 +297,49 @@ class DatabaseMigrationService:
                 'permissions': permissions
             }
     
-    def migrate_mood_triggers_simple(self) -> Dict[str, Any]:
+    def migrate_basic(self) -> Dict[str, Any]:
+        """Basic migration using exact same pattern as successful cleanup operations"""
+        try:
+            # Use exact same pattern as cleanup_until_date
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Step 1: Create tags table (most basic approach)
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS tags (
+                        id SERIAL PRIMARY KEY,
+                        name VARCHAR(50) UNIQUE NOT NULL,
+                        category VARCHAR(30) NOT NULL,
+                        color VARCHAR(7) DEFAULT '#6750A4'
+                    )
+                ''')
+                
+                # Step 2: Insert one test tag
+                cursor.execute('''
+                    INSERT INTO tags (name, category, color)
+                    VALUES ('work', 'work', '#FF6B6B')
+                    ON CONFLICT (name) DO NOTHING
+                ''')
+                
+                # Step 3: Check what we created
+                cursor.execute('SELECT COUNT(*) FROM tags')
+                tag_count = cursor.fetchone()[0]
+                
+                # Commit exactly like cleanup operations
+                conn.commit()
+                
+                return {
+                    'success': True,
+                    'message': f'Basic migration completed successfully! Created tags table with {tag_count} tags.',
+                    'tag_count': tag_count
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Basic migration failed: {str(e)}',
+                'message': f'Migration error: {str(e)}'
+            }
         """Try a very simple migration approach"""
         try:
             # Check if tables already exist first
@@ -568,9 +610,9 @@ class AdminService(AdminServiceInterface):
                 'params': []
             },
             {
-                'id': 'migrate_mood_triggers_simple',
-                'name': 'Simple Migrate Mood Triggers',
-                'description': 'Try migration with minimal operations',
+                'id': 'migrate_basic',
+                'name': 'Basic Migration',
+                'description': 'Create mood triggers tables using simplest approach',
                 'category': 'migration',
                 'params': []
             },
@@ -626,6 +668,11 @@ class AdminService(AdminServiceInterface):
             
             elif operation_id == 'check_permissions':
                 result = self.migration_service.check_permissions()
+                result['success'] = result.get('success', True)
+                return result
+            
+            elif operation_id == 'migrate_basic':
+                result = self.migration_service.migrate_basic()
                 result['success'] = result.get('success', True)
                 return result
             
