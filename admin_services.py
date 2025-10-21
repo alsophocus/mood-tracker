@@ -260,79 +260,53 @@ class DatabaseTestService:
         self.db = db
     
     def test_connection(self) -> Dict[str, Any]:
-        """Test basic database connectivity"""
+        """Test database connectivity using the same methods as main routes"""
         import traceback
-        from config import Config
         
         try:
-            # Check database URL configuration
-            db_url = Config.DATABASE_URL
-            if not db_url:
-                return {
-                    'success': False,
-                    'error': 'DATABASE_URL is not configured',
-                    'config_check': 'DATABASE_URL is None or empty'
-                }
-            
-            # Show partial URL for debugging (hide password)
-            url_parts = db_url.split('@')
-            if len(url_parts) > 1:
-                safe_url = f"{url_parts[0].split(':')[0]}://***:***@{url_parts[1]}"
-            else:
-                safe_url = "Invalid URL format"
-            
-            # Test direct psycopg connection
+            # Test 1: Use the same method as main routes - get_user_moods
             try:
-                import psycopg
-                from psycopg.rows import dict_row
+                # This should work if the main app works
+                test_moods = self.db.get_user_moods(1, limit=1)  # Try to get 1 mood for user 1
                 
-                # Try direct connection
-                with psycopg.connect(db_url, row_factory=dict_row) as conn:
-                    with conn.cursor() as cursor:
-                        cursor.execute('SELECT 1')
-                        result = cursor.fetchone()
-                        
-                        return {
-                            'success': True,
-                            'message': 'Direct psycopg connection successful',
-                            'database_url_format': safe_url,
-                            'test_result': result[0] if result else 'No result',
-                            'connection_method': 'Direct psycopg'
-                        }
-                        
-            except Exception as direct_error:
-                # Try using the Database class method
+                return {
+                    'success': True,
+                    'message': 'Database connection successful using get_user_moods method',
+                    'test_result': f'Found {len(test_moods) if test_moods else 0} moods',
+                    'connection_method': 'db.get_user_moods() - same as main app',
+                    'sample_mood': dict(test_moods[0]) if test_moods else 'No moods found'
+                }
+                
+            except Exception as method_error:
+                # Test 2: Try direct connection like in routes.py health check
                 try:
                     with self.db.get_connection() as conn:
                         cursor = conn.cursor()
-                        cursor.execute('SELECT 1')
-                        result = cursor.fetchone()
+                        cursor.execute('SELECT version()')
+                        version = cursor.fetchone()['version']
                         
                         return {
                             'success': True,
-                            'message': 'Database class connection successful',
-                            'database_url_format': safe_url,
-                            'test_result': result[0] if result else 'No result',
-                            'connection_method': 'Database class',
-                            'direct_connection_error': str(direct_error)
+                            'message': 'Database connection successful using direct connection',
+                            'database_version': version,
+                            'connection_method': 'db.get_connection() - same as health check',
+                            'method_error': str(method_error)
                         }
                         
-                except Exception as class_error:
+                except Exception as direct_error:
                     return {
                         'success': False,
-                        'error': 'Both connection methods failed',
-                        'database_url_format': safe_url,
-                        'direct_connection_error': str(direct_error),
-                        'class_connection_error': str(class_error),
-                        'direct_traceback': traceback.format_exc(),
-                        'database_url_length': len(db_url),
-                        'database_url_starts_with': db_url[:20] if len(db_url) > 20 else db_url
+                        'error': 'Both database methods failed',
+                        'method_error': str(method_error),
+                        'direct_error': str(direct_error),
+                        'method_traceback': traceback.format_exc(),
+                        'note': 'This is strange since the main app works fine'
                     }
                 
         except Exception as e:
             return {
                 'success': False,
-                'error': f'Configuration error: {str(e)}',
+                'error': f'Test setup failed: {str(e)}',
                 'traceback': traceback.format_exc()
             }
 
