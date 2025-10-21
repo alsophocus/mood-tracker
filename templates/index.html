@@ -3626,13 +3626,20 @@
         // Enhanced Material Design 3 PDF Export
         async function exportToPDF() {
             try {
-                const { jsPDF } = window.jspdf;
-                if (!jsPDF) {
+                console.log('Starting PDF export...');
+                
+                // Simple jsPDF access
+                if (!window.jspdf) {
+                    console.error('jsPDF not found on window.jspdf');
                     alert('PDF library not loaded. Please refresh the page and try again.');
                     return;
                 }
                 
+                const { jsPDF } = window.jspdf;
+                console.log('jsPDF constructor:', jsPDF);
+                
                 const pdf = new jsPDF('p', 'mm', 'a4');
+                console.log('PDF instance created:', pdf);
             
             // Material Design 3 Color Palette
             const colors = {
@@ -3899,7 +3906,10 @@
             // Save with Material Design 3 naming convention
             const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const fileName = `mood-analytics-report-${timestamp}.pdf`;
+            console.log('Saving PDF with filename:', fileName);
+            
             pdf.save(fileName);
+            console.log('PDF save command executed');
             
             // Show success message
             showNotification('📄 PDF report generated successfully!', 'success');
