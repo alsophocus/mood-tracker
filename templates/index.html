@@ -1599,13 +1599,9 @@
                     <i class="fas fa-bullseye"></i>
                     <span>Goals</span>
                 </a>
-                <a href="/features/analytics" class="md-button md-button-text" style="margin-right: 8px;">
+                <a href="/features/analytics" class="md-button md-button-text" style="margin-right: 16px;">
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
-                </a>
-                <a href="/triggers" class="md-button md-button-text" style="margin-right: 16px;">
-                    <i class="fas fa-tags"></i>
-                    <span>Triggers</span>
                 </a>
                 <div class="theme-toggle">
                     <i class="fas fa-sun theme-icon"></i>
@@ -1690,14 +1686,43 @@
                         </h3>
                         
                         <div class="triggers-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 16px;">
+                            <!-- Work Category -->
                             <div class="trigger-tag" data-trigger="work">
                                 <i class="fas fa-briefcase"></i>
                                 <span>Work</span>
                             </div>
+                            <div class="trigger-tag" data-trigger="meeting">
+                                <i class="fas fa-users"></i>
+                                <span>Meeting</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="deadline">
+                                <i class="fas fa-clock"></i>
+                                <span>Deadline</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="project">
+                                <i class="fas fa-tasks"></i>
+                                <span>Project</span>
+                            </div>
+                            
+                            <!-- Health Category -->
                             <div class="trigger-tag" data-trigger="exercise">
                                 <i class="fas fa-dumbbell"></i>
                                 <span>Exercise</span>
                             </div>
+                            <div class="trigger-tag" data-trigger="sleep">
+                                <i class="fas fa-bed"></i>
+                                <span>Sleep</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="food">
+                                <i class="fas fa-utensils"></i>
+                                <span>Food</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="medication">
+                                <i class="fas fa-pills"></i>
+                                <span>Medication</span>
+                            </div>
+                            
+                            <!-- Social Category -->
                             <div class="trigger-tag" data-trigger="family">
                                 <i class="fas fa-home"></i>
                                 <span>Family</span>
@@ -1706,21 +1731,67 @@
                                 <i class="fas fa-user-friends"></i>
                                 <span>Friends</span>
                             </div>
-                            <div class="trigger-tag" data-trigger="sleep">
-                                <i class="fas fa-bed"></i>
-                                <span>Sleep</span>
+                            <div class="trigger-tag" data-trigger="party">
+                                <i class="fas fa-glass-cheers"></i>
+                                <span>Party</span>
                             </div>
-                            <div class="trigger-tag" data-trigger="stress">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>Stress</span>
+                            <div class="trigger-tag" data-trigger="date">
+                                <i class="fas fa-heart"></i>
+                                <span>Date</span>
                             </div>
+                            
+                            <!-- Activities Category -->
+                            <div class="trigger-tag" data-trigger="music">
+                                <i class="fas fa-music"></i>
+                                <span>Music</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="reading">
+                                <i class="fas fa-book"></i>
+                                <span>Reading</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="gaming">
+                                <i class="fas fa-gamepad"></i>
+                                <span>Gaming</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="cooking">
+                                <i class="fas fa-cookie-bite"></i>
+                                <span>Cooking</span>
+                            </div>
+                            
+                            <!-- Environment Category -->
                             <div class="trigger-tag" data-trigger="weather">
                                 <i class="fas fa-cloud-sun"></i>
                                 <span>Weather</span>
                             </div>
-                            <div class="trigger-tag" data-trigger="food">
-                                <i class="fas fa-utensils"></i>
-                                <span>Food</span>
+                            <div class="trigger-tag" data-trigger="home">
+                                <i class="fas fa-house"></i>
+                                <span>Home</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="outdoors">
+                                <i class="fas fa-tree"></i>
+                                <span>Outdoors</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="travel">
+                                <i class="fas fa-plane"></i>
+                                <span>Travel</span>
+                            </div>
+                            
+                            <!-- Emotions Category -->
+                            <div class="trigger-tag" data-trigger="stress">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Stress</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="relaxation">
+                                <i class="fas fa-spa"></i>
+                                <span>Relaxation</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="excitement">
+                                <i class="fas fa-star"></i>
+                                <span>Excitement</span>
+                            </div>
+                            <div class="trigger-tag" data-trigger="anxiety">
+                                <i class="fas fa-dizzy"></i>
+                                <span>Anxiety</span>
                             </div>
                         </div>
                         <input type="hidden" name="triggers" id="selected-triggers">
@@ -1975,20 +2046,52 @@
                                     <span class="trigger-chip">
                                         {% if trigger.strip() == 'work' %}
                                             <i class="fas fa-briefcase"></i>
+                                        {% elif trigger.strip() == 'meeting' %}
+                                            <i class="fas fa-users"></i>
+                                        {% elif trigger.strip() == 'deadline' %}
+                                            <i class="fas fa-clock"></i>
+                                        {% elif trigger.strip() == 'project' %}
+                                            <i class="fas fa-tasks"></i>
                                         {% elif trigger.strip() == 'exercise' %}
                                             <i class="fas fa-dumbbell"></i>
+                                        {% elif trigger.strip() == 'sleep' %}
+                                            <i class="fas fa-bed"></i>
+                                        {% elif trigger.strip() == 'food' %}
+                                            <i class="fas fa-utensils"></i>
+                                        {% elif trigger.strip() == 'medication' %}
+                                            <i class="fas fa-pills"></i>
                                         {% elif trigger.strip() == 'family' %}
                                             <i class="fas fa-home"></i>
                                         {% elif trigger.strip() == 'friends' %}
                                             <i class="fas fa-user-friends"></i>
-                                        {% elif trigger.strip() == 'sleep' %}
-                                            <i class="fas fa-bed"></i>
-                                        {% elif trigger.strip() == 'stress' %}
-                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% elif trigger.strip() == 'party' %}
+                                            <i class="fas fa-glass-cheers"></i>
+                                        {% elif trigger.strip() == 'date' %}
+                                            <i class="fas fa-heart"></i>
+                                        {% elif trigger.strip() == 'music' %}
+                                            <i class="fas fa-music"></i>
+                                        {% elif trigger.strip() == 'reading' %}
+                                            <i class="fas fa-book"></i>
+                                        {% elif trigger.strip() == 'gaming' %}
+                                            <i class="fas fa-gamepad"></i>
+                                        {% elif trigger.strip() == 'cooking' %}
+                                            <i class="fas fa-cookie-bite"></i>
                                         {% elif trigger.strip() == 'weather' %}
                                             <i class="fas fa-cloud-sun"></i>
-                                        {% elif trigger.strip() == 'food' %}
-                                            <i class="fas fa-utensils"></i>
+                                        {% elif trigger.strip() == 'home' %}
+                                            <i class="fas fa-house"></i>
+                                        {% elif trigger.strip() == 'outdoors' %}
+                                            <i class="fas fa-tree"></i>
+                                        {% elif trigger.strip() == 'travel' %}
+                                            <i class="fas fa-plane"></i>
+                                        {% elif trigger.strip() == 'stress' %}
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% elif trigger.strip() == 'relaxation' %}
+                                            <i class="fas fa-spa"></i>
+                                        {% elif trigger.strip() == 'excitement' %}
+                                            <i class="fas fa-star"></i>
+                                        {% elif trigger.strip() == 'anxiety' %}
+                                            <i class="fas fa-dizzy"></i>
                                         {% else %}
                                             <i class="fas fa-tag"></i>
                                         {% endif %}
