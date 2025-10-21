@@ -6,4 +6,4 @@ insights_bp = Blueprint('insights', __name__, url_prefix='/insights')
 @insights_bp.route('/')
 @login_required
 def dashboard():
-    return render_template('insights_dashboard.html')
+    return render_template('insights_dashboard_simple.html')
