@@ -190,6 +190,167 @@ body {
 
 ## 🧩 Component Patterns
 
+### Material Design 3 Navigation Bar
+```css
+.top-app-bar {
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    padding: 8px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--md-sys-elevation-level2);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.top-app-bar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 64px;
+}
+
+.app-bar-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--md-sys-color-primary);
+}
+
+.app-bar-title i {
+    font-size: 32px;
+    animation: brainPulse 2s ease-in-out infinite;
+}
+
+.app-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.app-bar-actions .md-button {
+    min-height: 40px;
+    padding: 8px 16px;
+    border-radius: var(--md-sys-shape-corner-large);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+}
+```
+
+### Navigation Button Styling
+```css
+.md-button-text {
+    background-color: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid transparent;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+}
+
+.md-button-text:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border-color: var(--md-sys-color-primary);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+.md-button-text::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--md-sys-color-primary);
+    opacity: 0;
+    border-radius: inherit;
+    transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.md-button-text:hover::before {
+    opacity: 0.08;
+}
+```
+
+### Mobile Hamburger Menu
+```css
+.hamburger-menu {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--md-sys-color-on-surface);
+    font-size: 24px;
+    padding: 8px;
+    border-radius: var(--md-sys-shape-corner-full);
+    cursor: pointer;
+    transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.mobile-nav-drawer {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--md-sys-color-surface-container);
+    box-shadow: var(--md-sys-elevation-level3);
+    z-index: 2001;
+    transition: right var(--md-sys-motion-duration-medium3) var(--md-sys-motion-easing-emphasized);
+    padding: 24px 0;
+}
+
+.mobile-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    color: var(--md-sys-color-on-surface);
+    text-decoration: none;
+    transition: background-color var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .app-bar-actions .md-button {
+        display: none;
+    }
+    
+    .hamburger-menu {
+        display: block;
+    }
+}
+```
+
+### Typography Consistency
+**CRITICAL**: Always use Material Design 3 typography tokens for consistent sizing:
+
+```css
+.display-small {
+    font-family: var(--md-sys-typescale-display-small-font);
+    font-size: var(--md-sys-typescale-display-small-size);
+    font-weight: var(--md-sys-typescale-display-small-weight);
+    line-height: var(--md-sys-typescale-display-small-line-height);
+    letter-spacing: var(--md-sys-typescale-display-small-tracking);
+    color: var(--md-sys-color-primary);
+}
+```
+
+**❌ Never use hardcoded sizes:**
+```css
+/* DON'T DO THIS */
+.display-small {
+    font-size: 36px; /* Hardcoded - breaks consistency */
+}
+```
+
 ### Material Design 3 Cards
 ```css
 .md-card {
@@ -558,6 +719,124 @@ body {
                border-color 300ms var(--md-sys-motion-easing-emphasized) !important;
 }
 ```
+
+## 🎯 Navigation Design Guidelines
+
+### Adding New Navigation Items
+
+When adding new navigation buttons or paths, **ALWAYS** maintain consistency:
+
+#### 1. **Desktop Navigation Button**
+```html
+<a href="/new-feature" class="md-button md-button-text">
+    <i class="fas fa-icon-name"></i>
+    <span>Feature Name</span>
+</a>
+```
+
+#### 2. **Mobile Navigation Item**
+```html
+<a href="/new-feature" class="mobile-nav-item">
+    <i class="fas fa-icon-name"></i>
+    <span>Feature Name</span>
+</a>
+```
+
+#### 3. **Required CSS (add to ALL templates)**
+```css
+/* Main navigation styling */
+.app-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.app-bar-actions .md-button {
+    min-height: 40px;
+    padding: 8px 16px;
+    border-radius: var(--md-sys-shape-corner-large);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+}
+
+.md-button-text {
+    background-color: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid transparent;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+}
+
+.md-button-text:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border-color: var(--md-sys-color-primary);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* State layers */
+.md-button-text::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--md-sys-color-primary);
+    opacity: 0;
+    border-radius: inherit;
+    transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.md-button-text:hover::before { opacity: 0.08; }
+.md-button-text:focus::before { opacity: 0.12; }
+.md-button-text:active::before { opacity: 0.16; }
+
+.md-button-text span,
+.md-button-text i {
+    position: relative;
+    z-index: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .app-bar-actions .md-button {
+        display: none;
+    }
+    
+    .hamburger-menu {
+        display: block;
+    }
+}
+```
+
+#### 4. **Typography Consistency Checklist**
+- ✅ Use `var(--md-sys-typescale-display-small-*)` tokens for title
+- ✅ Use `font-family: 'Roboto', sans-serif` for all text
+- ✅ Use Material Design 3 color tokens
+- ✅ Include proper state layers and animations
+- ✅ Test on both desktop and mobile
+
+#### 5. **Template Update Checklist**
+When adding navigation to a new page:
+- [ ] Add navigation button to desktop `.app-bar-actions`
+- [ ] Add navigation item to mobile `.mobile-nav-items`
+- [ ] Include complete CSS styling (copy from main template)
+- [ ] Use MD3 typography tokens for title consistency
+- [ ] Test hamburger menu functionality
+- [ ] Verify responsive behavior
+
+### Common Mistakes to Avoid
+❌ **Hardcoded font sizes** - Always use MD3 typography tokens  
+❌ **Missing state layers** - Include hover/focus/active states  
+❌ **Inconsistent spacing** - Use standard gap and padding values  
+❌ **Missing mobile navigation** - Always add to hamburger menu  
+❌ **Wrong color tokens** - Use semantic MD3 color system  
 
 ## 📱 Responsive Design
 
