@@ -855,22 +855,21 @@
 
     <!-- Mobile Header -->
     <header class="mobile-header">
-        <div class="mobile-row-1">
-            <a href="/" class="mobile-title" style="text-decoration: none; color: inherit;">
-                <i class="fas fa-brain"></i>
-                <span>Mood Tracker</span>
-            </a>
-            <div class="mobile-theme-toggle">
-                <i class="fas fa-sun theme-icon"></i>
-                <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
-                <i class="fas fa-moon theme-icon"></i>
-            </div>
-        </div>
-        <div class="mobile-row-2">
+        <div class="mobile-header-content">
             <button class="mobile-hamburger" onclick="toggleMobileNav()" aria-label="Open navigation menu">
                 <i class="fas fa-bars"></i>
             </button>
-            <span class="mobile-user-welcome">Welcome, {{ user.name }}</span>
+            <div class="mobile-title">
+                <i class="fas fa-brain"></i>
+                <span>Mood Tracker</span>
+            </div>
+            <div class="mobile-actions">
+                <div class="mobile-theme-toggle">
+                    <i class="fas fa-sun theme-icon"></i>
+                    <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
+                    <i class="fas fa-moon theme-icon"></i>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -982,6 +981,17 @@
                 <i class="fas fa-brain"></i>
                 <span>Mood Tracker</span>
             </a>
+            <button class="logout-button" onclick="window.location.href='/logout'" aria-label="Sign out">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+        <div class="mobile-nav-user-section">
+            <div class="mobile-nav-user-avatar">
+                {{ user.name[0].upper() if user.name else 'U' }}
+            </div>
+            <div class="mobile-nav-user-info">
+                <div class="mobile-nav-user-name">{{ user.name }}</div>
+            </div>
         </div>
         <div class="mobile-nav-items">
             <a href="/insights" class="mobile-nav-item">
@@ -996,17 +1006,6 @@
                 <i class="fas fa-chart-bar"></i>
                 <span>Analytics</span>
             </a>
-        </div>
-        <div class="mobile-nav-footer">
-            <div style="padding: 16px 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px; text-align: right;">
-                Welcome, {{ user.name }}
-            </div>
-            <div style="border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 16px;">
-                <a href="/logout" class="mobile-nav-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
         </div>
     </div>
 
