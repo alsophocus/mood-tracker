@@ -232,6 +232,134 @@ class DataGenerationService:
                 'verification': 'PASSED' if count_after >= count_before else 'WARNING - No new records added'
             }
 
+class DatabaseMigrationService:
+    """Database migration operations - Single Responsibility Principle"""
+    
+    def __init__(self, db: Database):
+        self.db = db
+    
+    def migrate_mood_triggers(self) -> Dict[str, Any]:
+        """Add mood triggers and context tables"""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                steps_completed = []
+                
+                # Step 1: Create tags table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS tags (
+                        id SERIAL PRIMARY KEY,
+                        name VARCHAR(50) UNIQUE NOT NULL,
+                        category VARCHAR(30) NOT NULL,
+                        color VARCHAR(7) DEFAULT '#6750A4',
+                        icon VARCHAR(50),
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        is_active BOOLEAN DEFAULT TRUE
+                    )
+                ''')
+                steps_completed.append("Created tags table")
+                
+                # Step 2: Create mood_tags junction table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS mood_tags (
+                        id SERIAL PRIMARY KEY,
+                        mood_id INTEGER NOT NULL REFERENCES moods(id) ON DELETE CASCADE,
+                        tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(mood_id, tag_id)
+                    )
+                ''')
+                steps_completed.append("Created mood_tags junction table")
+                
+                # Step 3: Add context columns to moods table
+                context_columns = [
+                    'context_location VARCHAR(100)',
+                    'context_activity VARCHAR(100)', 
+                    'context_weather VARCHAR(50)',
+                    'context_sleep_hours DECIMAL(3,1)',
+                    'context_energy_level INTEGER CHECK (context_energy_level >= 1 AND context_energy_level <= 5)'
+                ]
+                
+                for column in context_columns:
+                    try:
+                        cursor.execute(f'ALTER TABLE moods ADD COLUMN IF NOT EXISTS {column}')
+                    except Exception as e:
+                        # Column might already exist, continue
+                        pass
+                
+                steps_completed.append("Added context columns to moods table")
+                
+                # Step 4: Create indexes
+                indexes = [
+                    'CREATE INDEX IF NOT EXISTS idx_mood_tags_mood_id ON mood_tags(mood_id)',
+                    'CREATE INDEX IF NOT EXISTS idx_mood_tags_tag_id ON mood_tags(tag_id)',
+                    'CREATE INDEX IF NOT EXISTS idx_tags_category ON tags(category)',
+                    'CREATE INDEX IF NOT EXISTS idx_moods_context_activity ON moods(context_activity)'
+                ]
+                
+                for index_sql in indexes:
+                    cursor.execute(index_sql)
+                
+                steps_completed.append("Created performance indexes")
+                
+                # Step 5: Insert default tags
+                default_tags = [
+                    ('work', 'work', '#FF6B6B', 'fas fa-briefcase'),
+                    ('meeting', 'work', '#FF6B6B', 'fas fa-users'),
+                    ('exercise', 'health', '#4ECDC4', 'fas fa-dumbbell'),
+                    ('sleep', 'health', '#4ECDC4', 'fas fa-bed'),
+                    ('family', 'social', '#45B7D1', 'fas fa-home'),
+                    ('friends', 'social', '#45B7D1', 'fas fa-user-friends'),
+                    ('travel', 'activities', '#96CEB4', 'fas fa-plane'),
+                    ('hobby', 'activities', '#96CEB4', 'fas fa-palette'),
+                    ('home', 'environment', '#FFEAA7', 'fas fa-house'),
+                    ('outdoors', 'environment', '#FFEAA7', 'fas fa-tree'),
+                    ('stress', 'emotions', '#DDA0DD', 'fas fa-exclamation-triangle'),
+                    ('joy', 'emotions', '#DDA0DD', 'fas fa-smile')
+                ]
+                
+                tags_inserted = 0
+                for name, category, color, icon in default_tags:
+                    cursor.execute('''
+                        INSERT INTO tags (name, category, color, icon)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (name) DO NOTHING
+                    ''', (name, category, color, icon))
+                    if cursor.rowcount > 0:
+                        tags_inserted += 1
+                
+                steps_completed.append(f"Inserted {tags_inserted} default tags")
+                
+                conn.commit()
+                
+                # Verify migration
+                cursor.execute('SELECT COUNT(*) FROM tags')
+                tag_count = cursor.fetchone()[0]
+                
+                cursor.execute('''
+                    SELECT column_name FROM information_schema.columns 
+                    WHERE table_name = 'moods' AND column_name LIKE 'context_%'
+                ''')
+                context_columns_added = len(cursor.fetchall())
+                
+                return {
+                    'success': True,
+                    'message': 'Mood triggers migration completed successfully',
+                    'steps_completed': steps_completed,
+                    'verification': {
+                        'tags_table_count': tag_count,
+                        'context_columns_added': context_columns_added
+                    }
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Migration failed: {str(e)}',
+                'steps_completed': steps_completed if 'steps_completed' in locals() else []
+            }
+
 class DatabaseTestService:
     """Database testing operations - Single Responsibility Principle"""
     
@@ -340,6 +468,7 @@ class AdminService(AdminServiceInterface):
         self.generation_service = DataGenerationService(db)
         self.analytics_service = DatabaseAnalyticsService(db)
         self.test_service = DatabaseTestService(db)
+        self.migration_service = DatabaseMigrationService(db)
     
     def get_available_operations(self) -> List[Dict[str, Any]]:
         """Get list of available admin operations"""
@@ -349,6 +478,13 @@ class AdminService(AdminServiceInterface):
                 'name': 'Test Database Connection',
                 'description': 'Test basic database connectivity and show raw data',
                 'category': 'debug',
+                'params': []
+            },
+            {
+                'id': 'migrate_mood_triggers',
+                'name': 'Migrate Mood Triggers',
+                'description': 'Add tables and columns for mood triggers and context system',
+                'category': 'migration',
                 'params': []
             },
             {
@@ -400,6 +536,11 @@ class AdminService(AdminServiceInterface):
         try:
             if operation_id == 'test_connection':
                 return self.test_service.test_connection()
+            
+            elif operation_id == 'migrate_mood_triggers':
+                result = self.migration_service.migrate_mood_triggers()
+                result['success'] = result.get('success', True)
+                return result
             
             elif operation_id == 'cleanup_until_date':
                 target_date_str = params.get('target_date', '2025-10-19')
