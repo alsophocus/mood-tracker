@@ -670,6 +670,38 @@
     </div>
 
     <script>
+        /**
+         * Mobile Navigation Functions
+         */
+        function toggleMobileNav() {
+            const overlay = document.getElementById('mobileNavOverlay');
+            const drawer = document.getElementById('mobileNavDrawer');
+            
+            overlay.classList.add('open');
+            drawer.classList.add('open');
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileNav() {
+            const overlay = document.getElementById('mobileNavOverlay');
+            const drawer = document.getElementById('mobileNavDrawer');
+            
+            overlay.classList.remove('open');
+            drawer.classList.remove('open');
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+        
+        // Close mobile nav on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileNav();
+            }
+        });
+
         function toggleTheme() {
             const body = document.body;
             body.classList.add('theme-transitioning');
