@@ -107,14 +107,26 @@ class Database:
                 # Column probably already exists
                 pass
             
-            cursor.execute('''
-                INSERT INTO moods (user_id, date, mood, notes, triggers, timestamp)
-                VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (user_id, date) 
-                DO UPDATE SET mood = EXCLUDED.mood, notes = EXCLUDED.notes, 
-                             triggers = EXCLUDED.triggers, timestamp = EXCLUDED.timestamp
-                RETURNING *
-            ''', (user_id, date, mood, notes, triggers))
+            # Check if entry exists for this user and date
+            cursor.execute('SELECT id FROM moods WHERE user_id = %s AND date = %s', (user_id, date))
+            existing = cursor.fetchone()
+            
+            if existing:
+                # Update existing entry
+                cursor.execute('''
+                    UPDATE moods 
+                    SET mood = %s, notes = %s, triggers = %s, timestamp = CURRENT_TIMESTAMP
+                    WHERE user_id = %s AND date = %s
+                    RETURNING *
+                ''', (mood, notes, triggers, user_id, date))
+            else:
+                # Insert new entry
+                cursor.execute('''
+                    INSERT INTO moods (user_id, date, mood, notes, triggers, timestamp)
+                    VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    RETURNING *
+                ''', (user_id, date, mood, notes, triggers))
+            
             return cursor.fetchone()
     
     def get_user_moods(self, user_id, limit=None):
