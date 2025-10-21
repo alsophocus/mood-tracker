@@ -291,14 +291,8 @@ def save_mood():
         
         print(f"DEBUG: Server time: {datetime.now()}, Chile time: {chile_time}, Chile date: {chile_date}")
         
-        result = db.save_mood(current_user.id, chile_date, mood, notes)
+        result = db.save_mood(current_user.id, chile_date, mood, notes, triggers)
         print(f"DEBUG: Mood saved successfully - result: {result}")
-        
-        # Save triggers if provided
-        if triggers:
-            trigger_list = [t.strip() for t in triggers.split(',') if t.strip()]
-            print(f"DEBUG: Saving triggers: {trigger_list}")
-            # Note: Trigger saving can be implemented later with proper tag system
         
         return jsonify({
             'success': True,

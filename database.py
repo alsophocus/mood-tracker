@@ -93,15 +93,28 @@ class Database:
             cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
             return cursor.fetchone()
     
-    def save_mood(self, user_id, date, mood, notes=''):
-        """Save mood entry with current timestamp"""
+    def save_mood(self, user_id, date, mood, notes='', triggers=''):
+        """Save mood entry with current timestamp and triggers"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # First, try to add triggers column if it doesn't exist
+            try:
+                cursor.execute('ALTER TABLE moods ADD COLUMN triggers TEXT DEFAULT \'\'')
+                conn.commit()
+                print("Added triggers column to moods table")
+            except Exception as e:
+                # Column probably already exists
+                pass
+            
             cursor.execute('''
-                INSERT INTO moods (user_id, date, mood, notes, timestamp)
-                VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
+                INSERT INTO moods (user_id, date, mood, notes, triggers, timestamp)
+                VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (user_id, date) 
+                DO UPDATE SET mood = EXCLUDED.mood, notes = EXCLUDED.notes, 
+                             triggers = EXCLUDED.triggers, timestamp = EXCLUDED.timestamp
                 RETURNING *
-            ''', (user_id, date, mood, notes))
+            ''', (user_id, date, mood, notes, triggers))
             return cursor.fetchone()
     
     def get_user_moods(self, user_id, limit=None):

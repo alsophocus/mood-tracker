@@ -1436,6 +1436,24 @@
             flex: 1;
         }
 
+        .trigger-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background-color: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-on-surface-variant);
+            border-radius: var(--md-sys-shape-corner-medium);
+            font-size: 10px;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 2px;
+        }
+
+        .trigger-chip i {
+            font-size: 8px;
+        }
+
         .history-date {
             font-weight: 500;
             color: var(--md-sys-color-primary);
@@ -1950,6 +1968,36 @@
                         <div class="history-details">
                             <div class="history-date body-medium">{{ mood.date }}</div>
                             <div class="history-mood body-large">{{ mood.mood|title }}</div>
+                            {% if mood.triggers %}
+                            <div class="history-triggers" style="margin-top: 4px;">
+                                {% for trigger in mood.triggers.split(',') %}
+                                    {% if trigger.strip() %}
+                                    <span class="trigger-chip">
+                                        {% if trigger.strip() == 'work' %}
+                                            <i class="fas fa-briefcase"></i>
+                                        {% elif trigger.strip() == 'exercise' %}
+                                            <i class="fas fa-dumbbell"></i>
+                                        {% elif trigger.strip() == 'family' %}
+                                            <i class="fas fa-home"></i>
+                                        {% elif trigger.strip() == 'friends' %}
+                                            <i class="fas fa-user-friends"></i>
+                                        {% elif trigger.strip() == 'sleep' %}
+                                            <i class="fas fa-bed"></i>
+                                        {% elif trigger.strip() == 'stress' %}
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% elif trigger.strip() == 'weather' %}
+                                            <i class="fas fa-cloud-sun"></i>
+                                        {% elif trigger.strip() == 'food' %}
+                                            <i class="fas fa-utensils"></i>
+                                        {% else %}
+                                            <i class="fas fa-tag"></i>
+                                        {% endif %}
+                                        {{ trigger.strip()|title }}
+                                    </span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                             {% if mood.notes %}
                             <div class="history-notes body-medium">{{ mood.notes }}</div>
                             {% endif %}
