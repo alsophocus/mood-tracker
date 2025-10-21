@@ -140,6 +140,43 @@ def index():
     
     return render_template('index.html', moods=recent_moods, analytics=analytics, user=current_user)
 
+@main_bp.route('/fix-unique-constraint')
+@login_required
+def fix_unique_constraint():
+    """Remove UNIQUE constraint from moods table to allow multiple entries per day"""
+    try:
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Check if constraint exists
+            cursor.execute("""
+                SELECT constraint_name 
+                FROM information_schema.table_constraints 
+                WHERE table_name = 'moods' 
+                AND constraint_type = 'UNIQUE'
+            """)
+            constraints = cursor.fetchall()
+            
+            # Drop any UNIQUE constraints on moods table
+            for constraint in constraints:
+                constraint_name = constraint['constraint_name']
+                cursor.execute(f'ALTER TABLE moods DROP CONSTRAINT IF EXISTS {constraint_name}')
+                print(f"Dropped constraint: {constraint_name}")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Removed {len(constraints)} UNIQUE constraints from moods table',
+                'constraints_removed': [c['constraint_name'] for c in constraints]
+            })
+            
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
+
 @main_bp.route('/fix-schema')
 def fix_schema():
     """Fix database schema constraints"""
