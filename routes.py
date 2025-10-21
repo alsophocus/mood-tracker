@@ -299,7 +299,7 @@ def save_mood():
             'message': 'Mood saved successfully!',
             'mood': mood,
             'notes': notes,
-            'triggers': triggers
+            'triggers': triggers,
             'date': chile_date.isoformat()
         })
             
