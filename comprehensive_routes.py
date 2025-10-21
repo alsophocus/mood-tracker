@@ -4,7 +4,7 @@ Single Responsibility Principle - handles routes for goals, reminders, export, a
 """
 
 from flask import Blueprint, render_template, jsonify, session, request, send_file
-from auth import login_required
+from flask_login import login_required, current_user
 from database import db
 from goal_tracker_service import GoalTracker
 from reminder_service import ReminderService
@@ -45,17 +45,16 @@ def goals_dashboard():
 def handle_goals():
     """Handle goals API requests"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
         
         if request.method == 'GET':
-            goals = comprehensive_controller.goal_tracker.get_user_goals(user_id)
+            goals = comprehensive_controller.goal_tracker.get_user_goals(current_user.id)
             return jsonify({'success': True, 'goals': goals})
         
         elif request.method == 'POST':
             goal_data = request.get_json()
-            result = comprehensive_controller.goal_tracker.create_goal(user_id, goal_data)
+            result = comprehensive_controller.goal_tracker.create_goal(current_user.id, goal_data)
             return jsonify(result)
             
     except Exception as e:
@@ -190,11 +189,10 @@ def analytics_dashboard():
 def get_correlation_analysis():
     """Get correlation analysis"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
         
-        result = comprehensive_controller.enhanced_analytics.get_correlation_analysis(user_id)
+        result = comprehensive_controller.enhanced_analytics.get_correlation_analysis(current_user.id)
         return jsonify(result)
         
     except Exception as e:
@@ -206,11 +204,10 @@ def get_correlation_analysis():
 def get_predictive_insights():
     """Get predictive insights"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
         
-        result = comprehensive_controller.enhanced_analytics.get_predictive_insights(user_id)
+        result = comprehensive_controller.enhanced_analytics.get_predictive_insights(current_user.id)
         return jsonify(result)
         
     except Exception as e:
@@ -222,11 +219,10 @@ def get_predictive_insights():
 def get_comparative_analytics():
     """Get comparative analytics"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
         
-        result = comprehensive_controller.enhanced_analytics.get_comparative_analytics(user_id)
+        result = comprehensive_controller.enhanced_analytics.get_comparative_analytics(current_user.id)
         return jsonify(result)
         
     except Exception as e:

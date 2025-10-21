@@ -4,7 +4,7 @@ Single Responsibility Principle - handles only insights-related routes
 """
 
 from flask import Blueprint, render_template, jsonify, session
-from auth import login_required
+from flask_login import login_required, current_user
 from database import db
 from mood_analyzer_service import MoodAnalyzer
 from insight_generator_service import InsightGenerator
@@ -53,11 +53,10 @@ def dashboard():
 def get_dashboard_data():
     """API endpoint for dashboard data"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
             
-        data = insights_controller.get_dashboard_data(user_id)
+        data = insights_controller.get_dashboard_data(current_user.id)
         return jsonify({'success': True, **data})
     except Exception as e:
         import traceback
@@ -73,11 +72,10 @@ def get_dashboard_data():
 def get_insights():
     """API endpoint for insights only"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
             
-        insights = insights_controller.insight_generator.generate_insights(user_id)
+        insights = insights_controller.insight_generator.generate_insights(current_user.id)
         return jsonify({'success': True, 'insights': insights})
     except Exception as e:
         import traceback
@@ -93,11 +91,10 @@ def get_insights():
 def get_trends(period):
     """API endpoint for mood trends"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
             
-        trends = insights_controller.insight_generator.get_mood_trends(user_id, period)
+        trends = insights_controller.insight_generator.get_mood_trends(current_user.id, period)
         return jsonify({'success': True, 'trends': trends})
     except Exception as e:
         import traceback
@@ -113,11 +110,10 @@ def get_trends(period):
 def get_correlations():
     """API endpoint for trigger correlations"""
     try:
-        user_id = session.get('user_id')
-        if not user_id:
+        if not current_user or not hasattr(current_user, 'id'):
             return jsonify({'success': False, 'error': 'User not authenticated'}), 401
             
-        correlations = insights_controller.mood_analyzer.get_trigger_correlations(user_id)
+        correlations = insights_controller.mood_analyzer.get_trigger_correlations(current_user.id)
         return jsonify({'success': True, 'correlations': correlations})
     except Exception as e:
         import traceback
