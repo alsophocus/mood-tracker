@@ -439,6 +439,102 @@ def get_mood_distribution():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@main_bp.route('/api/analytics/quick-insights')
+@login_required
+def get_quick_insights():
+    """Generate personalized quick insights based on user data"""
+    try:
+        insights = []
+        
+        with db.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Week comparison insight
+            cursor.execute("""
+                SELECT 
+                    AVG(CASE WHEN date >= CURRENT_DATE - INTERVAL '7 days' THEN
+                        CASE mood WHEN 'very bad' THEN 1 WHEN 'bad' THEN 2 WHEN 'slightly bad' THEN 3 
+                             WHEN 'neutral' THEN 4 WHEN 'slightly well' THEN 5 WHEN 'well' THEN 6 
+                             WHEN 'very well' THEN 7 ELSE 4 END
+                    END) as this_week,
+                    AVG(CASE WHEN date >= CURRENT_DATE - INTERVAL '14 days' AND date < CURRENT_DATE - INTERVAL '7 days' THEN
+                        CASE mood WHEN 'very bad' THEN 1 WHEN 'bad' THEN 2 WHEN 'slightly bad' THEN 3 
+                             WHEN 'neutral' THEN 4 WHEN 'slightly well' THEN 5 WHEN 'well' THEN 6 
+                             WHEN 'very well' THEN 7 ELSE 4 END
+                    END) as last_week
+                FROM moods WHERE user_id = %s
+            """, (current_user.id,))
+            
+            week_data = cursor.fetchone()
+            if week_data['this_week'] and week_data['last_week']:
+                change = ((week_data['this_week'] - week_data['last_week']) / week_data['last_week']) * 100
+                if abs(change) > 2:
+                    direction = "improved" if change > 0 else "declined"
+                    insights.append({
+                        'icon': 'fa-chart-line',
+                        'text': f'Your mood has {direction} {abs(change):.1f}% this week compared to last week'
+                    })
+            
+            # Streak insight
+            cursor.execute("""
+                WITH daily_moods AS (
+                    SELECT date FROM moods WHERE user_id = %s GROUP BY date ORDER BY date DESC
+                ),
+                streak_calc AS (
+                    SELECT date, ROW_NUMBER() OVER (ORDER BY date DESC) - 
+                           ROW_NUMBER() OVER (PARTITION BY date - ROW_NUMBER() OVER (ORDER BY date DESC) * INTERVAL '1 day' ORDER BY date DESC) as streak_group
+                    FROM daily_moods
+                )
+                SELECT COUNT(*) as streak FROM streak_calc WHERE streak_group = 0
+            """, (current_user.id,))
+            
+            streak = cursor.fetchone()['streak'] or 0
+            if streak >= 3:
+                insights.append({
+                    'icon': 'fa-calendar-check',
+                    'text': f'You\'ve logged moods for {streak} consecutive days - great streak!'
+                })
+            
+            # Top trigger insight
+            cursor.execute("""
+                SELECT TRIM(UNNEST(STRING_TO_ARRAY(triggers, ','))) as trigger, COUNT(*) as count,
+                       AVG(CASE mood WHEN 'very bad' THEN 1 WHEN 'bad' THEN 2 WHEN 'slightly bad' THEN 3 
+                            WHEN 'neutral' THEN 4 WHEN 'slightly well' THEN 5 WHEN 'well' THEN 6 
+                            WHEN 'very well' THEN 7 ELSE 4 END) as avg_mood
+                FROM moods WHERE user_id = %s AND triggers IS NOT NULL AND triggers != ''
+                GROUP BY TRIM(UNNEST(STRING_TO_ARRAY(triggers, ',')))
+                HAVING COUNT(*) >= 3 AND TRIM(UNNEST(STRING_TO_ARRAY(triggers, ','))) != ''
+                ORDER BY avg_mood DESC LIMIT 1
+            """, (current_user.id,))
+            
+            top_trigger = cursor.fetchone()
+            if top_trigger:
+                insights.append({
+                    'icon': 'fa-lightbulb',
+                    'text': f'{top_trigger["trigger"].title()} days show {top_trigger["avg_mood"]:.1f}/7 average mood - your best trigger!'
+                })
+            
+            # Total entries insight
+            cursor.execute("SELECT COUNT(*) as total FROM moods WHERE user_id = %s", (current_user.id,))
+            total = cursor.fetchone()['total']
+            if total >= 7:
+                insights.append({
+                    'icon': 'fa-database',
+                    'text': f'You\'ve tracked {total} mood entries - building great self-awareness!'
+                })
+            
+            # Default insights if no data
+            if not insights:
+                insights = [
+                    {'icon': 'fa-heart', 'text': 'Start logging moods regularly to see personalized insights'},
+                    {'icon': 'fa-tags', 'text': 'Add triggers to your mood entries to discover patterns'},
+                    {'icon': 'fa-chart-line', 'text': 'Track for a week to see your mood trends and improvements'}
+                ]
+        
+        return jsonify({'success': True, 'insights': insights})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 @main_bp.route('/recent_moods')
 @login_required
 def recent_moods():

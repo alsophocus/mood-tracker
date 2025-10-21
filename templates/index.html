@@ -3996,20 +3996,35 @@
         }
         
         function loadQuickInsights() {
-            const insights = [
-                { icon: 'fa-chart-line', text: 'Your mood has improved 8% this week compared to last week' },
-                { icon: 'fa-calendar-check', text: 'You\'ve logged moods for 7 consecutive days - great streak!' },
-                { icon: 'fa-lightbulb', text: 'Exercise days show 15% higher mood scores on average' },
-                { icon: 'fa-clock', text: 'Your best mood times are typically between 10 AM - 2 PM' }
-            ];
-            
-            const container = document.getElementById('quick-insights');
-            container.innerHTML = insights.map(insight => `
-                <div class="insight-item">
-                    <i class="fas ${insight.icon}"></i>
-                    <span>${insight.text}</span>
-                </div>
-            `).join('');
+            fetch('/api/analytics/quick-insights')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('quick-insights');
+                    if (data.success && data.insights.length > 0) {
+                        container.innerHTML = data.insights.map(insight => `
+                            <div class="insight-item">
+                                <i class="fas ${insight.icon}"></i>
+                                <span>${insight.text}</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = `
+                            <div class="insight-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Keep logging moods to see personalized insights!</span>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading insights:', error);
+                    document.getElementById('quick-insights').innerHTML = `
+                        <div class="insight-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Error loading insights</span>
+                        </div>
+                    `;
+                });
         }
     </script>
     
