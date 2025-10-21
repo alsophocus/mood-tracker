@@ -581,6 +581,22 @@
             font-size: 18px;
         }
 
+        .logout-button {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+        }
+
+        .logout-button:hover {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+
         .mobile-nav-title i {
             font-size: 20px;
         }
@@ -2365,6 +2381,9 @@
                 <i class="fas fa-brain"></i>
                 <span>Mood Tracker</span>
             </a>
+            <button class="logout-button" onclick="window.location.href='/logout'" aria-label="Sign out">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
         </div>
         <div class="mobile-nav-items">
             <a href="/insights" class="mobile-nav-item">
@@ -2381,14 +2400,8 @@
             </a>
         </div>
         <div class="mobile-nav-footer">
-            <div style="padding: 16px 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px; text-align: right;">
+            <div style="padding: 16px 24px; color: var(--md-sys-color-on-surface-variant); font-size: 14px; text-align: center;">
                 Welcome, {{ user.name }}
-            </div>
-            <div style="border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 16px;">
-                <a href="/logout" class="mobile-nav-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
             </div>
         </div>
     </div>
