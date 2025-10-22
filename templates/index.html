@@ -4539,68 +4539,64 @@
         
         function updateWeeklyChartNew(data, retryCount = 0) {
             console.log('updateWeeklyChartNew called, retry:', retryCount);
-            console.log('window.weeklyChart exists:', !!window.weeklyChart);
             
-            if (!window.weeklyChart) {
+            // Check if we should use the SOLID service or direct chart access
+            if (weeklyChartService && weeklyChartService.chart) {
+                console.log('Using weeklyChartService.chart');
+                const chart = weeklyChartService.chart;
+                updateChartData(chart, data);
+            } else if (window.weeklyChart && window.weeklyChart.data) {
+                console.log('Using window.weeklyChart');
+                updateChartData(window.weeklyChart, data);
+            } else {
                 if (retryCount < 10) {
-                    console.log('weeklyChart not found, waiting and retrying...');
+                    console.log('Chart not ready, waiting and retrying...');
                     setTimeout(() => updateWeeklyChartNew(data, retryCount + 1), 500);
                 } else {
-                    console.error('weeklyChart not found after 10 retries, giving up');
+                    console.error('Chart not found after 10 retries');
                 }
-                return;
             }
-            
+        }
+        
+        function updateChartData(chart, data) {
             console.log('Updating chart with data:', data);
-            console.log('Chart object:', window.weeklyChart);
-            console.log('Chart.data exists:', !!window.weeklyChart.data);
-            console.log('Chart.data.datasets exists:', !!window.weeklyChart.data?.datasets);
-            
-            // Double-check chart still exists and has required properties
-            if (!window.weeklyChart || !window.weeklyChart.data || !window.weeklyChart.data.datasets || !window.weeklyChart.data.datasets[0]) {
-                console.error('Chart structure invalid, retrying...');
-                if (retryCount < 10) {
-                    setTimeout(() => updateWeeklyChartNew(data, retryCount + 1), 500);
-                }
-                return;
-            }
             
             const dataValues = data.data || [];
             const counts = data.counts || [];
             
-            window.weeklyChart.data.labels = data.days || data.labels || [];
-            window.weeklyChart.data.datasets[0].data = dataValues;
-            window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+            chart.data.labels = data.days || data.labels || [];
+            chart.data.datasets[0].data = dataValues;
+            chart.data.datasets[0].label = data.period || 'Weekly Patterns';
             
             // Color dots based on mood values
-            window.weeklyChart.data.datasets[0].backgroundColor = dataValues.map(val => 
+            chart.data.datasets[0].backgroundColor = dataValues.map(val => 
                 val !== null ? getMoodColorFromValue(val) : 'transparent'
             );
-            window.weeklyChart.data.datasets[0].pointBackgroundColor = dataValues.map(val => 
+            chart.data.datasets[0].pointBackgroundColor = dataValues.map(val => 
                 val !== null ? getMoodColorFromValue(val) : 'transparent'
             );
-            window.weeklyChart.data.datasets[0].pointBorderColor = dataValues.map(val => 
+            chart.data.datasets[0].pointBorderColor = dataValues.map(val => 
                 val !== null ? getMoodColorFromValue(val) : 'transparent'
             );
             
             // Variable dot size based on entry count
-            window.weeklyChart.data.datasets[0].pointRadius = counts.map(count => {
+            chart.data.datasets[0].pointRadius = counts.map(count => {
                 if (count === 0) return 0;
                 return Math.min(8, Math.max(4, 4 + Math.log(count)));
             });
-            window.weeklyChart.data.datasets[0].pointHoverRadius = counts.map(count => {
+            chart.data.datasets[0].pointHoverRadius = counts.map(count => {
                 if (count === 0) return 0;
                 return Math.min(10, Math.max(6, 6 + Math.log(count)));
             });
             
             // Enable line breaks at null values
-            window.weeklyChart.data.datasets[0].spanGaps = false;
+            chart.data.datasets[0].spanGaps = false;
             
             // Store counts for tooltips
-            window.weeklyChart.weeklyCounts = counts;
+            chart.weeklyCounts = counts;
             
             // Update tooltip
-            window.weeklyChart.options.plugins.tooltip = {
+            chart.options.plugins.tooltip = {
                 enabled: true,
                 backgroundColor: 'rgba(33, 33, 33, 0.95)',
                 titleColor: '#ffffff',
@@ -4619,7 +4615,7 @@
                         if (value === null) return 'No data';
                         
                         const moodName = getMoodNameFromValue(value);
-                        const count = window.weeklyChart.weeklyCounts[context.dataIndex];
+                        const count = chart.weeklyCounts[context.dataIndex];
                         return [
                             `Average: ${value.toFixed(2)}`,
                             `Mood: ${moodName.toUpperCase()}`,
@@ -4633,7 +4629,7 @@
                 }
             };
             
-            window.weeklyChart.update();
+            chart.update();
         }
         
         function loadCurrentWeek() {
