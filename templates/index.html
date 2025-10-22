@@ -4258,6 +4258,7 @@
                             },
                             titleMarginBottom: 8,
                             bodySpacing: 4,
+                            maxWidth: 250,
                             callbacks: {
                                 title: function(context) {
                                     const point = context[0];
@@ -4281,7 +4282,28 @@
                                         if (moodPoint) {
                                             const lines = [`📊 Mood Level: ${context.parsed.y}/7`];
                                             if (moodPoint.notes && moodPoint.notes.trim()) {
-                                                lines.push(`💭 ${moodPoint.notes}`);
+                                                // Split long notes into multiple lines if needed
+                                                const notes = moodPoint.notes;
+                                                if (notes.length > 35) {
+                                                    const words = notes.split(' ');
+                                                    let currentLine = '💭 ';
+                                                    const noteLines = [];
+                                                    
+                                                    words.forEach(word => {
+                                                        if ((currentLine + word).length > 30) {
+                                                            noteLines.push(currentLine.trim());
+                                                            currentLine = '   ' + word + ' ';
+                                                        } else {
+                                                            currentLine += word + ' ';
+                                                        }
+                                                    });
+                                                    if (currentLine.trim().length > 3) {
+                                                        noteLines.push(currentLine.trim());
+                                                    }
+                                                    lines.push(...noteLines);
+                                                } else {
+                                                    lines.push(`💭 ${notes}`);
+                                                }
                                             }
                                             return lines;
                                         }
