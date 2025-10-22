@@ -153,7 +153,79 @@ class MoodAnalytics:
             'weekly_patterns': weekly
         }
     
-    def get_daily_patterns_with_minutes(self, selected_date=None):
+    def get_daily_patterns_for_date(self, selected_date):
+        """Get mood patterns for a specific date with precise minute positioning"""
+        from datetime import datetime, timedelta
+        
+        print(f"DEBUG: Getting daily patterns for date: {selected_date}")
+        
+        # Parse the selected date
+        try:
+            target_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+        except ValueError:
+            print(f"DEBUG: Invalid date format: {selected_date}")
+            return {'labels': [], 'data': [], 'period': f'Invalid date: {selected_date}'}
+        
+        # Filter moods for the selected date
+        filtered_moods = []
+        for mood_entry in self.moods:
+            timestamp = mood_entry.get('timestamp')
+            if not timestamp:
+                continue
+                
+            print(f"DEBUG: Checking mood date: {timestamp} (type: {type(timestamp)})")
+            
+            if isinstance(timestamp, str):
+                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            
+            # Convert UTC to Chile timezone (UTC-3)
+            chile_time = timestamp - timedelta(hours=3)
+            print(f"DEBUG: Formatted date: {chile_time.date()}")
+            
+            if chile_time.date() == target_date:
+                # Add precise time information for positioning
+                mood_entry_with_time = mood_entry.copy()
+                mood_entry_with_time['precise_time'] = chile_time.hour + (chile_time.minute / 60.0)  # Hour with decimal minutes
+                mood_entry_with_time['display_time'] = chile_time.strftime('%H:%M')
+                mood_entry_with_time['chile_timestamp'] = chile_time
+                filtered_moods.append(mood_entry_with_time)
+        
+        print(f"DEBUG: Filtered moods count: {len(filtered_moods)}")
+        
+        if not filtered_moods:
+            return {
+                'labels': [f"{hour:02d}:00" for hour in range(24)],
+                'data': [None] * 24,
+                'mood_points': [],
+                'period': f'Daily Patterns for {selected_date} (No data)'
+            }
+        
+        # Sort by timestamp
+        filtered_moods.sort(key=lambda x: x['chile_timestamp'])
+        
+        # Create chart data with precise positioning
+        mood_points = []
+        for mood_entry in filtered_moods:
+            mood_value = MOOD_VALUES[mood_entry['mood']]
+            mood_points.append({
+                'x': mood_entry['precise_time'],  # Exact hour.minute position
+                'y': mood_value,
+                'time': mood_entry['display_time'],
+                'mood': mood_entry['mood'],
+                'notes': mood_entry.get('notes', ''),
+                'timestamp': mood_entry['chile_timestamp'].isoformat()
+            })
+        
+        # Create hourly labels (keep the same format)
+        labels = [f"{hour:02d}:00" for hour in range(24)]
+        
+        return {
+            'labels': labels,
+            'data': [None] * 24,  # Keep empty for hourly structure
+            'mood_points': mood_points,  # Precise positioning data
+            'period': f'Daily Patterns for {selected_date}',
+            'total_entries': len(mood_points)
+        }
         """Get mood patterns with exact minute timestamps for a specific date"""
         from datetime import datetime, timedelta
         

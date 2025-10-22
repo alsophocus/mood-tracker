@@ -4064,47 +4064,60 @@
 
         // Data loading functions
         function loadDailyPatterns(selectedDate) {
-            const url = selectedDate ? `/daily_patterns_minutes?date=${selectedDate}` : '/daily_patterns_minutes';
+            const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Daily patterns data (minute precision):', data);
-                    if (window.dailyChart) {
+                    console.log('Daily patterns data:', data);
+                    if (window.dailyChart && data.mood_points && data.mood_points.length > 0) {
+                        // Use precise positioning for dots
                         window.dailyChart.data.labels = data.labels || [];
-                        window.dailyChart.data.datasets[0].data = data.data || [];
-                        window.dailyChart.data.datasets[0].label = `${data.date || 'Daily Patterns'} (${data.total_entries || 0} entries)`;
+                        window.dailyChart.data.datasets[0].data = data.mood_points.map(point => ({
+                            x: point.x,  // Precise hour.minute position
+                            y: point.y   // Mood value
+                        }));
+                        window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
                         
-                        // Update chart options for better minute display
-                        window.dailyChart.options.scales.x.title.text = 'Time (HH:MM)';
-                        window.dailyChart.options.plugins.tooltip.callbacks.title = function(context) {
-                            const index = context[0].dataIndex;
-                            const moodPoint = data.mood_points && data.mood_points[index];
-                            if (moodPoint) {
-                                return `${moodPoint.time} - ${moodPoint.mood_name}`;
+                        // Store mood points for tooltips
+                        window.dailyChart.moodPoints = data.mood_points;
+                        
+                        // Update chart options for precise positioning and tooltips
+                        window.dailyChart.options.scales.x.type = 'linear';
+                        window.dailyChart.options.scales.x.min = 0;
+                        window.dailyChart.options.scales.x.max = 24;
+                        window.dailyChart.options.scales.x.ticks = {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return value.toString().padStart(2, '0') + ':00';
                             }
-                            return context[0].label;
+                        };
+                        
+                        // Enhanced tooltips
+                        window.dailyChart.options.plugins.tooltip.callbacks = {
+                            title: function(context) {
+                                const point = context[0];
+                                const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
+                                return moodPoint ? `${moodPoint.time} - ${moodPoint.mood}` : '';
+                            },
+                            label: function(context) {
+                                const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
+                                if (moodPoint && moodPoint.notes) {
+                                    return `Notes: ${moodPoint.notes}`;
+                                }
+                                return `Mood Level: ${context.parsed.y}`;
+                            }
                         };
                         
                         window.dailyChart.update();
+                    } else if (window.dailyChart) {
+                        // Fallback to regular hourly data
+                        window.dailyChart.data.labels = data.labels || [];
+                        window.dailyChart.data.datasets[0].data = data.data || [];
+                        window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
+                        window.dailyChart.update();
                     }
                 })
-                .catch(error => {
-                    console.error('Error loading minute-precision daily patterns:', error);
-                    // Fallback to hourly data
-                    const fallbackUrl = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
-                    fetch(fallbackUrl)
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Daily patterns fallback data (hourly):', data);
-                            if (window.dailyChart) {
-                                window.dailyChart.data.labels = data.labels || [];
-                                window.dailyChart.data.datasets[0].data = data.data || [];
-                                window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns (Hourly)';
-                                window.dailyChart.update();
-                            }
-                        })
-                        .catch(fallbackError => console.error('Error loading fallback daily patterns:', fallbackError));
-                });
+                .catch(error => console.error('Error loading daily patterns:', error));
         }
 
         // SOLID Chart Implementation
