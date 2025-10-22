@@ -791,6 +791,38 @@ def monthly_trends():
         result = analytics.get_monthly_trends_for_year(today.year)
         return jsonify(result)
 
+@main_bp.route('/daily_patterns_minutes')
+@login_required
+def daily_patterns_minutes():
+    """Get daily mood patterns with minute precision"""
+    selected_date = request.args.get('date')
+    
+    # Get user's moods
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT date, mood, notes, timestamp 
+            FROM moods 
+            WHERE user_id = %s 
+            ORDER BY timestamp DESC
+        ''', (current_user.id,))
+        mood_entries = cursor.fetchall()
+    
+    # Convert to analytics format
+    moods = []
+    for entry in mood_entries:
+        moods.append({
+            'date': entry['date'],
+            'mood': entry['mood'],
+            'notes': entry['notes'],
+            'timestamp': entry['timestamp']
+        })
+    
+    analytics = MoodAnalytics(moods)
+    result = analytics.get_daily_patterns_with_minutes(selected_date)
+    
+    return jsonify(result)
+
 @main_bp.route('/daily_patterns')
 @login_required
 def daily_patterns():

@@ -153,7 +153,68 @@ class MoodAnalytics:
             'weekly_patterns': weekly
         }
     
-    def get_daily_patterns_for_date(self, selected_date):
+    def get_daily_patterns_with_minutes(self, selected_date=None):
+        """Get mood patterns with exact minute timestamps for a specific date"""
+        from datetime import datetime, timedelta
+        
+        # Filter moods for the selected date if provided
+        filtered_moods = self.moods
+        if selected_date:
+            try:
+                target_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+                filtered_moods = []
+                for mood_entry in self.moods:
+                    timestamp = mood_entry.get('timestamp')
+                    if timestamp:
+                        if isinstance(timestamp, str):
+                            timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        # Convert to Chile timezone
+                        chile_time = timestamp - timedelta(hours=3)
+                        if chile_time.date() == target_date:
+                            filtered_moods.append(mood_entry)
+            except ValueError:
+                filtered_moods = self.moods
+        
+        # Collect all mood points with exact timestamps
+        mood_points = []
+        for mood_entry in filtered_moods:
+            timestamp = mood_entry.get('timestamp')
+            if not timestamp:
+                continue
+            
+            mood_value = MOOD_VALUES[mood_entry['mood']]
+            
+            if isinstance(timestamp, str):
+                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            
+            # Convert UTC to Chile timezone (UTC-3)
+            chile_time = timestamp - timedelta(hours=3)
+            
+            # Format as HH:MM for precise time display
+            time_label = chile_time.strftime('%H:%M')
+            
+            mood_points.append({
+                'time': time_label,
+                'timestamp': chile_time.isoformat(),
+                'mood_value': mood_value,
+                'mood_name': mood_entry['mood'],
+                'notes': mood_entry.get('notes', '')
+            })
+        
+        # Sort by timestamp
+        mood_points.sort(key=lambda x: x['timestamp'])
+        
+        # Prepare chart data
+        labels = [point['time'] for point in mood_points]
+        data = [point['mood_value'] for point in mood_points]
+        
+        return {
+            'labels': labels,
+            'data': data,
+            'mood_points': mood_points,
+            'total_entries': len(mood_points),
+            'date': selected_date or 'All dates'
+        }
         """Get mood patterns for a specific date"""
         from datetime import datetime
         

@@ -4064,18 +4064,47 @@
 
         // Data loading functions
         function loadDailyPatterns(selectedDate) {
-            const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
+            const url = selectedDate ? `/daily_patterns_minutes?date=${selectedDate}` : '/daily_patterns_minutes';
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Daily patterns data (minute precision):', data);
                     if (window.dailyChart) {
                         window.dailyChart.data.labels = data.labels || [];
                         window.dailyChart.data.datasets[0].data = data.data || [];
-                        window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
+                        window.dailyChart.data.datasets[0].label = `${data.date || 'Daily Patterns'} (${data.total_entries || 0} entries)`;
+                        
+                        // Update chart options for better minute display
+                        window.dailyChart.options.scales.x.title.text = 'Time (HH:MM)';
+                        window.dailyChart.options.plugins.tooltip.callbacks.title = function(context) {
+                            const index = context[0].dataIndex;
+                            const moodPoint = data.mood_points && data.mood_points[index];
+                            if (moodPoint) {
+                                return `${moodPoint.time} - ${moodPoint.mood_name}`;
+                            }
+                            return context[0].label;
+                        };
+                        
                         window.dailyChart.update();
                     }
                 })
-                .catch(error => console.error('Error loading daily patterns:', error));
+                .catch(error => {
+                    console.error('Error loading minute-precision daily patterns:', error);
+                    // Fallback to hourly data
+                    const fallbackUrl = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
+                    fetch(fallbackUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Daily patterns fallback data (hourly):', data);
+                            if (window.dailyChart) {
+                                window.dailyChart.data.labels = data.labels || [];
+                                window.dailyChart.data.datasets[0].data = data.data || [];
+                                window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns (Hourly)';
+                                window.dailyChart.update();
+                            }
+                        })
+                        .catch(fallbackError => console.error('Error loading fallback daily patterns:', fallbackError));
+                });
         }
 
         // SOLID Chart Implementation
