@@ -4230,6 +4230,12 @@
                         window.dailyChart.data.datasets[0].borderColor = data.mood_points.map(point => 
                             getMoodColor(point.mood)
                         );
+                        window.dailyChart.data.datasets[0].pointBackgroundColor = data.mood_points.map(point => 
+                            getMoodColor(point.mood)
+                        );
+                        window.dailyChart.data.datasets[0].pointBorderColor = data.mood_points.map(point => 
+                            getMoodColor(point.mood)
+                        );
                         window.dailyChart.data.datasets[0].pointRadius = 6;
                         window.dailyChart.data.datasets[0].pointHoverRadius = 8;
                         
