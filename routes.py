@@ -535,10 +535,18 @@ def get_quick_stats():
         today_stat = None
         if today_moods:
             latest = today_moods[0]
+            # Convert UTC to Chile time (UTC-3)
+            timestamp = latest.get('timestamp')
+            if timestamp:
+                chile_time = timestamp - timedelta(hours=3)
+                time_str = chile_time.strftime('%H:%M')
+            else:
+                time_str = 'Unknown'
+            
             today_stat = {
                 'mood': latest.get('mood'),
                 'value': MOOD_VALUES[latest.get('mood')],
-                'time': latest.get('timestamp').strftime('%H:%M') if latest.get('timestamp') else 'Unknown'
+                'time': time_str
             }
         
         # This week average

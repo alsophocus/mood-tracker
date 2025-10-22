@@ -5415,8 +5415,13 @@
             }
             
             // Trend
+            const trendIconEl = document.getElementById('trendIcon');
             if (data.trend) {
-                const trendIcons = { 'up': '↗️', 'down': '↘️', 'stable': '→' };
+                const trendIcons = { 
+                    'up': 'fas fa-arrow-trend-up', 
+                    'down': 'fas fa-arrow-trend-down', 
+                    'stable': 'fas fa-arrows-left-right' 
+                };
                 const trendColors = {
                     'up': 'var(--md-sys-color-tertiary)',
                     'down': 'var(--md-sys-color-error)',
@@ -5424,15 +5429,17 @@
                 };
                 const trendLabels = { 'up': 'Improving', 'down': 'Declining', 'stable': 'Stable' };
                 
-                document.getElementById('trendIcon').textContent = trendIcons[data.trend.direction];
+                const iconClass = trendIcons[data.trend.direction];
+                const iconColor = trendColors[data.trend.direction];
+                trendIconEl.innerHTML = `<i class="${iconClass}" style="color: ${iconColor};"></i>`;
                 document.getElementById('trendDirection').textContent = trendLabels[data.trend.direction];
-                document.getElementById('trendDirection').style.color = trendColors[data.trend.direction];
+                document.getElementById('trendDirection').style.color = iconColor;
                 
                 const changeText = data.trend.change > 0 ? `+${data.trend.change.toFixed(2)}` : data.trend.change.toFixed(2);
                 document.getElementById('trendChange').textContent = `${changeText} vs last week`;
-                document.getElementById('trendChange').style.color = trendColors[data.trend.direction];
+                document.getElementById('trendChange').style.color = iconColor;
             } else {
-                document.getElementById('trendIcon').textContent = '📊';
+                trendIconEl.innerHTML = '<i class="fas fa-chart-line" style="color: var(--md-sys-color-on-surface-variant);"></i>';
                 document.getElementById('trendDirection').textContent = 'Not enough data';
                 document.getElementById('trendChange').textContent = 'Need 2 weeks';
             }
