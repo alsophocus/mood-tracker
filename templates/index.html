@@ -4063,6 +4063,34 @@
         }
 
         // Data loading functions
+        // Function to get mood icon
+        function getMoodIcon(mood) {
+            const moodIcons = {
+                'very bad': 'fas fa-face-frown-open',
+                'bad': 'fas fa-face-frown',
+                'slightly bad': 'fas fa-face-meh',
+                'neutral': 'fas fa-face-meh-blank',
+                'slightly well': 'fas fa-face-smile',
+                'well': 'fas fa-face-smile-beam',
+                'very well': 'fas fa-face-grin-stars'
+            };
+            return moodIcons[mood] || 'fas fa-circle';
+        }
+
+        // Function to get mood color
+        function getMoodColor(mood) {
+            const moodColors = {
+                'very bad': '#d32f2f',
+                'bad': '#ff5722',
+                'slightly bad': '#ff9800',
+                'neutral': '#9e9e9e',
+                'slightly well': '#8bc34a',
+                'well': '#4caf50',
+                'very well': '#2196f3'
+            };
+            return moodColors[mood] || '#9e9e9e';
+        }
+
         function loadDailyPatterns(selectedDate) {
             const url = selectedDate ? `/daily_patterns?date=${selectedDate}` : '/daily_patterns';
             fetch(url)
@@ -4070,12 +4098,23 @@
                 .then(data => {
                     console.log('Daily patterns data:', data);
                     if (window.dailyChart && data.mood_points && data.mood_points.length > 0) {
-                        // Use precise positioning for dots
+                        // Use precise positioning for dots with mood colors
                         window.dailyChart.data.labels = data.labels || [];
                         window.dailyChart.data.datasets[0].data = data.mood_points.map(point => ({
                             x: point.x,  // Precise hour.minute position
                             y: point.y   // Mood value
                         }));
+                        
+                        // Add mood-based colors for each point
+                        window.dailyChart.data.datasets[0].backgroundColor = data.mood_points.map(point => 
+                            getMoodColor(point.mood)
+                        );
+                        window.dailyChart.data.datasets[0].borderColor = data.mood_points.map(point => 
+                            getMoodColor(point.mood)
+                        );
+                        window.dailyChart.data.datasets[0].pointRadius = 6;
+                        window.dailyChart.data.datasets[0].pointHoverRadius = 8;
+                        
                         window.dailyChart.data.datasets[0].label = data.period || 'Daily Patterns';
                         
                         // Store mood points for tooltips
@@ -4092,19 +4131,54 @@
                             }
                         };
                         
-                        // Enhanced tooltips
-                        window.dailyChart.options.plugins.tooltip.callbacks = {
-                            title: function(context) {
-                                const point = context[0];
-                                const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
-                                return moodPoint ? `${moodPoint.time} - ${moodPoint.mood}` : '';
-                            },
-                            label: function(context) {
-                                const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
-                                if (moodPoint && moodPoint.notes) {
-                                    return `Notes: ${moodPoint.notes}`;
+                        // Enhanced tooltips with mood icons
+                        window.dailyChart.options.plugins.tooltip = {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#333333',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    const point = context[0];
+                                    const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
+                                    if (moodPoint) {
+                                        return `${moodPoint.time} - ${moodPoint.mood}`;
+                                    }
+                                    return '';
+                                },
+                                label: function(context) {
+                                    const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
+                                    if (moodPoint) {
+                                        const lines = [];
+                                        lines.push(`Mood Level: ${context.parsed.y}`);
+                                        if (moodPoint.notes && moodPoint.notes.trim()) {
+                                            lines.push(`Notes: ${moodPoint.notes}`);
+                                        }
+                                        return lines;
+                                    }
+                                    return `Mood Level: ${context.parsed.y}`;
+                                },
+                                beforeLabel: function(context) {
+                                    const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
+                                    if (moodPoint) {
+                                        // Add mood icon (using Unicode emoji as fallback for tooltip)
+                                        const moodEmojis = {
+                                            'very bad': '😫',
+                                            'bad': '😞',
+                                            'slightly bad': '😐',
+                                            'neutral': '😶',
+                                            'slightly well': '🙂',
+                                            'well': '😊',
+                                            'very well': '🤩'
+                                        };
+                                        const emoji = moodEmojis[moodPoint.mood] || '⚪';
+                                        return `${emoji} ${moodPoint.mood}`;
+                                    }
+                                    return '';
                                 }
-                                return `Mood Level: ${context.parsed.y}`;
                             }
                         };
                         
