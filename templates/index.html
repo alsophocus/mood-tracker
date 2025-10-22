@@ -2965,16 +2965,6 @@
                 </div>
                 
                 <div class="controls-container">
-                    <div class="md-select-container">
-                        <select id="dailyYearSelect" class="md-select" value="">
-                        </select>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
-                    </div>
-                    <div class="md-select-container">
-                        <select id="dailyMonthSelect" class="md-select" value="">
-                        </select>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
-                    </div>
                     <div class="md-date-picker">
                         <div class="md-date-field">
                             <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
@@ -4280,7 +4270,7 @@
                                     if (window.dailyChart.moodPoints && context.dataIndex < window.dailyChart.moodPoints.length) {
                                         const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
                                         if (moodPoint) {
-                                            const lines = [`📊 Mood Level: ${context.parsed.y}/7`];
+                                            const lines = [];
                                             if (moodPoint.notes && moodPoint.notes.trim()) {
                                                 // Split long notes into multiple lines if needed
                                                 const notes = moodPoint.notes;
@@ -4305,10 +4295,10 @@
                                                     lines.push(`💭 ${notes}`);
                                                 }
                                             }
-                                            return lines;
+                                            return lines.length > 0 ? lines : null;
                                         }
                                     }
-                                    return `📊 Mood Level: ${context.parsed.y}/7`;
+                                    return null;
                                 }
                             }
                         };
