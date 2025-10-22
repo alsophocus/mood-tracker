@@ -4253,6 +4253,19 @@
                         };
                         
                         console.log('Chart configured with mood points:', window.dailyChart.moodPoints);
+                        
+                        // Test direct canvas mouse events
+                        const canvas = document.getElementById('dailyChart');
+                        if (canvas) {
+                            canvas.addEventListener('mousemove', function(e) {
+                                console.log('CANVAS MOUSE MOVE DETECTED at:', e.offsetX, e.offsetY);
+                            });
+                            canvas.addEventListener('click', function(e) {
+                                console.log('CANVAS CLICK DETECTED at:', e.offsetX, e.offsetY);
+                            });
+                            console.log('Canvas event listeners added');
+                        }
+                        
                         window.dailyChart.update();
                     } else if (window.dailyChart) {
                         // Fallback to regular hourly data
