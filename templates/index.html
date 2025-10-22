@@ -4552,6 +4552,18 @@
             }
             
             console.log('Updating chart with data:', data);
+            console.log('Chart object:', window.weeklyChart);
+            console.log('Chart.data exists:', !!window.weeklyChart.data);
+            console.log('Chart.data.datasets exists:', !!window.weeklyChart.data?.datasets);
+            
+            // Double-check chart still exists and has required properties
+            if (!window.weeklyChart || !window.weeklyChart.data || !window.weeklyChart.data.datasets || !window.weeklyChart.data.datasets[0]) {
+                console.error('Chart structure invalid, retrying...');
+                if (retryCount < 10) {
+                    setTimeout(() => updateWeeklyChartNew(data, retryCount + 1), 500);
+                }
+                return;
+            }
             
             const dataValues = data.data || [];
             const counts = data.counts || [];
