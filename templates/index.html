@@ -4372,6 +4372,11 @@
             const data = processWeeklyData(rawData);
             console.log('DEBUG: Processed data:', data);
             
+            if (!window.weeklyChart) {
+                console.error('DEBUG: weeklyChart not found, cannot update');
+                return;
+            }
+            
             try {
                 // Method 1: Try normal update
                 window.weeklyChart.data.labels = data.days || data.labels || [];
@@ -4389,7 +4394,9 @@
                 
                 // Method 2: Destroy and recreate chart if update fails
                 try {
-                    window.weeklyChart.destroy();
+                    if (window.weeklyChart && typeof window.weeklyChart.destroy === 'function') {
+                        window.weeklyChart.destroy();
+                    }
                     
                     const weeklyCtx = document.getElementById('weeklyChart');
                     if (weeklyCtx) {
