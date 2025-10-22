@@ -1955,6 +1955,14 @@
             overflow: visible !important;
         }
 
+        .daily-patterns-chart {
+            overflow: visible !important;
+        }
+
+        .daily-patterns-chart:hover {
+            transform: none !important;
+        }
+
         /* Single input controls (like date picker or single select) */
         .controls-container:has(input[type="date"]:only-child),
         .controls-container:has(.md-select-container:only-child) {
@@ -3021,7 +3029,7 @@
                     </button>
                 </div>
                 
-                <div class="chart-container">
+                <div class="chart-container daily-patterns-chart">
                     <canvas id="dailyChart"></canvas>
                     <!-- Custom tooltip for FontAwesome icons -->
                     <div id="custom-mood-tooltip" style="
