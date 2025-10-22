@@ -4523,11 +4523,13 @@
             const startDateStr = currentWeekStart.toISOString().split('T')[0];
             const url = `/weekly_patterns?start_date=${startDateStr}`;
             
+            console.log('Loading weekly patterns for:', startDateStr);
             document.getElementById('weekRangeDisplay').textContent = formatDateRange(currentWeekStart);
             
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Received weekly data:', data);
                     updateWeeklyChartNew(data);
                 })
                 .catch(error => {
@@ -4536,8 +4538,12 @@
         }
         
         function updateWeeklyChartNew(data) {
+            console.log('updateWeeklyChartNew called with:', data);
+            console.log('window.weeklyChart exists:', !!window.weeklyChart);
+            
             if (!window.weeklyChart) {
-                console.error('weeklyChart not found');
+                console.error('weeklyChart not found, waiting and retrying...');
+                setTimeout(() => updateWeeklyChartNew(data), 500);
                 return;
             }
             
