@@ -2964,13 +2964,38 @@
                     <h2 class="md-card-title headline-small">Daily Patterns</h2>
                 </div>
                 
-                <div class="controls-container">
-                    <div class="md-date-picker">
-                        <div class="md-date-field">
-                            <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
+                <div class="controls-container" style="
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    gap: 16px;
+                    margin-bottom: 24px;
+                ">
+                    <div class="md-date-picker" style="
+                        position: relative;
+                        width: 200px;
+                    ">
+                        <div class="md-date-field" style="
+                            width: 100%;
+                        ">
+                            <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly style="
+                                width: 100%;
+                                box-sizing: border-box;
+                            ">
                             <i class="fas fa-calendar-alt md-date-icon"></i>
                         </div>
-                        <div class="md-date-calendar" id="dailyDateCalendar">
+                        <div class="md-date-calendar" id="dailyDateCalendar" style="
+                            position: absolute;
+                            top: 100%;
+                            left: 0;
+                            width: 280px;
+                            z-index: 1000;
+                            background: var(--md-sys-color-surface-container);
+                            border-radius: 12px;
+                            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+                            padding: 16px;
+                            display: none;
+                        ">
                             <div class="md-calendar-header">
                                 <button type="button" class="md-calendar-nav" id="prevYear">
                                     <i class="fas fa-angle-double-left"></i>
@@ -3000,7 +3025,12 @@
                             </div>
                         </div>
                     </div>
-                    <button class="md-button md-button-filled" onclick="loadAverageMoodData()" id="averageMoodBtn" style="height: 56px; min-height: 56px;">
+                    <button class="md-button md-button-filled" onclick="loadAverageMoodData()" id="averageMoodBtn" style="
+                        height: 56px; 
+                        min-height: 56px;
+                        width: 160px;
+                        flex-shrink: 0;
+                    ">
                         <i class="fas fa-chart-line"></i>
                         <span>Average Mood</span>
                     </button>
