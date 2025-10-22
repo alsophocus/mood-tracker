@@ -1923,6 +1923,7 @@
             align-items: center;
             justify-content: flex-end;
             margin-bottom: 24px;
+            overflow: visible;
         }
 
         .controls-container:has(.md-date-picker) .md-select-container {
@@ -1932,6 +1933,7 @@
         .controls-container:has(.md-date-picker) .md-date-picker {
             width: 220px;
             flex-shrink: 0;
+            overflow: visible;
         }
 
         .controls-container:has(.md-date-picker) .md-button {
@@ -1946,6 +1948,11 @@
             width: 100%;
             min-height: 56px;
             overflow: visible;
+        }
+
+        /* Allow calendar dropdown to extend outside Daily Patterns card */
+        .daily-patterns-card {
+            overflow: visible !important;
         }
 
         /* Single input controls (like date picker or single select) */
@@ -2966,7 +2973,7 @@
         
         <!-- Daily Patterns -->
         <div class="section">
-            <div class="md-card">
+            <div class="md-card daily-patterns-card">
                 <div class="md-card-header">
                     <i class="fas fa-clock md-card-icon"></i>
                     <h2 class="md-card-title headline-small">Daily Patterns</h2>
