@@ -676,17 +676,36 @@ def mood_data():
 @main_bp.route('/weekly_patterns')
 @login_required
 def weekly_patterns():
-    """Get weekly mood patterns for specific week of month"""
-    from datetime import date, timedelta
+    """Get weekly mood patterns for specific week"""
+    from datetime import date, timedelta, datetime
     import calendar
     
-    # Get week parameters
-    year = request.args.get('year', type=int)
-    month = request.args.get('month', type=int) 
-    week_of_month = request.args.get('week', type=int)
+    # Check for new simple format: start_date (Monday of the week)
+    start_date_str = request.args.get('start_date')
     
     moods = db.get_user_moods(current_user.id)
     analytics = MoodAnalytics(moods)
+    
+    if start_date_str:
+        # New format: start_date=2025-10-21
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = start_date + timedelta(days=6)
+            
+            result = analytics.get_weekly_patterns_for_period(
+                start_date, 
+                end_date, 
+                f"{start_date.strftime('%b %d')} - {end_date.strftime('%b %d, %Y')}"
+            )
+            return jsonify(result)
+        except Exception as e:
+            print(f"Error in weekly patterns: {str(e)}")
+            return jsonify({"error": "Invalid date parameter"}), 400
+    
+    # Legacy format support: year, month, week
+    year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int) 
+    week_of_month = request.args.get('week', type=int)
     
     # Debug: Log what we're working with
     print(f"DEBUG: Weekly patterns request - year={year}, month={month}, week={week_of_month}")

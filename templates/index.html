@@ -2953,24 +2953,18 @@
                     <h2 class="md-card-title headline-small">Weekly Patterns</h2>
                 </div>
                 
-                <div class="controls-container">
-                    <div class="md-select-container">
-                        <select id="yearSelect" class="md-select" value="">
-                        </select>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 24px;">
+                    <button class="md-button md-button-outlined" onclick="navigateWeek(-1)" style="min-width: 120px;">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Previous</span>
+                    </button>
+                    <div id="weekRangeDisplay" style="font-size: 16px; font-weight: 500; min-width: 200px; text-align: center; color: var(--md-sys-color-on-surface);">
+                        Loading...
                     </div>
-                    <div class="md-select-container">
-                        <select id="monthSelect" class="md-select" value="">
-                        </select>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
-                    </div>
-                    <div class="md-select-container">
-                        <select id="weekSelect" class="md-select" value="">
-                            <option value="">Week</option>
-                        </select>
-                        <label class="md-select-label">Week</label>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
-                    </div>
+                    <button class="md-button md-button-outlined" onclick="navigateWeek(1)" style="min-width: 120px;">
+                        <span>Next</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
                 
                 <div class="chart-container">
@@ -4487,12 +4481,140 @@
             }
         }
         
-        function loadCurrentWeek() {
-            if (weeklyChartService) {
-                weeklyChartService.loadCurrentWeek();
-            } else if (window.weeklyChart) {
-                loadCurrentWeekLegacy();
+        // Week navigation state and functions
+        let currentWeekStart = null;
+        
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+        
+        function formatDateRange(startDate) {
+            const start = new Date(startDate);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            
+            const options = { month: 'short', day: 'numeric' };
+            const startStr = start.toLocaleDateString('en-US', options);
+            const endStr = end.toLocaleDateString('en-US', { ...options, year: 'numeric' });
+            
+            return `${startStr} - ${endStr}`;
+        }
+        
+        function navigateWeek(direction) {
+            if (!currentWeekStart) {
+                currentWeekStart = getMonday(new Date());
             }
+            
+            const newDate = new Date(currentWeekStart);
+            newDate.setDate(newDate.getDate() + (direction * 7));
+            currentWeekStart = newDate;
+            
+            loadWeeklyPatternsNew();
+        }
+        
+        function loadWeeklyPatternsNew() {
+            if (!currentWeekStart) {
+                currentWeekStart = getMonday(new Date());
+            }
+            
+            const startDateStr = currentWeekStart.toISOString().split('T')[0];
+            const url = `/weekly_patterns?start_date=${startDateStr}`;
+            
+            document.getElementById('weekRangeDisplay').textContent = formatDateRange(currentWeekStart);
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    updateWeeklyChartNew(data);
+                })
+                .catch(error => {
+                    console.error('Error loading weekly patterns:', error);
+                });
+        }
+        
+        function updateWeeklyChartNew(data) {
+            if (!window.weeklyChart) {
+                console.error('weeklyChart not found');
+                return;
+            }
+            
+            const dataValues = data.data || [];
+            const counts = data.counts || [];
+            
+            window.weeklyChart.data.labels = data.days || data.labels || [];
+            window.weeklyChart.data.datasets[0].data = dataValues;
+            window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
+            
+            // Color dots based on mood values
+            window.weeklyChart.data.datasets[0].backgroundColor = dataValues.map(val => 
+                val !== null ? getMoodColorFromValue(val) : 'transparent'
+            );
+            window.weeklyChart.data.datasets[0].pointBackgroundColor = dataValues.map(val => 
+                val !== null ? getMoodColorFromValue(val) : 'transparent'
+            );
+            window.weeklyChart.data.datasets[0].pointBorderColor = dataValues.map(val => 
+                val !== null ? getMoodColorFromValue(val) : 'transparent'
+            );
+            
+            // Variable dot size based on entry count
+            window.weeklyChart.data.datasets[0].pointRadius = counts.map(count => {
+                if (count === 0) return 0;
+                return Math.min(8, Math.max(4, 4 + Math.log(count)));
+            });
+            window.weeklyChart.data.datasets[0].pointHoverRadius = counts.map(count => {
+                if (count === 0) return 0;
+                return Math.min(10, Math.max(6, 6 + Math.log(count)));
+            });
+            
+            // Enable line breaks at null values
+            window.weeklyChart.data.datasets[0].spanGaps = false;
+            
+            // Store counts for tooltips
+            window.weeklyChart.weeklyCounts = counts;
+            
+            // Update tooltip
+            window.weeklyChart.options.plugins.tooltip = {
+                enabled: true,
+                backgroundColor: 'rgba(33, 33, 33, 0.95)',
+                titleColor: '#ffffff',
+                bodyColor: '#e0e0e0',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 1,
+                cornerRadius: 12,
+                displayColors: false,
+                padding: 16,
+                callbacks: {
+                    title: function(context) {
+                        return context[0].label;
+                    },
+                    label: function(context) {
+                        const value = context.parsed.y;
+                        if (value === null) return 'No data';
+                        
+                        const moodName = getMoodNameFromValue(value);
+                        const count = window.weeklyChart.weeklyCounts[context.dataIndex];
+                        return [
+                            `Average: ${value.toFixed(2)}`,
+                            `Mood: ${moodName.toUpperCase()}`,
+                            `Entries: ${count}`
+                        ];
+                    },
+                    labelTextColor: function(context) {
+                        const value = context.parsed.y;
+                        return value !== null ? getMoodColorFromValue(value) : '#ffffff';
+                    }
+                }
+            };
+            
+            window.weeklyChart.update();
+        }
+        
+        function loadCurrentWeek() {
+            currentWeekStart = getMonday(new Date());
+            loadWeeklyPatternsNew();
         }
         
         function loadWeeklyPatternsLegacy() {

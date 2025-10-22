@@ -331,9 +331,11 @@ class MoodAnalytics:
     def get_weekly_patterns_for_period(self, start_date, end_date, period_label):
         """Get weekly patterns for a specific date range"""
         from datetime import datetime
+        from collections import defaultdict
         
-        # Filter moods for the date range
-        filtered_moods = []
+        # Group moods by day of week
+        daily_moods = defaultdict(list)
+        
         for mood_entry in self.moods:
             mood_date = mood_entry.get('date')
             
@@ -347,26 +349,33 @@ class MoodAnalytics:
                 mood_date = mood_date.date()
             
             if start_date <= mood_date <= end_date:
-                filtered_moods.append(mood_entry)
+                mood_value = MOOD_VALUES[mood_entry['mood']]
+                day_of_week = mood_date.weekday()  # 0=Monday, 6=Sunday
+                daily_moods[day_of_week].append(mood_value)
         
-        # Create temporary analytics instance for filtered data
-        temp_analytics = MoodAnalytics(filtered_moods)
-        result = temp_analytics.get_weekly_patterns()
-        result['period'] = period_label
-        result['start_date'] = start_date.isoformat()
-        result['end_date'] = end_date.isoformat()
+        # Calculate averages for each day
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        data = []
+        counts = []
         
-        # Ensure we have the right structure for the frontend
-        if 'labels' not in result:
-            result['labels'] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        if 'data' not in result:
-            result['data'] = [0, 0, 0, 0, 0, 0, 0]  # Use 0 instead of None
+        for day_index in range(7):
+            if daily_moods[day_index]:
+                avg = round(sum(daily_moods[day_index]) / len(daily_moods[day_index]), 2)
+                data.append(avg)
+                counts.append(len(daily_moods[day_index]))
+            else:
+                data.append(None)  # null for days with no data (creates gaps in line)
+                counts.append(0)
         
-        # Rename labels to days for consistency with frontend
-        result['days'] = result['labels']
-        result['days'] = result['labels']
-        
-        return result
+        return {
+            'labels': days,
+            'days': days,
+            'data': data,
+            'counts': counts,
+            'period': period_label,
+            'start_date': start_date.isoformat(),
+            'end_date': end_date.isoformat()
+        }
     
     def get_weekly_trends_for_month(self, year, month):
         """Get weekly mood trends (averages) for a specific month"""
