@@ -491,6 +491,8 @@ class MoodAnalytics:
         from datetime import datetime, timedelta
         
         hourly_totals = defaultdict(list)
+        earliest_date = None
+        latest_date = None
         
         # Group moods by hour (same logic as get_daily_patterns)
         for mood_entry in self.moods:
@@ -503,23 +505,42 @@ class MoodAnalytics:
             if isinstance(timestamp, str):
                 timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
             
+            # Track date range
+            if earliest_date is None or timestamp < earliest_date:
+                earliest_date = timestamp
+            if latest_date is None or timestamp > latest_date:
+                latest_date = timestamp
+            
             # Convert UTC to UTC-3 (Chile timezone)
             chile_time = timestamp - timedelta(hours=3)
             hour = chile_time.hour
             
             hourly_totals[hour].append(mood_value)
         
-        # Calculate averages for each hour
+        # Calculate averages and counts for each hour
         data = []
+        counts = []
         for hour in range(24):
             if hourly_totals[hour]:
                 avg = round(sum(hourly_totals[hour]) / len(hourly_totals[hour]), 2)
                 data.append(avg)
+                counts.append(len(hourly_totals[hour]))
             else:
                 data.append(4)  # Neutral mood when no data available
+                counts.append(0)
+        
+        # Format date range
+        date_range = None
+        if earliest_date and latest_date:
+            date_range = {
+                'start': earliest_date.strftime('%Y-%m-%d'),
+                'end': latest_date.strftime('%Y-%m-%d')
+            }
         
         return {
             'labels': [f"{hour:02d}:00" for hour in range(24)],
             'data': data,
+            'counts': counts,
+            'date_range': date_range,
             'period': 'Average Mood Per Hour (All Time)'
         }

@@ -4090,12 +4090,26 @@
                         
                         // Color dots based on average mood value
                         const dataValues = data.data || [];
+                        const counts = data.counts || [];
+                        
                         window.dailyChart.data.datasets[0].backgroundColor = dataValues.map(val => getMoodColorFromValue(val));
                         window.dailyChart.data.datasets[0].borderColor = '#2196f3';
                         window.dailyChart.data.datasets[0].pointBackgroundColor = dataValues.map(val => getMoodColorFromValue(val));
                         window.dailyChart.data.datasets[0].pointBorderColor = dataValues.map(val => getMoodColorFromValue(val));
-                        window.dailyChart.data.datasets[0].pointRadius = 5;
-                        window.dailyChart.data.datasets[0].pointHoverRadius = 7;
+                        
+                        // Variable dot size based on sample count (min 3, max 10)
+                        window.dailyChart.data.datasets[0].pointRadius = counts.map(count => {
+                            if (count === 0) return 2;
+                            return Math.min(10, Math.max(3, 3 + Math.log(count) * 1.5));
+                        });
+                        window.dailyChart.data.datasets[0].pointHoverRadius = counts.map(count => {
+                            if (count === 0) return 3;
+                            return Math.min(12, Math.max(5, 5 + Math.log(count) * 1.5));
+                        });
+                        
+                        // Store counts and date range for tooltips
+                        window.dailyChart.averageMoodCounts = counts;
+                        window.dailyChart.averageDateRange = data.date_range;
                         
                         // Reset scale to category for hourly labels
                         window.dailyChart.options.scales.x.type = 'category';
@@ -4106,7 +4120,7 @@
                         // Clear mood points for tooltips
                         window.dailyChart.moodPoints = null;
                         
-                        // Update tooltip for average mood display
+                        // Update tooltip for average mood display with enhanced info
                         window.dailyChart.options.plugins.tooltip = {
                             enabled: true,
                             backgroundColor: 'rgba(33, 33, 33, 0.95)',
@@ -4124,7 +4138,19 @@
                                 label: function(context) {
                                     const value = context.parsed.y;
                                     const moodName = getMoodNameFromValue(value);
-                                    return [`Average: ${value.toFixed(2)}`, `Mood: ${moodName.toUpperCase()}`];
+                                    const count = window.dailyChart.averageMoodCounts[context.dataIndex];
+                                    const lines = [
+                                        `Average: ${value.toFixed(2)}`,
+                                        `Mood: ${moodName.toUpperCase()}`,
+                                        `Entries: ${count}`
+                                    ];
+                                    
+                                    if (window.dailyChart.averageDateRange) {
+                                        const range = window.dailyChart.averageDateRange;
+                                        lines.push(`Period: ${range.start} to ${range.end}`);
+                                    }
+                                    
+                                    return lines;
                                 },
                                 labelTextColor: function(context) {
                                     const value = context.parsed.y;
