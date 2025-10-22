@@ -4088,9 +4088,12 @@
                         window.dailyChart.data.datasets[0].data = data.data || [];
                         window.dailyChart.data.datasets[0].label = 'Average Mood Per Hour (All Time)';
                         
-                        // Reset colors to default
-                        window.dailyChart.data.datasets[0].backgroundColor = '#2196f3';
+                        // Reset colors to default (use arrays to override previous colored dots)
+                        const dataLength = (data.data || []).length;
+                        window.dailyChart.data.datasets[0].backgroundColor = Array(dataLength).fill('#2196f3');
                         window.dailyChart.data.datasets[0].borderColor = '#2196f3';
+                        window.dailyChart.data.datasets[0].pointBackgroundColor = Array(dataLength).fill('#2196f3');
+                        window.dailyChart.data.datasets[0].pointBorderColor = Array(dataLength).fill('#2196f3');
                         window.dailyChart.data.datasets[0].pointRadius = 3;
                         window.dailyChart.data.datasets[0].pointHoverRadius = 5;
                         
