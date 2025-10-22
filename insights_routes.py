@@ -8,7 +8,6 @@ from flask import Blueprint, render_template, jsonify
 from flask_login import login_required, current_user
 from typing import Dict, Any
 from models import MoodEntry
-from visualization_service import MoodVisualizationService, VisualizationController
 
 insights_bp = Blueprint('insights', __name__)
 
@@ -19,9 +18,9 @@ class InsightsController:
     Handles HTTP concerns only, delegates business logic to services.
     """
     
-    def __init__(self, visualization_controller: VisualizationController):
-        """Initialize controller with visualization service dependency injection."""
-        self.visualization_controller = visualization_controller
+    def __init__(self):
+        """Initialize controller with minimal dependencies."""
+        pass
     
     def render_insights_dashboard(self, additional_context: Dict[str, Any] = None) -> str:
         """
@@ -53,19 +52,51 @@ class InsightsController:
             # Fetch user's mood data
             mood_entries = MoodEntry.query.filter_by(user_id=current_user.id).order_by(MoodEntry.date.desc()).limit(100).all()
             
-            # Convert to dict format for visualization service
-            mood_data = [
-                {
+            # Simple data processing for now
+            mood_data = []
+            mood_counts = {}
+            
+            for entry in mood_entries:
+                mood_data.append({
                     'date': entry.date.strftime('%Y-%m-%d'),
                     'mood': entry.mood,
                     'triggers': entry.triggers or '',
                     'notes': entry.notes or ''
-                }
-                for entry in mood_entries
-            ]
+                })
+                
+                # Count moods for distribution
+                mood = entry.mood.lower()
+                mood_counts[mood] = mood_counts.get(mood, 0) + 1
             
-            # Get visualization data
-            visualization_data = self.visualization_controller.get_visualization_data(mood_data)
+            # Generate simple visualization data
+            visualization_data = {
+                'mood_trend': {
+                    'chart_type': 'line',
+                    'data': {
+                        'labels': [entry['date'] for entry in mood_data[-30:]],  # Last 30 days
+                        'datasets': [{
+                            'label': 'Mood Trend',
+                            'data': [self._mood_to_value(entry['mood']) for entry in mood_data[-30:]],
+                            'borderColor': '#2196f3',
+                            'backgroundColor': 'rgba(33, 150, 243, 0.1)',
+                            'tension': 0.4,
+                            'fill': True
+                        }]
+                    }
+                },
+                'mood_distribution': {
+                    'chart_type': 'doughnut',
+                    'data': {
+                        'labels': list(mood_counts.keys()),
+                        'datasets': [{
+                            'data': list(mood_counts.values()),
+                            'backgroundColor': ['#f44336', '#ff9800', '#9e9e9e', '#4caf50', '#2196f3'],
+                            'borderWidth': 2,
+                            'borderColor': '#ffffff'
+                        }]
+                    }
+                }
+            }
             
             return {
                 'success': True,
@@ -79,11 +110,22 @@ class InsightsController:
                 'error': str(e),
                 'visualizations': {}
             }
+    
+    def _mood_to_value(self, mood: str) -> int:
+        """Convert mood string to numeric value."""
+        mood_values = {
+            'very bad': 1,
+            'bad': 2,
+            'neutral': 3,
+            'good': 4,
+            'very good': 5,
+            'well': 4,
+            'very well': 5
+        }
+        return mood_values.get(mood.lower(), 3)
 
-# Initialize services following Dependency Injection principle
-visualization_service = MoodVisualizationService()
-visualization_controller = VisualizationController(visualization_service)
-controller = InsightsController(visualization_controller)
+# Initialize controller instance
+controller = InsightsController()
 
 @insights_bp.route('/insights')
 @login_required

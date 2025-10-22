@@ -1392,7 +1392,7 @@
                 </div>
                 <div class="chart-description">
                     <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
-                        Track your mood patterns over time with daily averages
+                        Track your mood patterns over time
                     </p>
                 </div>
             </div>
@@ -1409,38 +1409,6 @@
                 <div class="chart-description">
                     <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
                         Breakdown of your mood entries by category
-                    </p>
-                </div>
-            </div>
-
-            <!-- Weekly Heatmap -->
-            <div class="md-card visualization-card full-width">
-                <div class="md-card-header">
-                    <i class="fas fa-calendar-week md-card-icon"></i>
-                    <h3 class="md-card-title title-medium">Weekly Mood Heatmap</h3>
-                </div>
-                <div class="chart-container" style="height: 250px;">
-                    <canvas id="weeklyHeatmapChart"></canvas>
-                </div>
-                <div class="chart-description">
-                    <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
-                        Visual representation of mood intensity throughout the week
-                    </p>
-                </div>
-            </div>
-
-            <!-- Trigger Correlation Chart -->
-            <div class="md-card visualization-card full-width">
-                <div class="md-card-header">
-                    <i class="fas fa-tags md-card-icon"></i>
-                    <h3 class="md-card-title title-medium">Trigger Impact Analysis</h3>
-                </div>
-                <div class="chart-container" style="height: 300px;">
-                    <canvas id="triggerCorrelationChart"></canvas>
-                </div>
-                <div class="chart-description">
-                    <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
-                        How different triggers affect your mood on average
                     </p>
                 </div>
             </div>
@@ -1547,7 +1515,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script>
         /**
-         * Enhanced Insights Visualization Manager - SOLID Principles
+         * Simplified Insights Visualization Manager
          */
         class InsightsVisualizationManager {
             constructor() {
@@ -1558,8 +1526,12 @@
             async initialize() {
                 try {
                     await this.loadVisualizationData();
-                    this.renderAllCharts();
-                    this.hideLoading();
+                    if (this.visualizationData && this.visualizationData.total_entries > 0) {
+                        this.renderAllCharts();
+                        this.hideLoading();
+                    } else {
+                        this.showEmptyState();
+                    }
                 } catch (error) {
                     console.error('Error initializing insights:', error);
                     this.showError();
@@ -1568,34 +1540,31 @@
 
             async loadVisualizationData() {
                 const response = await fetch('/api/insights/visualizations');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 if (!data.success) {
                     throw new Error(data.error || 'Failed to load visualization data');
                 }
                 
-                this.visualizationData = data.visualizations;
-                
-                if (data.total_entries === 0) {
-                    this.showEmptyState();
-                    return;
-                }
+                this.visualizationData = data;
             }
 
             renderAllCharts() {
-                if (!this.visualizationData) return;
+                if (!this.visualizationData || !this.visualizationData.visualizations) return;
 
                 this.renderMoodTrendChart();
                 this.renderMoodDistributionChart();
-                this.renderWeeklyHeatmap();
-                this.renderTriggerCorrelationChart();
             }
 
             renderMoodTrendChart() {
                 const ctx = document.getElementById('moodTrendChart');
-                if (!ctx || !this.visualizationData.mood_trend) return;
+                if (!ctx || !this.visualizationData.visualizations.mood_trend) return;
 
-                const chartData = this.visualizationData.mood_trend;
+                const chartData = this.visualizationData.visualizations.mood_trend;
                 
                 this.charts.moodTrend = new Chart(ctx, {
                     type: chartData.chart_type,
@@ -1604,7 +1573,12 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { display: true },
+                            legend: { 
+                                display: true,
+                                labels: {
+                                    color: 'var(--md-sys-color-on-surface)'
+                                }
+                            },
                             tooltip: { mode: 'index' }
                         },
                         scales: {
@@ -1616,7 +1590,8 @@
                                     stepSize: 1,
                                     color: 'var(--md-sys-color-on-surface-variant)',
                                     callback: function(value) {
-                                        return ['', 'Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][value] || value;
+                                        const labels = ['', 'Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'];
+                                        return labels[value] || value;
                                     }
                                 }
                             },
@@ -1631,9 +1606,9 @@
 
             renderMoodDistributionChart() {
                 const ctx = document.getElementById('moodDistributionChart');
-                if (!ctx || !this.visualizationData.mood_distribution) return;
+                if (!ctx || !this.visualizationData.visualizations.mood_distribution) return;
 
-                const chartData = this.visualizationData.mood_distribution;
+                const chartData = this.visualizationData.visualizations.mood_distribution;
                 
                 this.charts.moodDistribution = new Chart(ctx, {
                     type: chartData.chart_type,
@@ -1647,100 +1622,6 @@
                                 labels: {
                                     color: 'var(--md-sys-color-on-surface)',
                                     font: { family: 'Roboto, sans-serif' }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            renderWeeklyHeatmap() {
-                const ctx = document.getElementById('weeklyHeatmapChart');
-                if (!ctx || !this.visualizationData.weekly_heatmap) return;
-
-                // Simplified scatter plot for weekly mood data
-                this.charts.weeklyHeatmap = new Chart(ctx, {
-                    type: 'scatter',
-                    data: {
-                        datasets: [{
-                            label: 'Mood Intensity',
-                            data: [],
-                            backgroundColor: '#4caf50',
-                            pointRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            x: {
-                                type: 'linear',
-                                min: 0,
-                                max: 6,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function(value) {
-                                        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                                        return days[value] || '';
-                                    },
-                                    color: 'var(--md-sys-color-on-surface-variant)'
-                                },
-                                grid: { color: 'var(--md-sys-color-outline-variant)' }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                max: 5,
-                                title: {
-                                    display: true,
-                                    text: 'Mood Level',
-                                    color: 'var(--md-sys-color-on-surface-variant)'
-                                },
-                                ticks: { color: 'var(--md-sys-color-on-surface-variant)' },
-                                grid: { color: 'var(--md-sys-color-outline-variant)' }
-                            }
-                        }
-                    }
-                });
-            }
-
-            renderTriggerCorrelationChart() {
-                const ctx = document.getElementById('triggerCorrelationChart');
-                if (!ctx || !this.visualizationData.trigger_correlation) return;
-
-                const chartData = this.visualizationData.trigger_correlation;
-                
-                this.charts.triggerCorrelation = new Chart(ctx, {
-                    type: chartData.chart_type,
-                    data: chartData.data,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 5,
-                                grid: { color: 'var(--md-sys-color-outline-variant)' },
-                                ticks: { color: 'var(--md-sys-color-on-surface-variant)' },
-                                title: {
-                                    display: true,
-                                    text: 'Mood Impact',
-                                    color: 'var(--md-sys-color-on-surface-variant)'
-                                }
-                            },
-                            x: {
-                                grid: { color: 'var(--md-sys-color-outline-variant)' },
-                                ticks: {
-                                    color: 'var(--md-sys-color-on-surface-variant)',
-                                    maxRotation: 45
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Triggers',
-                                    color: 'var(--md-sys-color-on-surface-variant)'
                                 }
                             }
                         }
