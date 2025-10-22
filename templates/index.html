@@ -892,7 +892,7 @@
             box-shadow: var(--md-sys-elevation-level1);
             transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .md-card::before {
@@ -1929,12 +1929,12 @@
         }
 
         .controls-container:has(.md-date-picker) .md-date-picker {
-            width: 160px;
+            width: 220px;
             flex-shrink: 0;
         }
 
         .controls-container:has(.md-date-picker) .md-button {
-            width: 160px;
+            width: 220px;
             height: 56px;
             min-height: 56px;
             flex-shrink: 0;
@@ -1944,6 +1944,7 @@
             position: relative;
             width: 100%;
             min-height: 56px;
+            overflow: visible;
         }
 
         /* Single input controls (like date picker or single select) */
