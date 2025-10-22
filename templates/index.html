@@ -4537,13 +4537,17 @@
                 });
         }
         
-        function updateWeeklyChartNew(data) {
-            console.log('updateWeeklyChartNew called');
+        function updateWeeklyChartNew(data, retryCount = 0) {
+            console.log('updateWeeklyChartNew called, retry:', retryCount);
             console.log('window.weeklyChart exists:', !!window.weeklyChart);
             
             if (!window.weeklyChart) {
-                console.error('weeklyChart not found, waiting and retrying...');
-                setTimeout(() => updateWeeklyChartNew(data), 500);
+                if (retryCount < 10) {
+                    console.log('weeklyChart not found, waiting and retrying...');
+                    setTimeout(() => updateWeeklyChartNew(data, retryCount + 1), 500);
+                } else {
+                    console.error('weeklyChart not found after 10 retries, giving up');
+                }
                 return;
             }
             
