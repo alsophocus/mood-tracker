@@ -4757,20 +4757,6 @@
                 });
         }
 
-        function loadCurrentWeek() {
-            fetch('/weekly_patterns')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('DEBUG: Current week data:', data);
-                    
-                    if (window.weeklyChart) {
-                        safeUpdateWeeklyChart(data, 'Current Week');
-                        console.log('DEBUG: Current week chart updated');
-                    }
-                })
-                .catch(error => console.error('Error loading current week:', error));
-        }
-
         function loadWeeklyTrends() {
             const year = document.getElementById('trendsYearSelect').value;
             const month = document.getElementById('trendsMonthSelect').value;
