@@ -5368,18 +5368,36 @@
         }
         
         function updateQuickStatsCards(data) {
-            const moodEmojis = {
-                'very bad': '😫', 'bad': '😞', 'slightly bad': '😐',
-                'neutral': '😶', 'slightly well': '🙂', 'well': '😊', 'very well': '🤩'
+            const moodIcons = {
+                'very bad': 'fas fa-face-frown-open',
+                'bad': 'fas fa-face-frown',
+                'slightly bad': 'fas fa-face-meh',
+                'neutral': 'fas fa-face-meh-blank',
+                'slightly well': 'fas fa-face-smile',
+                'well': 'fas fa-face-smile-beam',
+                'very well': 'fas fa-face-grin-stars'
+            };
+            
+            const moodColors = {
+                'very bad': '#d32f2f',
+                'bad': '#ff5722',
+                'slightly bad': '#ff9800',
+                'neutral': '#9e9e9e',
+                'slightly well': '#8bc34a',
+                'well': '#4caf50',
+                'very well': '#2196f3'
             };
             
             // Today's Mood
+            const todayIconEl = document.getElementById('todayMoodIcon');
             if (data.today) {
-                document.getElementById('todayMoodIcon').textContent = moodEmojis[data.today.mood] || '⚪';
+                const iconClass = moodIcons[data.today.mood] || 'fas fa-circle';
+                const iconColor = moodColors[data.today.mood] || '#9e9e9e';
+                todayIconEl.innerHTML = `<i class="${iconClass}" style="color: ${iconColor};"></i>`;
                 document.getElementById('todayMoodName').textContent = data.today.mood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                 document.getElementById('todayMoodTime').textContent = `Last entry: ${data.today.time}`;
             } else {
-                document.getElementById('todayMoodIcon').textContent = '📝';
+                todayIconEl.innerHTML = '<i class="fas fa-pen" style="color: var(--md-sys-color-on-surface-variant);"></i>';
                 document.getElementById('todayMoodName').textContent = 'No entries yet';
                 document.getElementById('todayMoodTime').textContent = 'Add your first mood';
             }
