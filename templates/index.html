@@ -4254,9 +4254,23 @@
                         
                         console.log('Chart configured with mood points:', window.dailyChart.moodPoints);
                         
-                        // Test direct canvas mouse events
+                        // Debug canvas and check for overlays
                         const canvas = document.getElementById('dailyChart');
                         if (canvas) {
+                            console.log('Canvas found:', canvas);
+                            console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+                            console.log('Canvas style:', window.getComputedStyle(canvas));
+                            console.log('Canvas position:', canvas.getBoundingClientRect());
+                            
+                            // Check if canvas has pointer-events
+                            const style = window.getComputedStyle(canvas);
+                            console.log('Pointer events:', style.pointerEvents);
+                            console.log('Z-index:', style.zIndex);
+                            
+                            // Force pointer events
+                            canvas.style.pointerEvents = 'auto';
+                            console.log('Forced pointer-events to auto');
+                            
                             canvas.addEventListener('mousemove', function(e) {
                                 console.log('CANVAS MOUSE MOVE DETECTED at:', e.offsetX, e.offsetY);
                             });
@@ -4264,6 +4278,8 @@
                                 console.log('CANVAS CLICK DETECTED at:', e.offsetX, e.offsetY);
                             });
                             console.log('Canvas event listeners added');
+                        } else {
+                            console.error('Canvas NOT found!');
                         }
                         
                         window.dailyChart.update();
