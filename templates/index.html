@@ -3018,6 +3018,19 @@
                 
                 <div class="chart-container">
                     <canvas id="dailyChart"></canvas>
+                    <!-- Custom tooltip for FontAwesome icons -->
+                    <div id="custom-mood-tooltip" style="
+                        position: fixed;
+                        background: rgba(0, 0, 0, 0.9);
+                        color: white;
+                        padding: 8px 12px;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        pointer-events: none;
+                        z-index: 1000;
+                        display: none;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    "></div>
                 </div>
             </div>
         </div>
@@ -4131,7 +4144,7 @@
                             }
                         };
                         
-                        // Enhanced tooltips with mood icons
+                        // Enhanced tooltips (simplified for better compatibility)
                         window.dailyChart.options.plugins.tooltip = {
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             titleColor: '#ffffff',
@@ -4145,40 +4158,54 @@
                                     const point = context[0];
                                     const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
                                     if (moodPoint) {
-                                        return `${moodPoint.time} - ${moodPoint.mood}`;
+                                        return `${moodPoint.time} - ${moodPoint.mood.toUpperCase()}`;
                                     }
                                     return '';
                                 },
                                 label: function(context) {
                                     const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
                                     if (moodPoint) {
-                                        const lines = [];
-                                        lines.push(`Mood Level: ${context.parsed.y}`);
+                                        const lines = [`Mood Level: ${context.parsed.y}`];
                                         if (moodPoint.notes && moodPoint.notes.trim()) {
                                             lines.push(`Notes: ${moodPoint.notes}`);
                                         }
                                         return lines;
                                     }
                                     return `Mood Level: ${context.parsed.y}`;
-                                },
-                                beforeLabel: function(context) {
-                                    const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
-                                    if (moodPoint) {
-                                        // Add mood icon (using Unicode emoji as fallback for tooltip)
-                                        const moodEmojis = {
-                                            'very bad': '😫',
-                                            'bad': '😞',
-                                            'slightly bad': '😐',
-                                            'neutral': '😶',
-                                            'slightly well': '🙂',
-                                            'well': '😊',
-                                            'very well': '🤩'
-                                        };
-                                        const emoji = moodEmojis[moodPoint.mood] || '⚪';
-                                        return `${emoji} ${moodPoint.mood}`;
-                                    }
-                                    return '';
                                 }
+                            }
+                        };
+                        
+                        // Add custom hover events for FontAwesome icons
+                        window.dailyChart.options.onHover = function(event, activeElements) {
+                            const customTooltip = document.getElementById('custom-mood-tooltip');
+                            
+                            if (activeElements.length > 0) {
+                                const dataIndex = activeElements[0].index;
+                                const moodPoint = window.dailyChart.moodPoints[dataIndex];
+                                
+                                if (moodPoint && customTooltip) {
+                                    const iconClass = getMoodIcon(moodPoint.mood);
+                                    const color = getMoodColor(moodPoint.mood);
+                                    
+                                    customTooltip.innerHTML = `
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                            <i class="${iconClass}" style="color: ${color}; font-size: 16px;"></i>
+                                            <strong>${moodPoint.time} - ${moodPoint.mood.toUpperCase()}</strong>
+                                        </div>
+                                        <div style="font-size: 12px; opacity: 0.9;">
+                                            Mood Level: ${moodPoint.y}
+                                            ${moodPoint.notes ? `<br>Notes: ${moodPoint.notes}` : ''}
+                                        </div>
+                                    `;
+                                    
+                                    // Position tooltip near cursor
+                                    customTooltip.style.left = (event.native.clientX + 10) + 'px';
+                                    customTooltip.style.top = (event.native.clientY - 10) + 'px';
+                                    customTooltip.style.display = 'block';
+                                }
+                            } else if (customTooltip) {
+                                customTooltip.style.display = 'none';
                             }
                         };
                         
