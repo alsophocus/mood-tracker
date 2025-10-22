@@ -4232,6 +4232,14 @@
                             }
                         };
                         
+                        // Test mouse events
+                        window.dailyChart.options.onHover = function(event, activeElements) {
+                            console.log('HOVER EVENT DETECTED:', activeElements.length, 'elements');
+                            if (activeElements.length > 0) {
+                                console.log('Active element:', activeElements[0]);
+                            }
+                        };
+                        
                         // Simple hover interaction with better detection
                         window.dailyChart.options.interaction = {
                             intersect: false,
@@ -4398,20 +4406,11 @@
                 return;
             }
             
-            try {
-                // Method 1: Try normal update
-                window.weeklyChart.data.labels = data.days || data.labels || [];
-                window.weeklyChart.data.datasets[0].data = data.data || [];
-                window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
-                
-                // Force immediate update without animation
-                window.weeklyChart.update('none');
-                window.weeklyChart.render();
-                
+            // Use safe helper function
+            if (safeUpdateWeeklyChart(data, data.period || 'Weekly Patterns')) {
                 console.log('DEBUG: Chart updated successfully');
-                
-            } catch (error) {
-                console.error('DEBUG: Chart update failed, trying recreation:', error);
+            } else {
+                console.error('DEBUG: Chart update failed, trying recreation:');
                 
                 // Method 2: Destroy and recreate chart if update fails
                 try {
@@ -4497,14 +4496,7 @@
                     console.log('DEBUG: Current week data:', data);
                     
                     if (window.weeklyChart) {
-                        window.weeklyChart.data.labels = data.days || data.labels || [];
-                        window.weeklyChart.data.datasets[0].data = data.data || [];
-                        window.weeklyChart.data.datasets[0].label = 'Current Week';
-                        
-                        // Force chart to redraw completely
-                        window.weeklyChart.update('none');
-                        window.weeklyChart.render();
-                        
+                        safeUpdateWeeklyChart(data, 'Current Week');
                         console.log('DEBUG: Current week chart updated');
                     }
                 })
