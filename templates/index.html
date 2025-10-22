@@ -4092,6 +4092,25 @@
                 .catch(error => console.error('Error loading hourly average mood data:', error));
         }
 
+        // Helper function to safely update weeklyChart
+        function safeUpdateWeeklyChart(data, label) {
+            if (!window.weeklyChart) {
+                console.warn('weeklyChart not available for update');
+                return false;
+            }
+            try {
+                window.weeklyChart.data.labels = data.days || data.labels || [];
+                window.weeklyChart.data.datasets[0].data = data.data || [];
+                window.weeklyChart.data.datasets[0].label = label || 'Weekly Patterns';
+                window.weeklyChart.update('none');
+                window.weeklyChart.render();
+                return true;
+            } catch (error) {
+                console.error('Error updating weeklyChart:', error);
+                return false;
+            }
+        }
+
         // Data loading functions
         // Function to get mood icon
         function getMoodIcon(mood) {
@@ -4331,10 +4350,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (window.weeklyChart) {
-                        window.weeklyChart.data.labels = data.days || data.labels || [];
-                        window.weeklyChart.data.datasets[0].data = data.data || [];
-                        window.weeklyChart.data.datasets[0].label = data.period || 'Weekly Patterns';
-                        window.weeklyChart.update('none');
+                        safeUpdateWeeklyChart(data, data.period || 'Weekly Patterns');
                     }
                 })
                 .catch(error => console.error('Error loading weekly patterns:', error));
@@ -4345,10 +4361,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (window.weeklyChart) {
-                        window.weeklyChart.data.labels = data.days || data.labels || [];
-                        window.weeklyChart.data.datasets[0].data = data.data || [];
-                        window.weeklyChart.data.datasets[0].label = 'Current Week';
-                        window.weeklyChart.update('none');
+                        safeUpdateWeeklyChart(data, 'Current Week');
                     }
                 })
                 .catch(error => console.error('Error loading current week:', error));
