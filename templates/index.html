@@ -4244,6 +4244,43 @@
                             }
                         };
                         
+                        // Enhanced tooltips with mood info
+                        window.dailyChart.options.plugins.tooltip = {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#333333',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    const point = context[0];
+                                    if (window.dailyChart.moodPoints && point.dataIndex < window.dailyChart.moodPoints.length) {
+                                        const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
+                                        if (moodPoint) {
+                                            return `${moodPoint.time} - ${moodPoint.mood.toUpperCase()}`;
+                                        }
+                                    }
+                                    return 'Mood Entry';
+                                },
+                                label: function(context) {
+                                    if (window.dailyChart.moodPoints && context.dataIndex < window.dailyChart.moodPoints.length) {
+                                        const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
+                                        if (moodPoint) {
+                                            const lines = [`Mood Level: ${context.parsed.y}`];
+                                            if (moodPoint.notes && moodPoint.notes.trim()) {
+                                                lines.push(`Notes: ${moodPoint.notes}`);
+                                            }
+                                            return lines;
+                                        }
+                                    }
+                                    return `Mood Level: ${context.parsed.y}`;
+                                }
+                            }
+                        };
+                        
                         // Test mouse events
                         window.dailyChart.options.onHover = function(event, activeElements) {
                             console.log('HOVER EVENT DETECTED:', activeElements.length, 'elements');
