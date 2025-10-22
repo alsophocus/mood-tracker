@@ -760,20 +760,90 @@
                        border-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized) !important;
         }
 
+        /* Enhanced Insights Visualization Styles - Material Design 3 */
+        .insights-visualization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .visualization-card {
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .visualization-card:hover {
+            box-shadow: var(--md-sys-elevation-level2);
+            transform: translateY(-2px);
+        }
+
+        .visualization-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-container {
+            position: relative;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container-lowest);
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin: 16px 0;
+        }
+
+        .chart-description {
+            padding: 0 24px 16px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            margin-top: 16px;
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--md-sys-color-outline-variant);
+            border-top: 4px solid var(--md-sys-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        /* Responsive Design for Visualizations */
         @media (max-width: 768px) {
-            .container {
+            .insights-visualization-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .chart-container {
+                height: 250px !important;
                 padding: 12px;
             }
             
-            .insights-grid {
-                grid-template-columns: 1fr;
+            .visualization-card.full-width {
+                grid-column: 1;
             }
-            
-            .top-app-bar-content {
-                flex-direction: column;
-                gap: 12px;
-                min-height: auto;
-                padding: 8px 0;
+        }
+
+        @media (max-width: 480px) {
+            .chart-container {
+                height: 200px !important;
+                padding: 8px;
             }
         }
 
@@ -1294,19 +1364,117 @@
     <div class="main-content">
         <div class="container">
 
-        <div class="md-card">
-            <div class="md-card-header">
-                <i class="fas fa-chart-line md-card-icon"></i>
-                <h2 class="md-card-title">Your Mood Patterns</h2>
-            </div>
-            <div id="insights-content" class="loading">
-                <p>Loading insights...</p>
+        <!-- Enhanced Insights Header -->
+        <div class="section">
+            <div class="md-card">
+                <div class="md-card-header">
+                    <i class="fas fa-brain md-card-icon"></i>
+                    <h2 class="md-card-title headline-medium">Advanced Mood Insights</h2>
+                </div>
+                <div class="md-card-content">
+                    <p class="body-large" style="color: var(--md-sys-color-on-surface-variant);">
+                        Discover patterns in your mood data with advanced visualizations and analytics.
+                    </p>
+                </div>
             </div>
         </div>
 
-        <div class="insights-grid" id="insights-grid" style="display: none;">
-            <!-- Insights will be loaded here -->
+        <!-- Visualization Grid -->
+        <div class="insights-visualization-grid">
+            <!-- Mood Trend Chart -->
+            <div class="md-card visualization-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-line md-card-icon"></i>
+                    <h3 class="md-card-title title-medium">Mood Trend Analysis</h3>
+                </div>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="moodTrendChart"></canvas>
+                </div>
+                <div class="chart-description">
+                    <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
+                        Track your mood patterns over time with daily averages
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mood Distribution Chart -->
+            <div class="md-card visualization-card">
+                <div class="md-card-header">
+                    <i class="fas fa-chart-pie md-card-icon"></i>
+                    <h3 class="md-card-title title-medium">Mood Distribution</h3>
+                </div>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="moodDistributionChart"></canvas>
+                </div>
+                <div class="chart-description">
+                    <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
+                        Breakdown of your mood entries by category
+                    </p>
+                </div>
+            </div>
+
+            <!-- Weekly Heatmap -->
+            <div class="md-card visualization-card full-width">
+                <div class="md-card-header">
+                    <i class="fas fa-calendar-week md-card-icon"></i>
+                    <h3 class="md-card-title title-medium">Weekly Mood Heatmap</h3>
+                </div>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="weeklyHeatmapChart"></canvas>
+                </div>
+                <div class="chart-description">
+                    <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
+                        Visual representation of mood intensity throughout the week
+                    </p>
+                </div>
+            </div>
+
+            <!-- Trigger Correlation Chart -->
+            <div class="md-card visualization-card full-width">
+                <div class="md-card-header">
+                    <i class="fas fa-tags md-card-icon"></i>
+                    <h3 class="md-card-title title-medium">Trigger Impact Analysis</h3>
+                </div>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="triggerCorrelationChart"></canvas>
+                </div>
+                <div class="chart-description">
+                    <p class="body-medium" style="color: var(--md-sys-color-on-surface-variant);">
+                        How different triggers affect your mood on average
+                    </p>
+                </div>
+            </div>
         </div>
+
+        <!-- Loading State -->
+        <div id="insights-loading" class="loading-container">
+            <div class="md-card">
+                <div class="md-card-content" style="text-align: center; padding: 48px;">
+                    <div class="loading-spinner"></div>
+                    <p class="body-large" style="margin-top: 16px; color: var(--md-sys-color-on-surface-variant);">
+                        Loading your mood insights...
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="insights-empty" class="empty-state" style="display: none;">
+            <div class="md-card">
+                <div class="md-card-content" style="text-align: center; padding: 48px;">
+                    <i class="fas fa-chart-line" style="font-size: 64px; color: var(--md-sys-color-outline); margin-bottom: 16px;"></i>
+                    <h3 class="headline-small" style="margin-bottom: 8px;">No Insights Available</h3>
+                    <p class="body-large" style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">
+                        Log more mood entries to see detailed patterns and insights.
+                    </p>
+                    <a href="/" class="md-button md-button-filled">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Mood Entry</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         </div>
     </div>
 
@@ -1375,38 +1543,274 @@
             }, 300);
         }
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script>
+        /**
+         * Enhanced Insights Visualization Manager - SOLID Principles
+         */
+        class InsightsVisualizationManager {
+            constructor() {
+                this.charts = {};
+                this.visualizationData = null;
+            }
+
+            async initialize() {
+                try {
+                    await this.loadVisualizationData();
+                    this.renderAllCharts();
+                    this.hideLoading();
+                } catch (error) {
+                    console.error('Error initializing insights:', error);
+                    this.showError();
+                }
+            }
+
+            async loadVisualizationData() {
+                const response = await fetch('/api/insights/visualizations');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load visualization data');
+                }
+                
+                this.visualizationData = data.visualizations;
+                
+                if (data.total_entries === 0) {
+                    this.showEmptyState();
+                    return;
+                }
+            }
+
+            renderAllCharts() {
+                if (!this.visualizationData) return;
+
+                this.renderMoodTrendChart();
+                this.renderMoodDistributionChart();
+                this.renderWeeklyHeatmap();
+                this.renderTriggerCorrelationChart();
+            }
+
+            renderMoodTrendChart() {
+                const ctx = document.getElementById('moodTrendChart');
+                if (!ctx || !this.visualizationData.mood_trend) return;
+
+                const chartData = this.visualizationData.mood_trend;
+                
+                this.charts.moodTrend = new Chart(ctx, {
+                    type: chartData.chart_type,
+                    data: chartData.data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true },
+                            tooltip: { mode: 'index' }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 5,
+                                grid: { color: 'var(--md-sys-color-outline-variant)' },
+                                ticks: {
+                                    stepSize: 1,
+                                    color: 'var(--md-sys-color-on-surface-variant)',
+                                    callback: function(value) {
+                                        return ['', 'Very Bad', 'Bad', 'Neutral', 'Good', 'Very Good'][value] || value;
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { color: 'var(--md-sys-color-outline-variant)' },
+                                ticks: { color: 'var(--md-sys-color-on-surface-variant)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderMoodDistributionChart() {
+                const ctx = document.getElementById('moodDistributionChart');
+                if (!ctx || !this.visualizationData.mood_distribution) return;
+
+                const chartData = this.visualizationData.mood_distribution;
+                
+                this.charts.moodDistribution = new Chart(ctx, {
+                    type: chartData.chart_type,
+                    data: chartData.data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: 'var(--md-sys-color-on-surface)',
+                                    font: { family: 'Roboto, sans-serif' }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderWeeklyHeatmap() {
+                const ctx = document.getElementById('weeklyHeatmapChart');
+                if (!ctx || !this.visualizationData.weekly_heatmap) return;
+
+                // Simplified scatter plot for weekly mood data
+                this.charts.weeklyHeatmap = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Mood Intensity',
+                            data: [],
+                            backgroundColor: '#4caf50',
+                            pointRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                min: 0,
+                                max: 6,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                                        return days[value] || '';
+                                    },
+                                    color: 'var(--md-sys-color-on-surface-variant)'
+                                },
+                                grid: { color: 'var(--md-sys-color-outline-variant)' }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                max: 5,
+                                title: {
+                                    display: true,
+                                    text: 'Mood Level',
+                                    color: 'var(--md-sys-color-on-surface-variant)'
+                                },
+                                ticks: { color: 'var(--md-sys-color-on-surface-variant)' },
+                                grid: { color: 'var(--md-sys-color-outline-variant)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderTriggerCorrelationChart() {
+                const ctx = document.getElementById('triggerCorrelationChart');
+                if (!ctx || !this.visualizationData.trigger_correlation) return;
+
+                const chartData = this.visualizationData.trigger_correlation;
+                
+                this.charts.triggerCorrelation = new Chart(ctx, {
+                    type: chartData.chart_type,
+                    data: chartData.data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 5,
+                                grid: { color: 'var(--md-sys-color-outline-variant)' },
+                                ticks: { color: 'var(--md-sys-color-on-surface-variant)' },
+                                title: {
+                                    display: true,
+                                    text: 'Mood Impact',
+                                    color: 'var(--md-sys-color-on-surface-variant)'
+                                }
+                            },
+                            x: {
+                                grid: { color: 'var(--md-sys-color-outline-variant)' },
+                                ticks: {
+                                    color: 'var(--md-sys-color-on-surface-variant)',
+                                    maxRotation: 45
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Triggers',
+                                    color: 'var(--md-sys-color-on-surface-variant)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            hideLoading() {
+                const loadingElement = document.getElementById('insights-loading');
+                if (loadingElement) loadingElement.style.display = 'none';
+            }
+
+            showEmptyState() {
+                this.hideLoading();
+                const emptyElement = document.getElementById('insights-empty');
+                if (emptyElement) emptyElement.style.display = 'flex';
+            }
+
+            showError() {
+                this.hideLoading();
+                const loadingElement = document.getElementById('insights-loading');
+                if (loadingElement) {
+                    loadingElement.innerHTML = `
+                        <div class="md-card">
+                            <div class="md-card-content" style="text-align: center; padding: 48px;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: var(--md-sys-color-error); margin-bottom: 16px;"></i>
+                                <h3 class="headline-small" style="margin-bottom: 8px;">Error Loading Insights</h3>
+                                <p class="body-large" style="color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px;">
+                                    Unable to load your mood insights. Please try again later.
+                                </p>
+                                <button class="md-button md-button-filled" onclick="location.reload()">
+                                    <i class="fas fa-refresh"></i>
+                                    <span>Retry</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    loadingElement.style.display = 'flex';
+                }
+            }
+
+            destroy() {
+                Object.values(this.charts).forEach(chart => {
+                    if (chart && typeof chart.destroy === 'function') {
+                        chart.destroy();
+                    }
+                });
+                this.charts = {};
+            }
+        }
+
+        // Initialize visualization manager
+        let visualizationManager;
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize theme
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.body.setAttribute('data-theme', savedTheme);
-            loadInsights();
+            
+            // Initialize visualizations
+            visualizationManager = new InsightsVisualizationManager();
+            visualizationManager.initialize();
         });
 
-        function loadInsights() {
-            fetch('/api/insights')
-                .then(response => response.json())
-                .then(data => {
-                    const content = document.getElementById('insights-content');
-                    const grid = document.getElementById('insights-grid');
-                    
-                    if (data.success && data.insights) {
-                        content.style.display = 'none';
-                        grid.style.display = 'grid';
-                        
-                        grid.innerHTML = data.insights.map(insight => `
-                            <div class="insight-card">
-                                <h3>${insight.title}</h3>
-                                <p>${insight.description}</p>
-                            </div>
-                        `).join('');
-                    } else {
-                        content.innerHTML = '<p>No insights available yet. Log more moods to see patterns!</p>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading insights:', error);
-                    document.getElementById('insights-content').innerHTML = '<p>Error loading insights. Please try again later.</p>';
-                });
-        }
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (visualizationManager) {
+                visualizationManager.destroy();
+            }
+        });
     </script>
 
     <!-- Mobile Navigation Overlay and Drawer -->
