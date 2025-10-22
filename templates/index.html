@@ -1736,13 +1736,14 @@
             position: absolute;
             top: 100%;
             left: 0;
-            right: 0;
+            width: 280px;
             background-color: var(--md-sys-color-surface-container);
             border: 1px solid var(--md-sys-color-outline-variant);
             border-radius: var(--md-sys-shape-corner-medium);
             box-shadow: var(--md-sys-elevation-level2);
             z-index: 1000;
             margin-top: 4px;
+            padding: 16px;
             opacity: 0;
             transform: translateY(-8px);
             visibility: hidden;
@@ -2975,18 +2976,7 @@
                             <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
                             <i class="fas fa-calendar-alt md-date-icon"></i>
                         </div>
-                        <div class="md-date-calendar" id="dailyDateCalendar" style="
-                            position: absolute;
-                            top: 100%;
-                            left: 0;
-                            width: 280px;
-                            z-index: 1000;
-                            background: var(--md-sys-color-surface-container);
-                            border-radius: 12px;
-                            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-                            padding: 16px;
-                            display: none;
-                        ">
+                        <div class="md-date-calendar" id="dailyDateCalendar">
                             <div class="md-calendar-header">
                                 <button type="button" class="md-calendar-nav" id="prevYear">
                                     <i class="fas fa-angle-double-left"></i>
