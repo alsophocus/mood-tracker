@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from datetime import datetime
 from database import db
-from analytics import MoodAnalytics
+from analytics import MoodAnalytics, MOOD_VALUES
 from pdf_export import PDFExporter
 
 main_bp = Blueprint('main', __name__)
