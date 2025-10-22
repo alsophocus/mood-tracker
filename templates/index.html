@@ -3031,18 +3031,6 @@
                         display: none;
                         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                     "></div>
-                    <!-- DEBUG: Deployment test indicator -->
-                    <div id="debug-deployment-test" style="
-                        position: fixed;
-                        top: 10px;
-                        right: 10px;
-                        background: red;
-                        color: white;
-                        padding: 4px 8px;
-                        font-size: 12px;
-                        z-index: 9999;
-                        border-radius: 4px;
-                    ">DEBUG: v2025.10.22.12.33</div>
                 </div>
             </div>
         </div>
@@ -4244,23 +4232,41 @@
                             }
                         };
                         
-                        // Enhanced tooltips with mood info
+                        // Enhanced tooltips with beautiful styling
                         window.dailyChart.options.plugins.tooltip = {
                             enabled: true,
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            backgroundColor: 'rgba(33, 33, 33, 0.95)',
                             titleColor: '#ffffff',
-                            bodyColor: '#ffffff',
-                            borderColor: '#333333',
+                            bodyColor: '#e0e0e0',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
                             borderWidth: 1,
-                            cornerRadius: 8,
+                            cornerRadius: 12,
                             displayColors: false,
+                            padding: 16,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold',
+                                family: 'Roboto, sans-serif'
+                            },
+                            bodyFont: {
+                                size: 13,
+                                family: 'Roboto, sans-serif'
+                            },
+                            titleMarginBottom: 8,
+                            bodySpacing: 4,
                             callbacks: {
                                 title: function(context) {
                                     const point = context[0];
                                     if (window.dailyChart.moodPoints && point.dataIndex < window.dailyChart.moodPoints.length) {
                                         const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
                                         if (moodPoint) {
-                                            return `${moodPoint.time} - ${moodPoint.mood.toUpperCase()}`;
+                                            // Add mood emoji for visual appeal
+                                            const moodEmojis = {
+                                                'very bad': '😫', 'bad': '😞', 'slightly bad': '😐',
+                                                'neutral': '😶', 'slightly well': '🙂', 'well': '😊', 'very well': '🤩'
+                                            };
+                                            const emoji = moodEmojis[moodPoint.mood] || '⚪';
+                                            return `${emoji} ${moodPoint.time} - ${moodPoint.mood.toUpperCase()}`;
                                         }
                                     }
                                     return 'Mood Entry';
@@ -4269,14 +4275,14 @@
                                     if (window.dailyChart.moodPoints && context.dataIndex < window.dailyChart.moodPoints.length) {
                                         const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
                                         if (moodPoint) {
-                                            const lines = [`Mood Level: ${context.parsed.y}`];
+                                            const lines = [`📊 Mood Level: ${context.parsed.y}/7`];
                                             if (moodPoint.notes && moodPoint.notes.trim()) {
-                                                lines.push(`Notes: ${moodPoint.notes}`);
+                                                lines.push(`💭 ${moodPoint.notes}`);
                                             }
                                             return lines;
                                         }
                                     }
-                                    return `Mood Level: ${context.parsed.y}`;
+                                    return `📊 Mood Level: ${context.parsed.y}/7`;
                                 }
                             }
                         };
@@ -4303,56 +4309,14 @@
                         
                         console.log('Chart configured with mood points:', window.dailyChart.moodPoints);
                         
-                        // Debug canvas and check for overlays
+                        // Fix container blocking mouse events
                         const canvas = document.getElementById('dailyChart');
                         if (canvas) {
-                            console.log('Canvas found:', canvas);
-                            console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
-                            console.log('Canvas style:', window.getComputedStyle(canvas));
-                            console.log('Canvas position:', canvas.getBoundingClientRect());
-                            
-                            // Check if canvas has pointer-events
-                            const style = window.getComputedStyle(canvas);
-                            console.log('Pointer events:', style.pointerEvents);
-                            console.log('Z-index:', style.zIndex);
-                            
-                            // Fix container blocking mouse events
                             const container = canvas.parentElement;
                             if (container && container.classList.contains('chart-container')) {
                                 container.style.pointerEvents = 'none';
                                 canvas.style.pointerEvents = 'auto';
-                                console.log('Fixed container pointer events - container: none, canvas: auto');
                             }
-                            
-                            // Force pointer events
-                            canvas.style.pointerEvents = 'auto';
-                            console.log('Forced pointer-events to auto');
-                            
-                            // Test what element is at the canvas position
-                            const rect = canvas.getBoundingClientRect();
-                            const centerX = rect.left + rect.width / 2;
-                            const centerY = rect.top + rect.height / 2;
-                            const elementAtCenter = document.elementFromPoint(centerX, centerY);
-                            console.log('Element at canvas center:', elementAtCenter);
-                            console.log('Is it the canvas?', elementAtCenter === canvas);
-                            
-                            // Add global mouse move listener to see what's happening
-                            document.addEventListener('mousemove', function(e) {
-                                const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
-                                if (elementUnderMouse === canvas) {
-                                    console.log('GLOBAL: Mouse over canvas at:', e.clientX, e.clientY);
-                                }
-                            });
-                            
-                            canvas.addEventListener('mousemove', function(e) {
-                                console.log('CANVAS MOUSE MOVE DETECTED at:', e.offsetX, e.offsetY);
-                            });
-                            canvas.addEventListener('click', function(e) {
-                                console.log('CANVAS CLICK DETECTED at:', e.offsetX, e.offsetY);
-                            });
-                            console.log('Canvas event listeners added');
-                        } else {
-                            console.error('Canvas NOT found!');
                         }
                         
                         window.dailyChart.update();
