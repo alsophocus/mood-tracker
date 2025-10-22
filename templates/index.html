@@ -4066,9 +4066,26 @@
                 .then(response => response.json())
                 .then(data => {
                     if (window.dailyChart) {
+                        // Reset chart to standard format for average data
                         window.dailyChart.data.labels = data.labels || [];
                         window.dailyChart.data.datasets[0].data = data.data || [];
                         window.dailyChart.data.datasets[0].label = 'Average Mood Per Hour (All Time)';
+                        
+                        // Reset colors to default
+                        window.dailyChart.data.datasets[0].backgroundColor = '#2196f3';
+                        window.dailyChart.data.datasets[0].borderColor = '#2196f3';
+                        window.dailyChart.data.datasets[0].pointRadius = 3;
+                        window.dailyChart.data.datasets[0].pointHoverRadius = 5;
+                        
+                        // Reset scale to category for hourly labels
+                        window.dailyChart.options.scales.x.type = 'category';
+                        delete window.dailyChart.options.scales.x.min;
+                        delete window.dailyChart.options.scales.x.max;
+                        delete window.dailyChart.options.scales.x.ticks;
+                        
+                        // Clear mood points for tooltips
+                        window.dailyChart.moodPoints = null;
+                        
                         window.dailyChart.update();
                     }
                 })
@@ -4144,8 +4161,9 @@
                             }
                         };
                         
-                        // Enhanced tooltips (simplified for better compatibility)
+                        // Enhanced tooltips with working hover
                         window.dailyChart.options.plugins.tooltip = {
+                            enabled: true,
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             titleColor: '#ffffff',
                             bodyColor: '#ffffff',
@@ -4176,37 +4194,10 @@
                             }
                         };
                         
-                        // Add custom hover events for FontAwesome icons
-                        window.dailyChart.options.onHover = function(event, activeElements) {
-                            const customTooltip = document.getElementById('custom-mood-tooltip');
-                            
-                            if (activeElements.length > 0) {
-                                const dataIndex = activeElements[0].index;
-                                const moodPoint = window.dailyChart.moodPoints[dataIndex];
-                                
-                                if (moodPoint && customTooltip) {
-                                    const iconClass = getMoodIcon(moodPoint.mood);
-                                    const color = getMoodColor(moodPoint.mood);
-                                    
-                                    customTooltip.innerHTML = `
-                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                            <i class="${iconClass}" style="color: ${color}; font-size: 16px;"></i>
-                                            <strong>${moodPoint.time} - ${moodPoint.mood.toUpperCase()}</strong>
-                                        </div>
-                                        <div style="font-size: 12px; opacity: 0.9;">
-                                            Mood Level: ${moodPoint.y}
-                                            ${moodPoint.notes ? `<br>Notes: ${moodPoint.notes}` : ''}
-                                        </div>
-                                    `;
-                                    
-                                    // Position tooltip near cursor
-                                    customTooltip.style.left = (event.native.clientX + 10) + 'px';
-                                    customTooltip.style.top = (event.native.clientY - 10) + 'px';
-                                    customTooltip.style.display = 'block';
-                                }
-                            } else if (customTooltip) {
-                                customTooltip.style.display = 'none';
-                            }
+                        // Simple hover interaction
+                        window.dailyChart.options.interaction = {
+                            intersect: false,
+                            mode: 'point'
                         };
                         
                         window.dailyChart.update();
