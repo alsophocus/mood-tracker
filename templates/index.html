@@ -4279,6 +4279,14 @@
                             console.log('Pointer events:', style.pointerEvents);
                             console.log('Z-index:', style.zIndex);
                             
+                            // Fix container blocking mouse events
+                            const container = canvas.parentElement;
+                            if (container && container.classList.contains('chart-container')) {
+                                container.style.pointerEvents = 'none';
+                                canvas.style.pointerEvents = 'auto';
+                                console.log('Fixed container pointer events - container: none, canvas: auto');
+                            }
+                            
                             // Force pointer events
                             canvas.style.pointerEvents = 'auto';
                             console.log('Forced pointer-events to auto');
