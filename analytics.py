@@ -526,7 +526,7 @@ class MoodAnalytics:
                 data.append(avg)
                 counts.append(len(hourly_totals[hour]))
             else:
-                data.append(4)  # Neutral mood when no data available
+                data.append(None)  # null for hours with no data (creates gaps in line)
                 counts.append(0)
         
         # Format date range

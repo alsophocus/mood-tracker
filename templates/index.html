@@ -4092,20 +4092,29 @@
                         const dataValues = data.data || [];
                         const counts = data.counts || [];
                         
-                        window.dailyChart.data.datasets[0].backgroundColor = dataValues.map(val => getMoodColorFromValue(val));
+                        window.dailyChart.data.datasets[0].backgroundColor = dataValues.map(val => 
+                            val !== null ? getMoodColorFromValue(val) : 'transparent'
+                        );
                         window.dailyChart.data.datasets[0].borderColor = '#2196f3';
-                        window.dailyChart.data.datasets[0].pointBackgroundColor = dataValues.map(val => getMoodColorFromValue(val));
-                        window.dailyChart.data.datasets[0].pointBorderColor = dataValues.map(val => getMoodColorFromValue(val));
+                        window.dailyChart.data.datasets[0].pointBackgroundColor = dataValues.map(val => 
+                            val !== null ? getMoodColorFromValue(val) : 'transparent'
+                        );
+                        window.dailyChart.data.datasets[0].pointBorderColor = dataValues.map(val => 
+                            val !== null ? getMoodColorFromValue(val) : 'transparent'
+                        );
                         
                         // Variable dot size based on sample count (min 3, max 10)
                         window.dailyChart.data.datasets[0].pointRadius = counts.map(count => {
-                            if (count === 0) return 2;
+                            if (count === 0) return 0;  // No dot for no data
                             return Math.min(10, Math.max(3, 3 + Math.log(count) * 1.5));
                         });
                         window.dailyChart.data.datasets[0].pointHoverRadius = counts.map(count => {
-                            if (count === 0) return 3;
+                            if (count === 0) return 0;  // No hover for no data
                             return Math.min(12, Math.max(5, 5 + Math.log(count) * 1.5));
                         });
+                        
+                        // Enable spanGaps: false to create breaks in line where data is null
+                        window.dailyChart.data.datasets[0].spanGaps = false;
                         
                         // Store counts and date range for tooltips
                         window.dailyChart.averageMoodCounts = counts;
