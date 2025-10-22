@@ -4161,7 +4161,7 @@
                             }
                         };
                         
-                        // Enhanced tooltips with working hover
+                        // Enhanced tooltips with debugging
                         window.dailyChart.options.plugins.tooltip = {
                             enabled: true,
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -4173,23 +4173,42 @@
                             displayColors: false,
                             callbacks: {
                                 title: function(context) {
-                                    const point = context[0];
-                                    const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
-                                    if (moodPoint) {
-                                        return `${moodPoint.time} - ${moodPoint.mood.toUpperCase()}`;
+                                    try {
+                                        console.log('Tooltip context:', context);
+                                        const point = context[0];
+                                        console.log('Point:', point);
+                                        console.log('Mood points available:', window.dailyChart.moodPoints);
+                                        
+                                        if (window.dailyChart.moodPoints && point.dataIndex < window.dailyChart.moodPoints.length) {
+                                            const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
+                                            console.log('Selected mood point:', moodPoint);
+                                            if (moodPoint) {
+                                                return `${moodPoint.time} - ${moodPoint.mood.toUpperCase()}`;
+                                            }
+                                        }
+                                        return `Point ${point.dataIndex}`;
+                                    } catch (error) {
+                                        console.error('Tooltip title error:', error);
+                                        return 'Mood Entry';
                                     }
-                                    return '';
                                 },
                                 label: function(context) {
-                                    const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
-                                    if (moodPoint) {
-                                        const lines = [`Mood Level: ${context.parsed.y}`];
-                                        if (moodPoint.notes && moodPoint.notes.trim()) {
-                                            lines.push(`Notes: ${moodPoint.notes}`);
+                                    try {
+                                        if (window.dailyChart.moodPoints && context.dataIndex < window.dailyChart.moodPoints.length) {
+                                            const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
+                                            if (moodPoint) {
+                                                const lines = [`Mood Level: ${context.parsed.y}`];
+                                                if (moodPoint.notes && moodPoint.notes.trim()) {
+                                                    lines.push(`Notes: ${moodPoint.notes}`);
+                                                }
+                                                return lines;
+                                            }
                                         }
-                                        return lines;
+                                        return `Mood Level: ${context.parsed.y}`;
+                                    } catch (error) {
+                                        console.error('Tooltip label error:', error);
+                                        return `Mood Level: ${context.parsed.y}`;
                                     }
-                                    return `Mood Level: ${context.parsed.y}`;
                                 }
                             }
                         };
