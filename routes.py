@@ -510,6 +510,102 @@ def get_mood_distribution():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@main_bp.route('/api/analytics/quick-stats')
+@login_required
+def get_quick_stats():
+    """Get quick stats for dashboard cards"""
+    from datetime import datetime, timedelta, date
+    
+    try:
+        moods = db.get_user_moods(current_user.id)
+        
+        if not moods:
+            return jsonify({
+                'success': True,
+                'today': None,
+                'week': None,
+                'trend': None
+            })
+        
+        analytics = MoodAnalytics(moods)
+        today = date.today()
+        
+        # Today's mood
+        today_moods = [m for m in moods if m.get('date') == today or (hasattr(m.get('date'), 'date') and m.get('date').date() == today)]
+        today_stat = None
+        if today_moods:
+            latest = today_moods[0]
+            today_stat = {
+                'mood': latest.get('mood'),
+                'value': MOOD_VALUES[latest.get('mood')],
+                'time': latest.get('timestamp').strftime('%H:%M') if latest.get('timestamp') else 'Unknown'
+            }
+        
+        # This week average
+        week_start = today - timedelta(days=today.weekday())
+        week_moods = []
+        for m in moods:
+            m_date = m.get('date')
+            if isinstance(m_date, str):
+                m_date = datetime.strptime(m_date, '%Y-%m-%d').date()
+            elif hasattr(m_date, 'date'):
+                m_date = m_date.date()
+            
+            if week_start <= m_date <= today:
+                week_moods.append(MOOD_VALUES[m.get('mood')])
+        
+        week_stat = None
+        if week_moods:
+            avg = sum(week_moods) / len(week_moods)
+            week_stat = {
+                'average': round(avg, 2),
+                'count': len(week_moods)
+            }
+        
+        # Trend (compare this week to last week)
+        last_week_start = week_start - timedelta(days=7)
+        last_week_end = week_start - timedelta(days=1)
+        last_week_moods = []
+        
+        for m in moods:
+            m_date = m.get('date')
+            if isinstance(m_date, str):
+                m_date = datetime.strptime(m_date, '%Y-%m-%d').date()
+            elif hasattr(m_date, 'date'):
+                m_date = m_date.date()
+            
+            if last_week_start <= m_date <= last_week_end:
+                last_week_moods.append(MOOD_VALUES[m.get('mood')])
+        
+        trend_stat = None
+        if week_moods and last_week_moods:
+            this_week_avg = sum(week_moods) / len(week_moods)
+            last_week_avg = sum(last_week_moods) / len(last_week_moods)
+            change = this_week_avg - last_week_avg
+            
+            if abs(change) < 0.3:
+                direction = 'stable'
+            elif change > 0:
+                direction = 'up'
+            else:
+                direction = 'down'
+            
+            trend_stat = {
+                'direction': direction,
+                'change': round(change, 2)
+            }
+        
+        return jsonify({
+            'success': True,
+            'today': today_stat,
+            'week': week_stat,
+            'trend': trend_stat
+        })
+        
+    except Exception as e:
+        print(f"Error in quick stats: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
+
 @main_bp.route('/api/analytics/quick-insights')
 @login_required
 def get_quick_insights():

@@ -2928,6 +2928,35 @@
             </div>
         </div>
 
+        <!-- Quick Stats Cards -->
+        <div class="section">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <!-- Today's Mood Card -->
+                <div class="md-card" style="text-align: center; padding: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 8px;" id="todayMoodIcon">-</div>
+                    <div class="title-medium" style="margin-bottom: 4px;">Today's Mood</div>
+                    <div class="body-large" style="color: var(--md-sys-color-primary); font-weight: 500;" id="todayMoodName">-</div>
+                    <div class="label-small" style="color: var(--md-sys-color-on-surface-variant); margin-top: 4px;" id="todayMoodTime">-</div>
+                </div>
+                
+                <!-- This Week Card -->
+                <div class="md-card" style="text-align: center; padding: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 8px; font-weight: 600; color: var(--md-sys-color-primary);" id="weekAverage">-</div>
+                    <div class="title-medium" style="margin-bottom: 4px;">This Week</div>
+                    <div class="body-medium" style="color: var(--md-sys-color-on-surface-variant);" id="weekMoodName">-</div>
+                    <div class="label-small" style="color: var(--md-sys-color-on-surface-variant); margin-top: 4px;" id="weekEntries">-</div>
+                </div>
+                
+                <!-- Trend Card -->
+                <div class="md-card" style="text-align: center; padding: 24px;">
+                    <div style="font-size: 48px; margin-bottom: 8px;" id="trendIcon">-</div>
+                    <div class="title-medium" style="margin-bottom: 4px;">Trend</div>
+                    <div class="body-large" style="font-weight: 500;" id="trendDirection">-</div>
+                    <div class="label-small" style="margin-top: 4px;" id="trendChange">-</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Quick Insights Card -->
         <div class="section">
             <div class="md-card">
@@ -5263,6 +5292,7 @@
                             loadCurrentMonthTrends();
                             loadCurrentYearTrends();
                             loadAverageMoodData();
+                            loadQuickStats();
                             refreshRecentMoods();
                         } else {
                             showSnackbar(data.error || 'Error saving mood - please try again.');
@@ -5323,6 +5353,71 @@
             loadTopTriggers();
             loadWeekComparison();
             loadQuickInsights();
+            loadQuickStats();
+        }
+        
+        function loadQuickStats() {
+            fetch('/api/analytics/quick-stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateQuickStatsCards(data);
+                    }
+                })
+                .catch(error => console.error('Error loading quick stats:', error));
+        }
+        
+        function updateQuickStatsCards(data) {
+            const moodEmojis = {
+                'very bad': '😫', 'bad': '😞', 'slightly bad': '😐',
+                'neutral': '😶', 'slightly well': '🙂', 'well': '😊', 'very well': '🤩'
+            };
+            
+            // Today's Mood
+            if (data.today) {
+                document.getElementById('todayMoodIcon').textContent = moodEmojis[data.today.mood] || '⚪';
+                document.getElementById('todayMoodName').textContent = data.today.mood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                document.getElementById('todayMoodTime').textContent = `Last entry: ${data.today.time}`;
+            } else {
+                document.getElementById('todayMoodIcon').textContent = '📝';
+                document.getElementById('todayMoodName').textContent = 'No entries yet';
+                document.getElementById('todayMoodTime').textContent = 'Add your first mood';
+            }
+            
+            // This Week
+            if (data.week) {
+                document.getElementById('weekAverage').textContent = data.week.average.toFixed(1);
+                const weekMoodName = getMoodNameFromValue(data.week.average);
+                document.getElementById('weekMoodName').textContent = weekMoodName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                document.getElementById('weekEntries').textContent = `${data.week.count} ${data.week.count === 1 ? 'entry' : 'entries'}`;
+            } else {
+                document.getElementById('weekAverage').textContent = '-';
+                document.getElementById('weekMoodName').textContent = 'No data';
+                document.getElementById('weekEntries').textContent = 'Start tracking';
+            }
+            
+            // Trend
+            if (data.trend) {
+                const trendIcons = { 'up': '↗️', 'down': '↘️', 'stable': '→' };
+                const trendColors = {
+                    'up': 'var(--md-sys-color-tertiary)',
+                    'down': 'var(--md-sys-color-error)',
+                    'stable': 'var(--md-sys-color-on-surface-variant)'
+                };
+                const trendLabels = { 'up': 'Improving', 'down': 'Declining', 'stable': 'Stable' };
+                
+                document.getElementById('trendIcon').textContent = trendIcons[data.trend.direction];
+                document.getElementById('trendDirection').textContent = trendLabels[data.trend.direction];
+                document.getElementById('trendDirection').style.color = trendColors[data.trend.direction];
+                
+                const changeText = data.trend.change > 0 ? `+${data.trend.change.toFixed(2)}` : data.trend.change.toFixed(2);
+                document.getElementById('trendChange').textContent = `${changeText} vs last week`;
+                document.getElementById('trendChange').style.color = trendColors[data.trend.direction];
+            } else {
+                document.getElementById('trendIcon').textContent = '📊';
+                document.getElementById('trendDirection').textContent = 'Not enough data';
+                document.getElementById('trendChange').textContent = 'Need 2 weeks';
+            }
         }
         
         function loadMoodDistribution() {
