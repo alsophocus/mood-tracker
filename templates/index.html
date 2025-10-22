@@ -1918,7 +1918,9 @@
         .controls-container:has(.md-date-picker) {
             display: flex;
             gap: 16px;
-            align-items: stretch;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 24px;
         }
 
         .controls-container:has(.md-date-picker) .md-select-container {
@@ -1926,12 +1928,15 @@
         }
 
         .controls-container:has(.md-date-picker) .md-date-picker {
-            flex: 2;
+            width: 200px;
+            flex-shrink: 0;
         }
 
         .controls-container:has(.md-date-picker) .md-button {
-            flex: 1;
+            width: 160px;
+            height: 56px;
             min-height: 56px;
+            flex-shrink: 0;
         }
 
         .md-date-picker {
@@ -2962,28 +2967,12 @@
                 <div class="md-card-header">
                     <i class="fas fa-clock md-card-icon"></i>
                     <h2 class="md-card-title headline-small">Daily Patterns</h2>
-                    <!-- Layout test indicator -->
-                    <span style="background: green; color: white; padding: 2px 6px; font-size: 10px; border-radius: 3px; margin-left: 8px;">LAYOUT v2</span>
                 </div>
                 
-                <div class="controls-container" style="
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    gap: 16px;
-                    margin-bottom: 24px;
-                ">
-                    <div class="md-date-picker" style="
-                        position: relative;
-                        width: 200px;
-                    ">
-                        <div class="md-date-field" style="
-                            width: 100%;
-                        ">
-                            <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly style="
-                                width: 100%;
-                                box-sizing: border-box;
-                            ">
+                <div class="controls-container">
+                    <div class="md-date-picker">
+                        <div class="md-date-field">
+                            <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
                             <i class="fas fa-calendar-alt md-date-icon"></i>
                         </div>
                         <div class="md-date-calendar" id="dailyDateCalendar" style="
@@ -3027,12 +3016,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="md-button md-button-filled" onclick="loadAverageMoodData()" id="averageMoodBtn" style="
-                        height: 56px; 
-                        min-height: 56px;
-                        width: 160px;
-                        flex-shrink: 0;
-                    ">
+                    <button class="md-button md-button-filled" onclick="loadAverageMoodData()" id="averageMoodBtn">
                         <i class="fas fa-chart-line"></i>
                         <span>Average Mood</span>
                     </button>
@@ -4203,58 +4187,6 @@
                             stepSize: 1,
                             callback: function(value) {
                                 return value.toString().padStart(2, '0') + ':00';
-                            }
-                        };
-                        
-                        // Enhanced tooltips with debugging
-                        window.dailyChart.options.plugins.tooltip = {
-                            enabled: true,
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#ffffff',
-                            borderColor: '#333333',
-                            borderWidth: 1,
-                            cornerRadius: 8,
-                            displayColors: false,
-                            callbacks: {
-                                title: function(context) {
-                                    try {
-                                        console.log('Tooltip context:', context);
-                                        const point = context[0];
-                                        console.log('Point:', point);
-                                        console.log('Mood points available:', window.dailyChart.moodPoints);
-                                        
-                                        if (window.dailyChart.moodPoints && point.dataIndex < window.dailyChart.moodPoints.length) {
-                                            const moodPoint = window.dailyChart.moodPoints[point.dataIndex];
-                                            console.log('Selected mood point:', moodPoint);
-                                            if (moodPoint) {
-                                                return `${moodPoint.time} - ${moodPoint.mood.toUpperCase()}`;
-                                            }
-                                        }
-                                        return `Point ${point.dataIndex}`;
-                                    } catch (error) {
-                                        console.error('Tooltip title error:', error);
-                                        return 'Mood Entry';
-                                    }
-                                },
-                                label: function(context) {
-                                    try {
-                                        if (window.dailyChart.moodPoints && context.dataIndex < window.dailyChart.moodPoints.length) {
-                                            const moodPoint = window.dailyChart.moodPoints[context.dataIndex];
-                                            if (moodPoint) {
-                                                const lines = [`Mood Level: ${context.parsed.y}`];
-                                                if (moodPoint.notes && moodPoint.notes.trim()) {
-                                                    lines.push(`Notes: ${moodPoint.notes}`);
-                                                }
-                                                return lines;
-                                            }
-                                        }
-                                        return `Mood Level: ${context.parsed.y}`;
-                                    } catch (error) {
-                                        console.error('Tooltip label error:', error);
-                                        return `Mood Level: ${context.parsed.y}`;
-                                    }
-                                }
                             }
                         };
                         
