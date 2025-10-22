@@ -4538,7 +4538,7 @@
         }
         
         function updateWeeklyChartNew(data) {
-            console.log('updateWeeklyChartNew called with:', data);
+            console.log('updateWeeklyChartNew called');
             console.log('window.weeklyChart exists:', !!window.weeklyChart);
             
             if (!window.weeklyChart) {
@@ -4546,6 +4546,8 @@
                 setTimeout(() => updateWeeklyChartNew(data), 500);
                 return;
             }
+            
+            console.log('Updating chart with data:', data);
             
             const dataValues = data.data || [];
             const counts = data.counts || [];
