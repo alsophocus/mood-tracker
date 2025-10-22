@@ -314,6 +314,7 @@
 
         .section {
             margin-bottom: 24px;
+            overflow: visible;
         }
 
         /* Material Design 3 Top App Bar */
@@ -1735,24 +1736,24 @@
         .md-date-calendar {
             position: absolute;
             top: 100%;
-            left: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
             width: 320px;
             background-color: var(--md-sys-color-surface-container);
             border: 1px solid var(--md-sys-color-outline-variant);
             border-radius: var(--md-sys-shape-corner-medium);
             box-shadow: var(--md-sys-elevation-level2);
-            z-index: 1000;
+            z-index: 9999;
             margin-top: 4px;
             padding: 16px;
             opacity: 0;
-            transform: translateY(-8px);
             visibility: hidden;
             transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized-decelerate);
         }
 
         .md-date-calendar.open {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateX(-50%) translateY(0);
             visibility: visible;
         }
 
@@ -3615,9 +3616,9 @@
                     daysContainer.appendChild(dayElement);
                 }
                 
-                // Add next month's leading days
+                // Add next month's leading days (limit to 5 rows = 35 cells)
                 const totalCells = daysContainer.children.length;
-                const remainingCells = 42 - totalCells; // 6 rows × 7 days
+                const remainingCells = 35 - totalCells; // 5 rows × 7 days
                 for (let day = 1; day <= remainingCells && day <= 14; day++) {
                     const dayElement = this.createDayElement(day, true);
                     daysContainer.appendChild(dayElement);
