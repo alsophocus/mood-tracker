@@ -4213,12 +4213,19 @@
                             }
                         };
                         
-                        // Simple hover interaction
+                        // Simple hover interaction with better detection
                         window.dailyChart.options.interaction = {
                             intersect: false,
-                            mode: 'point'
+                            mode: 'nearest'
                         };
                         
+                        // Ensure hover is enabled
+                        window.dailyChart.options.hover = {
+                            mode: 'nearest',
+                            intersect: false
+                        };
+                        
+                        console.log('Chart configured with mood points:', window.dailyChart.moodPoints);
                         window.dailyChart.update();
                     } else if (window.dailyChart) {
                         // Fallback to regular hourly data
@@ -4259,7 +4266,8 @@
         
         function initializeLegacyWeeklyChart() {
             const weeklyCtx = document.getElementById('weeklyChart');
-            if (weeklyCtx) {
+            if (weeklyCtx && !window.weeklyChart) {
+                // Only create if it doesn't exist
                 window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
                     type: 'line',
                     data: {
@@ -4399,7 +4407,8 @@
                     }
                     
                     const weeklyCtx = document.getElementById('weeklyChart');
-                    if (weeklyCtx) {
+                    if (weeklyCtx && !window.weeklyChart) {
+                        // Only create if it doesn't exist
                         window.weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
                             type: 'line',
                             data: {
