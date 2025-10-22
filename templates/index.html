@@ -4283,6 +4283,22 @@
                             canvas.style.pointerEvents = 'auto';
                             console.log('Forced pointer-events to auto');
                             
+                            // Test what element is at the canvas position
+                            const rect = canvas.getBoundingClientRect();
+                            const centerX = rect.left + rect.width / 2;
+                            const centerY = rect.top + rect.height / 2;
+                            const elementAtCenter = document.elementFromPoint(centerX, centerY);
+                            console.log('Element at canvas center:', elementAtCenter);
+                            console.log('Is it the canvas?', elementAtCenter === canvas);
+                            
+                            // Add global mouse move listener to see what's happening
+                            document.addEventListener('mousemove', function(e) {
+                                const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+                                if (elementUnderMouse === canvas) {
+                                    console.log('GLOBAL: Mouse over canvas at:', e.clientX, e.clientY);
+                                }
+                            });
+                            
                             canvas.addEventListener('mousemove', function(e) {
                                 console.log('CANVAS MOUSE MOVE DETECTED at:', e.offsetX, e.offsetY);
                             });
