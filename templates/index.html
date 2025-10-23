@@ -5762,7 +5762,7 @@
                     if (data.success && data.insights.length > 0) {
                         container.innerHTML = data.insights.map(insight => `
                             <div class="insight-item">
-                                <i class="fas ${insight.icon}"></i>
+                                <i class="material-symbols-outlined">${insight.icon}</i>
                                 <span>${insight.text}</span>
                             </div>
                         `).join('');
