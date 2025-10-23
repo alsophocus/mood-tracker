@@ -278,31 +278,31 @@
                 <div style="text-align: right;">
                     <span style="opacity: 0.9; margin-right: 15px;">Welcome, {{ user.name }}!</span>
                     <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 20px; transition: all 0.3s ease;">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                        <i class="material-symbols-outlined">logout</i> Logout
                     </a>
                 </div>
             </div>
-            <h1><i class="fas fa-heart"></i> Mood Tracker</h1>
+            <h1><i class="material-symbols-outlined">favorite</i> Mood Tracker</h1>
             <p>Track your emotional journey with beautiful insights</p>
         </div>
         
         <!-- System Status Dashboard -->
         <div class="dashboard">
             <div class="card system-status">
-                <h3><i class="fas fa-server"></i> System Status</h3>
+                <h3><i class="material-symbols-outlined">dns</i> System Status</h3>
                 <div class="status-grid">
                     <div class="status-item">
-                        <div class="status-icon"><i class="fas fa-database"></i></div>
+                        <div class="status-icon"><i class="material-symbols-outlined">storage</i></div>
                         <div>Database</div>
                         <div id="db-status" class="status-icon status-checking"></div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="status-icon"><i class="material-symbols-outlined">trending_up</i></div>
                         <div>Analytics</div>
                         <div id="analytics-status" class="status-icon status-checking"></div>
                     </div>
                     <div class="status-item">
-                        <div class="status-icon"><i class="fas fa-cloud"></i></div>
+                        <div class="status-icon"><i class="material-symbols-outlined">cloud</i></div>
                         <div>Service</div>
                         <div id="service-status">Online</div>
                     </div>
@@ -312,7 +312,7 @@
         
         <!-- MAIN MOOD SELECTION BLOCK -->
         <div class="main-mood-section">
-            <h2><i class="fas fa-smile"></i> How are you feeling today?</h2>
+            <h2><i class="material-symbols-outlined">sentiment_satisfied</i> How are you feeling today?</h2>
             <form method="POST" action="/save_mood">
                 <div class="mood-buttons">
                     <button type="submit" name="mood" value="super sad" class="mood-btn super-sad">
@@ -333,7 +333,7 @@
                 </div>
                 <textarea name="notes" placeholder="Optional: Add notes about your day..." class="notes-field" rows="3"></textarea>
                 <button type="button" class="export-btn" onclick="window.location.href='/export_pdf'">
-                    <i class="fas fa-download"></i> Export PDF
+                    <i class="material-symbols-outlined">download</i> Export PDF
                 </button>
             </form>
         </div>
@@ -342,23 +342,23 @@
         <div class="dashboard">
             <div class="card">
                 <div class="analytics-number">{{ analytics.current_streak }}</div>
-                <div class="analytics-label"><i class="fas fa-fire"></i> Current Good Days</div>
+                <div class="analytics-label"><i class="material-symbols-outlined">local_fire_department</i> Current Good Days</div>
             </div>
             
             <div class="card">
                 <div class="analytics-number">{{ analytics.best_streak }}</div>
-                <div class="analytics-label"><i class="fas fa-trophy"></i> Best Streak Record</div>
+                <div class="analytics-label"><i class="material-symbols-outlined">trophy</i> Best Streak Record</div>
             </div>
             
             <div class="card">
                 <div class="analytics-number">{{ moods|length }}</div>
-                <div class="analytics-label"><i class="fas fa-calendar"></i> Total Days</div>
+                <div class="analytics-label"><i class="material-symbols-outlined">calendar_month</i> Total Days</div>
             </div>
         </div>
         
         <!-- Weekly Patterns -->
         <div class="section">
-            <h3 class="section-title"><i class="fas fa-calendar-week"></i> Weekly Patterns</h3>
+            <h3 class="section-title"><i class="material-symbols-outlined">date_range</i> Weekly Patterns</h3>
             <div class="weekly-patterns">
                 {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
                     {% if analytics.weekly_patterns[day] %}
@@ -373,7 +373,7 @@
         
         <!-- Daily Patterns -->
         <div class="section">
-            <h3 class="section-title"><i class="fas fa-clock"></i> Daily Patterns</h3>
+            <h3 class="section-title"><i class="material-symbols-outlined">schedule</i> Daily Patterns</h3>
             <div class="chart-container">
                 <canvas id="dailyChart" width="400" height="200"></canvas>
             </div>
@@ -381,13 +381,13 @@
         
         <!-- Monthly Chart -->
         <div class="section chart-container">
-            <h3 class="section-title"><i class="fas fa-chart-line"></i> Monthly Mood Trends</h3>
+            <h3 class="section-title"><i class="material-symbols-outlined">trending_up</i> Monthly Mood Trends</h3>
             <canvas id="moodChart"></canvas>
         </div>
         
         <!-- Mood History -->
         <div class="section">
-            <h3 class="section-title"><i class="fas fa-history"></i> Mood History</h3>
+            <h3 class="section-title"><i class="material-symbols-outlined">history</i> Mood History</h3>
             {% for date, mood, notes in moods %}
             <div class="entry">
                 <strong>{{ date }}</strong>: {{ mood }}

@@ -6,8 +6,20 @@
     <title>Goals - Mood Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <style>
+        .material-symbols-outlined,
+        .material-symbols-rounded,
+        .material-symbols-sharp {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24;
+        }
+
         :root {
             --md-sys-color-primary: #6750a4;
             --md-sys-color-on-primary: #ffffff;
@@ -1239,7 +1251,7 @@
     <header class="top-app-bar desktop-header">
         <div class="top-app-bar-content">
             <a href="/" class="app-bar-title" style="text-decoration: none; color: inherit;">
-                <i class="fas fa-brain"></i>
+                <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </a>
             <div class="app-bar-actions">
@@ -1252,7 +1264,7 @@
                     <button class="user-menu-button" onclick="toggleUserMenu()" aria-label="User menu">
                         <div class="user-avatar">{{ user.name[0].upper() if user.name else 'U' }}</div>
                         <span>{{ user.name }}</span>
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="material-symbols-outlined">expand_more</i>
                     </button>
                     <div class="user-menu-dropdown" id="userMenuDropdown">
                         <div class="user-menu-header">
@@ -1261,7 +1273,7 @@
                         </div>
                         <div class="user-menu-items">
                             <button class="user-menu-item destructive" onclick="window.location.href='/logout'">
-                                <i class="fas fa-sign-out-alt"></i>
+                                <i class="material-symbols-outlined">logout</i>
                                 <span>Sign out</span>
                             </button>
                         </div>
@@ -1274,15 +1286,15 @@
     <!-- Navigation Rail -->
     <nav class="navigation-rail desktop-header">
         <a href="/insights" class="navigation-rail-item" data-page="insights">
-            <i class="fas fa-chart-line"></i>
+            <i class="material-symbols-outlined">trending_up</i>
             <span>Insights</span>
         </a>
         <a href="/features/goals" class="navigation-rail-item active" data-page="goals">
-            <i class="fas fa-bullseye"></i>
+            <i class="material-symbols-outlined">target</i>
             <span>Goals</span>
         </a>
         <a href="/features/analytics" class="navigation-rail-item" data-page="analytics">
-            <i class="fas fa-chart-bar"></i>
+            <i class="material-symbols-outlined">bar_chart</i>
             <span>Analytics</span>
         </a>
     </nav>
@@ -1291,10 +1303,10 @@
     <header class="mobile-header">
         <div class="mobile-header-content">
             <button class="mobile-hamburger" onclick="toggleMobileNav()" aria-label="Open navigation menu">
-                <i class="fas fa-bars"></i>
+                <i class="material-symbols-outlined">menu</i>
             </button>
             <a href="/" class="mobile-title" style="text-decoration: none; color: inherit;">
-                <i class="fas fa-brain"></i>
+                <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </a>
             <div class="mobile-actions">
@@ -1327,7 +1339,7 @@
     </div>
 
     <button class="md-fab" onclick="showAddGoalDialog()" aria-label="Add new goal">
-        <i class="fas fa-plus"></i>
+        <i class="material-symbols-outlined">add</i>
     </button>
 
     <script>
@@ -1447,11 +1459,11 @@
     <div class="mobile-nav-drawer" id="mobileNavDrawer">
         <div class="mobile-nav-header">
             <a href="/" class="mobile-nav-title" style="text-decoration: none; color: inherit;">
-                <i class="fas fa-brain"></i>
+                <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </a>
             <button class="logout-button" onclick="window.location.href='/logout'" aria-label="Sign out">
-                <i class="fas fa-sign-out-alt"></i>
+                <i class="material-symbols-outlined">logout</i>
             </button>
         </div>
         <div class="mobile-nav-user-section">
@@ -1464,15 +1476,15 @@
         </div>
         <div class="mobile-nav-items">
             <a href="/insights" class="mobile-nav-item">
-                <i class="fas fa-chart-line"></i>
+                <i class="material-symbols-outlined">trending_up</i>
                 <span>Insights</span>
             </a>
             <a href="/features/goals" class="mobile-nav-item">
-                <i class="fas fa-bullseye"></i>
+                <i class="material-symbols-outlined">target</i>
                 <span>Goals</span>
             </a>
             <a href="/features/analytics" class="mobile-nav-item">
-                <i class="fas fa-chart-bar"></i>
+                <i class="material-symbols-outlined">bar_chart</i>
                 <span>Analytics</span>
             </a>
         </div>
