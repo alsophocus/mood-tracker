@@ -49,26 +49,47 @@ class PDFExporter:
         return buffer
     
     def _create_md3_header(self):
-        """Create Material Design 3 styled header"""
+        """Create enhanced Material Design 3 header with professional branding"""
         header_elements = []
         
-        # Main title with MD3 Display Large typography
-        title_text = "🧠 Mood Analytics Report"
-        title = Paragraph(title_text, self.typography['display_large'])
+        # Professional header with branding
+        user_name = self.user.name if self.user and self.user.name else "User"
+        generation_date = datetime.now().strftime('%B %d, %Y')
+        generation_time = datetime.now().strftime('%H:%M')
+        
+        # Main title with enhanced styling
+        title_html = f"""
+        <para align="center" spaceAfter="12">
+        <font size="48" color="{MD3_COLORS['primary']}"><b>🧠 Mood Analytics</b></font><br/>
+        <font size="24" color="{MD3_COLORS['on_surface']}"><b>Professional Report</b></font>
+        </para>
+        """
+        title = Paragraph(title_html, self.typography['display_large'])
         header_elements.append(title)
         
-        # Subtitle with user info and generation date
-        user_name = self.user.name if self.user and self.user.name else "User"
-        generation_date = datetime.now().strftime('%B %d, %Y at %H:%M')
-        
-        subtitle_text = f"""
-        <font color="{MD3_COLORS['primary']}"><b>Generated for:</b></font> {user_name}<br/>
-        <font color="{MD3_COLORS['on_surface_variant']}"><b>Report Date:</b></font> {generation_date}
+        # Professional metadata card
+        metadata_html = f"""
+        <table width="100%" style="background-color: {MD3_COLORS['surface_container']}; border-radius: 12px;">
+        <tr>
+        <td width="50%" align="left" valign="top">
+        <font color="{MD3_COLORS['primary']}" size="12"><b>Report Details</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="11">Generated for: <b>{user_name}</b></font><br/>
+        <font color="{MD3_COLORS['on_surface_variant']}" size="10">Report Date: {generation_date}</font><br/>
+        <font color="{MD3_COLORS['on_surface_variant']}" size="10">Generated at: {generation_time}</font>
+        </td>
+        <td width="50%" align="right" valign="top">
+        <font color="{MD3_COLORS['secondary']}" size="12"><b>Analytics Summary</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="11">Total Entries: <b>{len(self.moods)}</b></font><br/>
+        <font color="{MD3_COLORS['on_surface_variant']}" size="10">Period: Last 30 days</font><br/>
+        <font color="{MD3_COLORS['on_surface_variant']}" size="10">Format: Material Design 3</font>
+        </td>
+        </tr>
+        </table>
         """
         
-        subtitle = Paragraph(subtitle_text, self.typography['body_large'])
-        header_elements.append(subtitle)
-        header_elements.append(Spacer(1, 20))
+        metadata = Paragraph(metadata_html, self.typography['body_medium'])
+        header_elements.append(metadata)
+        header_elements.append(Spacer(1, 24))
         
         return header_elements
     
@@ -248,7 +269,7 @@ class PDFExporter:
         return insights[:3]  # Limit to 3 insights
     
     def _create_md3_mood_distribution_chart(self):
-        """Create mood distribution pie chart with Material Design 3 colors"""
+        """Create mood distribution pie chart with enhanced MD3 styling"""
         try:
             from datetime import datetime, timedelta
             from collections import Counter
@@ -258,7 +279,6 @@ class PDFExporter:
             recent_moods = []
             for mood in self.moods:
                 mood_date = mood['date']
-                # Handle both string and date objects
                 if isinstance(mood_date, str):
                     mood_date = datetime.fromisoformat(mood_date).date()
                 elif hasattr(mood_date, 'date'):
@@ -273,16 +293,15 @@ class PDFExporter:
             # Count mood occurrences
             mood_counts = Counter(mood['mood'] for mood in recent_moods)
             
-            # MD3 color palette for moods
-            md3_mood_colors = self.md3.get_chart_colors()
+            # Enhanced MD3 color palette for moods
             mood_color_map = {
-                'very bad': '#BA1A1A',     # Error
-                'bad': '#FF5722',          # Error variant
+                'very bad': '#BA1A1A',     # MD3 Error
+                'bad': '#D32F2F',          # Error variant
                 'slightly bad': '#FF9800', # Warning
-                'neutral': '#79747E',      # Outline
+                'neutral': '#79747E',      # MD3 Outline
                 'slightly well': '#8BC34A', # Success variant
                 'well': '#4CAF50',         # Success
-                'very well': '#6750A4'     # Primary
+                'very well': '#6750A4'     # MD3 Primary
             }
             
             # Prepare data
@@ -290,21 +309,37 @@ class PDFExporter:
             counts = list(mood_counts.values())
             colors = [mood_color_map.get(mood, '#79747E') for mood in moods]
             
-            # Create pie chart with MD3 styling
-            fig, ax = plt.subplots(figsize=(8, 6), facecolor='#FFFBFE')  # MD3 surface
-            wedges, texts, autotexts = ax.pie(counts, labels=[mood.title() for mood in moods], 
-                                            colors=colors, autopct='%1.1f%%', startangle=90,
-                                            textprops={'fontsize': 11, 'color': '#1C1B1F'})
+            # Create enhanced pie chart
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), facecolor='#FFFBFE')
             
-            # MD3 styling
-            ax.set_title('Mood Distribution (Last 30 Days)', 
-                        fontsize=16, fontweight='bold', color='#6750A4', pad=20)
+            # Main pie chart
+            wedges, texts, autotexts = ax1.pie(counts, labels=None, colors=colors, 
+                                              autopct='%1.1f%%', startangle=90,
+                                              textprops={'fontsize': 10, 'color': 'white', 'weight': 'bold'},
+                                              wedgeprops={'edgecolor': 'white', 'linewidth': 2})
             
-            # Style percentage text
-            for autotext in autotexts:
-                autotext.set_color('white')
-                autotext.set_fontweight('bold')
-                autotext.set_fontsize(10)
+            ax1.set_title('Mood Distribution\n(Last 30 Days)', 
+                         fontsize=16, fontweight='bold', color='#6750A4', pad=20)
+            
+            # Enhanced legend
+            ax2.axis('off')
+            legend_y = 0.9
+            ax2.text(0.1, 0.95, 'Legend', fontsize=14, fontweight='bold', color='#6750A4')
+            
+            for mood, count, color in zip(moods, counts, colors):
+                percentage = (count / sum(counts)) * 100
+                # Create colored square
+                ax2.add_patch(plt.Rectangle((0.1, legend_y-0.05), 0.08, 0.08, 
+                                          facecolor=color, edgecolor='white', linewidth=1))
+                # Add text
+                ax2.text(0.25, legend_y, f'{mood.title()}', fontsize=11, 
+                        color='#1C1B1F', va='center')
+                ax2.text(0.7, legend_y, f'{count} ({percentage:.1f}%)', fontsize=10, 
+                        color='#49454F', va='center')
+                legend_y -= 0.12
+            
+            ax2.set_xlim(0, 1)
+            ax2.set_ylim(0, 1)
             
             plt.tight_layout()
             
@@ -318,35 +353,73 @@ class PDFExporter:
             return None
     
     def _create_md3_weekly_chart(self):
-        """Create weekly patterns chart with Material Design 3 styling"""
+        """Create enhanced weekly patterns chart with trend analysis"""
         try:
             weekly_data = self.analytics.get_weekly_patterns()
             
-            fig, ax = plt.subplots(figsize=(8, 4), facecolor='#FFFBFE')  # MD3 surface
+            fig, ax = plt.subplots(figsize=(10, 5), facecolor='#FFFBFE')
             
-            # MD3 primary color for the line
+            # Enhanced styling
             primary_color = '#6750A4'
-            ax.plot(weekly_data['labels'], weekly_data['data'], 
-                   marker='o', linewidth=3, markersize=8, 
-                   color=primary_color, markerfacecolor=primary_color, 
-                   markeredgecolor='white', markeredgewidth=2)
+            data_points = weekly_data['data']
+            labels = weekly_data['labels']
             
-            # MD3 primary container for fill
-            ax.fill_between(weekly_data['labels'], weekly_data['data'], 
-                           alpha=0.2, color=primary_color)
+            # Main line with enhanced styling
+            line = ax.plot(labels, data_points, marker='o', linewidth=4, markersize=10, 
+                          color=primary_color, markerfacecolor=primary_color, 
+                          markeredgecolor='white', markeredgewidth=3, zorder=3)
             
+            # Fill area with gradient effect
+            ax.fill_between(labels, data_points, alpha=0.15, color=primary_color, zorder=1)
+            
+            # Add trend annotations
+            max_mood = max(data_points)
+            min_mood = min(data_points)
+            max_day = labels[data_points.index(max_mood)]
+            min_day = labels[data_points.index(min_mood)]
+            
+            # Highlight best and worst days
+            ax.scatter([max_day], [max_mood], color='#4CAF50', s=150, 
+                      marker='^', edgecolor='white', linewidth=2, zorder=4, label='Best Day')
+            ax.scatter([min_day], [min_mood], color='#FF5722', s=150, 
+                      marker='v', edgecolor='white', linewidth=2, zorder=4, label='Needs Attention')
+            
+            # Add annotations
+            ax.annotate(f'Peak: {max_mood:.1f}', xy=(max_day, max_mood), 
+                       xytext=(10, 20), textcoords='offset points',
+                       bbox=dict(boxstyle='round,pad=0.3', facecolor='#4CAF50', alpha=0.8),
+                       arrowprops=dict(arrowstyle='->', color='#4CAF50'),
+                       fontsize=9, color='white', weight='bold')
+            
+            # Chart styling
             ax.set_ylim(1, 7)
-            ax.set_ylabel('Average Mood', fontsize=12, color='#1C1B1F')  # MD3 on-surface
-            ax.set_title('Weekly Patterns', fontsize=16, fontweight='bold', 
-                        color=primary_color, pad=20)
+            ax.set_ylabel('Average Mood', fontsize=12, color='#1C1B1F', weight='bold')
+            ax.set_title('Weekly Mood Patterns', fontsize=16, fontweight='bold', 
+                        color=primary_color, pad=25)
             
-            # MD3 grid styling
-            ax.grid(True, alpha=0.2, color='#79747E')  # MD3 outline
-            ax.set_facecolor('#F3EDF7')  # MD3 surface-container
+            # Enhanced grid
+            ax.grid(True, alpha=0.3, color='#79747E', linestyle='--', linewidth=0.8)
+            ax.set_facecolor('#F8F9FA')
             
-            # MD3 text styling
-            ax.tick_params(colors='#49454F')  # MD3 on-surface-variant
-            plt.xticks(rotation=45, fontsize=10)
+            # Mood level indicators
+            mood_levels = ['Very Bad', 'Bad', 'Slightly Bad', 'Neutral', 'Slightly Well', 'Well', 'Very Well']
+            for i, level in enumerate(mood_levels, 1):
+                ax.axhline(y=i, color='#E0E0E0', linestyle=':', alpha=0.5, zorder=0)
+                ax.text(len(labels)-0.5, i, level, fontsize=8, color='#666', 
+                       ha='left', va='center', alpha=0.7)
+            
+            # Style axes
+            ax.tick_params(colors='#49454F', labelsize=10)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_color('#CAB6CF')
+            ax.spines['bottom'].set_color('#CAB6CF')
+            
+            # Add legend
+            ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True,
+                     facecolor='white', edgecolor='#CAB6CF')
+            
+            plt.xticks(rotation=45, ha='right')
             plt.tight_layout()
             
             chart_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
@@ -485,16 +558,29 @@ class PDFExporter:
         return story
     
     def _create_md3_footer(self):
-        """Create Material Design 3 styled footer"""
-        footer_text = f"""
-        <font color="{MD3_COLORS['on_surface_variant']}" size="10">
-        Generated by Mood Tracker • {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br/>
-        Material Design 3 • Professional Analytics Report
+        """Create enhanced Material Design 3 footer with professional branding"""
+        footer_html = f"""
+        <table width="100%" style="border-top: 2px solid {MD3_COLORS['outline_variant']};">
+        <tr>
+        <td width="33%" align="left">
+        <font color="{MD3_COLORS['primary']}" size="10"><b>🧠 Mood Tracker</b></font><br/>
+        <font color="{MD3_COLORS['on_surface_variant']}" size="8">Professional Analytics Platform</font>
+        </td>
+        <td width="34%" align="center">
+        <font color="{MD3_COLORS['on_surface_variant']}" size="9">
+        Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br/>
+        Material Design 3 • Premium Report
         </font>
+        </td>
+        <td width="33%" align="right">
+        <font color="{MD3_COLORS['secondary']}" size="9"><b>Confidential</b></font><br/>
+        <font color="{MD3_COLORS['on_surface_variant']}" size="8">Personal Analytics Report</font>
+        </td>
+        </tr>
+        </table>
         """
         
-        footer_para = Paragraph(footer_text, self.typography['body_medium'])
-        footer_para.alignment = TA_CENTER
+        footer_para = Paragraph(footer_html, self.typography['body_medium'])
         
         return [
             Spacer(1, 30),
