@@ -2527,7 +2527,7 @@
             box-shadow: var(--md-sys-elevation-level1);
         }
 
-        .trend-indicator .material-icons {
+        .trend-indicator .fas {
             font-size: 20px;
         }
 
@@ -5075,7 +5075,7 @@
             
             trendContainer.innerHTML = `
                 <div class="trend-indicator ${direction.direction}" style="background-color: ${direction.color}20; color: ${direction.color};">
-                    <i class="material-icons">${direction.icon}</i>
+                    <i class="${direction.icon}"></i>
                     <span>${direction.description}</span>
                     <span class="trend-percentage">${slopePercentage > 0 ? '+' : ''}${slopePercentage}%</span>
                 </div>
