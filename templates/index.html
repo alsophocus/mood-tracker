@@ -3095,7 +3095,7 @@
                                 <span>Anxiety</span>
                             </div>
                         </div>
-                        <input type=</i>hidden" name="triggers" id="selected-triggers">
+                        <input type="hidden" name="triggers" id="selected-triggers">
                     </div>
                     
                     <div class="md-text-field">
@@ -3105,7 +3105,7 @@
                         </label>
                     </div>
                     
-                    <button type=</i>submit" class="md-button md-button-filled">
+                    <button type="submit" class="md-button md-button-filled">
                         <i class="material-symbols-outlined">save</i>
                         <span>Save Mood</span>
                     </button>
@@ -3248,7 +3248,7 @@
                         <i class="material-symbols-outlined">chevron_left</i>
                         <span>Previous</span>
                     </button>
-                    <div id=</i>weekRangeDisplay" style="font-size: 16px; font-weight: 500; min-width: 200px; text-align: center; color: var(--md-sys-color-on-surface);">
+                    <div id="weekRangeDisplay" style="font-size: 16px; font-weight: 500; min-width: 200px; text-align: center; color: var(--md-sys-color-on-surface);">>
                         Loading...
                     </div>
                     <button class="md-button md-button-outlined" onclick="navigateWeek(1)" style="min-width: 120px;">
@@ -3282,14 +3282,14 @@
                                 <button type="button" class="md-calendar-nav" id="prevYear">
                                     <i class="material-symbols-outlined">keyboard_double_arrow_left</i>
                                 </button>
-                                <button type=</i>button" class="md-calendar-nav" id="prevMonth">
+                                <button type="button" class="md-calendar-nav" id="prevMonth">
                                     <i class="material-symbols-outlined">chevron_left</i>
                                 </button>
                                 <div class="md-calendar-title" id="calendarTitle"></div>
                                 <button type="button" class="md-calendar-nav" id="nextMonth">
                                     <i class="material-symbols-outlined">chevron_right</i>
                                 </button>
-                                <button type=</i>button" class="md-calendar-nav" id="nextYear">
+                                <button type="button" class="md-calendar-nav" id="nextYear">
                                     <i class="material-symbols-outlined">keyboard_double_arrow_right</i>
                                 </button>
                             </div>
@@ -4933,36 +4933,6 @@
             }
         }
 
-        function loadWeeklyPatterns() {
-            const year = document.getElementById('yearSelect').value;
-            const month = document.getElementById('monthSelect').value;
-            const week = document.getElementById('weekSelect').value;
-            
-            console.log('DEBUG: Loading weekly patterns', {year, month, week});
-            
-            if (!year || !month || !week) {
-                showSnackbar('Please select Year, Month, and Week');
-                return;
-            }
-            
-            const url = `/weekly_patterns?year=${year}&month=${month}&week=${week}`;
-            console.log('DEBUG: Fetching URL:', url);
-            
-            fetch(url)
-                .then(response => {
-                    console.log('DEBUG: Response status:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('DEBUG: Received data:', data);
-                    updateWeeklyChart(data);
-                })
-                .catch(error => {
-                    console.error('Error loading weekly patterns:', error);
-                    console.error('DEBUG: Full error details:', error);
-                });
-        }
-
         function loadWeeklyTrends() {
             // No longer needs year/month parameters - loads last 4 weeks automatically
             fetch('/weekly_trends')
@@ -5595,7 +5565,7 @@
                 document.getElementById('todayMoodName').textContent = data.today.mood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                 document.getElementById('todayMoodTime').textContent = `Last entry: ${data.today.time}`;
             } else {
-                todayIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">edit</i>';;
+                todayIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">edit</i>';
                 document.getElementById('todayMoodName').textContent = 'No entries yet';
                 document.getElementById('todayMoodTime').textContent = 'Add your first mood';
             }
@@ -5637,7 +5607,7 @@
                 document.getElementById('trendChange').textContent = `${changeText} vs last week`;
                 document.getElementById('trendChange').style.color = iconColor;
             } else {
-                trendIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">trending_up</i>';;
+                trendIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">trending_up</i>';
                 document.getElementById('trendDirection').textContent = 'Not enough data';
                 document.getElementById('trendChange').textContent = 'Need 2 weeks';
             }
@@ -5818,7 +5788,7 @@
     </script>
     
     <!-- Material Design 3 Snackbar -->
-    <div id=</i>snackbar" class="md-snackbar">
+    <div id="snackbar" class="md-snackbar">
         <div class="md-snackbar-content">
             <span class="md-snackbar-text"></span>
         </div>
