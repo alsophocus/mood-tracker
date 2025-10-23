@@ -39,9 +39,12 @@ class PDFExporter:
         
         story = []
         story.extend(self._create_md3_header())
+        story.extend(self._create_executive_summary())
         story.extend(self._create_md3_summary())
         story.extend(self._create_md3_charts())
+        story.extend(self._create_trend_analysis())
         story.extend(self._create_md3_recent_history())
+        story.extend(self._create_methodology())
         story.extend(self._create_md3_footer())
         
         doc.build(story)
@@ -91,7 +94,113 @@ class PDFExporter:
         header_elements.append(metadata)
         header_elements.append(Spacer(1, 24))
         
-        return header_elements
+    def _create_executive_summary(self):
+        """Create executive summary with key insights and recommendations"""
+        if not self.moods:
+            return []
+        
+        summary_elements = []
+        summary = self.analytics.get_summary()
+        
+        # Executive Summary Header
+        header_html = f"""
+        <table width="100%" style="background-color: {MD3_COLORS['primary_container']}; border-radius: 12px;">
+        <tr>
+        <td align="center" style="padding: 16px;">
+        <font size="18" color="{MD3_COLORS['primary']}"><b>📋 Executive Summary</b></font><br/>
+        <font size="11" color="{MD3_COLORS['on_surface_variant']}">Key findings and actionable insights from your mood data</font>
+        </td>
+        </tr>
+        </table>
+        """
+        summary_elements.append(Paragraph(header_html, self.typography['headline_large']))
+        summary_elements.append(Spacer(1, 16))
+        
+        # Generate insights
+        avg_mood = summary['daily_average']
+        total_entries = summary['total_entries']
+        streak = summary['current_streak']
+        
+        # Key findings
+        findings_html = f"""
+        <table width="100%" cellpadding="12">
+        <tr>
+        <td width="50%" style="background-color: {MD3_COLORS['surface_container']}; border-radius: 8px;">
+        <font color="{MD3_COLORS['primary']}" size="12"><b>📊 Overall Assessment</b></font><br/>
+        """
+        
+        if avg_mood >= 5.5:
+            findings_html += f'<font color="#4CAF50" size="11"><b>Positive Trend</b></font><br/>'
+            findings_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">Your mood levels show a consistently positive pattern with an average of {avg_mood:.1f}/7.0.</font>'
+        elif avg_mood >= 4.5:
+            findings_html += f'<font color="#FF9800" size="11"><b>Balanced State</b></font><br/>'
+            findings_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">Your mood levels are generally stable and balanced at {avg_mood:.1f}/7.0.</font>'
+        else:
+            findings_html += f'<font color="#F44336" size="11"><b>Needs Attention</b></font><br/>'
+            findings_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">Consider focusing on mood-boosting activities. Current average: {avg_mood:.1f}/7.0.</font>'
+        
+        findings_html += f"""
+        </td>
+        <td width="50%" style="background-color: {MD3_COLORS['surface_container']}; border-radius: 8px;">
+        <font color="{MD3_COLORS['secondary']}" size="12"><b>🎯 Key Metrics</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="10">
+        • <b>{total_entries}</b> total mood entries tracked<br/>
+        • <b>{streak} days</b> current positive streak<br/>
+        • <b>{summary['best_day']}</b> is your strongest day<br/>
+        • Data spans the last <b>30 days</b>
+        </font>
+        </td>
+        </tr>
+        </table>
+        """
+        
+        summary_elements.append(Paragraph(findings_html, self.typography['body_medium']))
+        summary_elements.append(Spacer(1, 16))
+        
+        # Recommendations
+        recommendations = self._generate_recommendations(summary)
+        rec_html = f"""
+        <font color="{MD3_COLORS['primary']}" size="14"><b>💡 Personalized Recommendations</b></font><br/>
+        """
+        
+        for i, rec in enumerate(recommendations, 1):
+            rec_html += f"""
+            <font color="{MD3_COLORS['primary']}" size="11">•</font> 
+            <font color="{MD3_COLORS['on_surface']}" size="11">{rec}</font><br/>
+            """
+        
+        summary_elements.append(Paragraph(rec_html, self.typography['body_large']))
+        summary_elements.append(Spacer(1, 24))
+        
+        return summary_elements
+    
+    def _generate_recommendations(self, summary):
+        """Generate personalized recommendations based on mood data"""
+        recommendations = []
+        avg_mood = summary['daily_average']
+        streak = summary['current_streak']
+        
+        if avg_mood >= 5.5:
+            recommendations.append("Maintain your positive momentum by continuing current wellness practices.")
+            recommendations.append("Consider sharing your successful strategies with others or documenting them.")
+        elif avg_mood >= 4.5:
+            recommendations.append("Focus on identifying patterns that lead to your higher mood days.")
+            recommendations.append("Gradually introduce new mood-boosting activities to your routine.")
+        else:
+            recommendations.append("Prioritize self-care activities and consider professional support if needed.")
+            recommendations.append("Track specific triggers and work on developing coping strategies.")
+        
+        if streak > 7:
+            recommendations.append(f"Excellent work maintaining a {streak}-day positive streak!")
+        elif streak > 0:
+            recommendations.append("Build on your current positive momentum to extend your streak.")
+        else:
+            recommendations.append("Focus on small, achievable daily goals to build positive momentum.")
+        
+        if summary['best_day']:
+            recommendations.append(f"Analyze what makes {summary['best_day']} successful and apply those elements to other days.")
+        
+        return recommendations[:4]  # Limit to 4 recommendations
     
     def _create_md3_summary(self):
         """Create premium summary section with enhanced visual effects"""
@@ -275,7 +384,94 @@ class PDFExporter:
         if not insights:
             insights.append("Continue tracking your mood to discover meaningful patterns.")
         
-        return insights[:3]  # Limit to 3 insights
+    def _create_trend_analysis(self):
+        """Create comprehensive trend analysis section"""
+        if not self.moods or len(self.moods) < 7:
+            return []
+        
+        story = []
+        
+        # Trend Analysis Header
+        header_html = f"""
+        <table width="100%" style="background-color: {MD3_COLORS['secondary_container']}; border-radius: 12px;">
+        <tr>
+        <td align="center" style="padding: 16px;">
+        <font size="18" color="{MD3_COLORS['secondary']}"><b>📈 Trend Analysis</b></font><br/>
+        <font size="11" color="{MD3_COLORS['on_surface_variant']}">Statistical analysis of your mood patterns and trajectories</font>
+        </td>
+        </tr>
+        </table>
+        """
+        story.append(Paragraph(header_html, self.typography['headline_large']))
+        story.append(Spacer(1, 16))
+        
+        # Calculate trends
+        recent_moods = [MOOD_VALUES.get(mood['mood'], 4) for mood in self.moods[:14]]  # Last 2 weeks
+        older_moods = [MOOD_VALUES.get(mood['mood'], 4) for mood in self.moods[14:28]]  # Previous 2 weeks
+        
+        recent_avg = sum(recent_moods) / len(recent_moods) if recent_moods else 4
+        older_avg = sum(older_moods) / len(older_moods) if older_moods else 4
+        trend_change = recent_avg - older_avg
+        
+        # Trend analysis content
+        trend_html = f"""
+        <table width="100%" cellpadding="12">
+        <tr>
+        <td width="33%" style="background-color: {MD3_COLORS['surface_container_high']}; border-radius: 8px;">
+        <font color="{MD3_COLORS['primary']}" size="12"><b>📊 Recent Trend</b></font><br/>
+        """
+        
+        if trend_change > 0.3:
+            trend_html += f'<font color="#4CAF50" size="20"><b>↗️</b></font><br/>'
+            trend_html += f'<font color="#4CAF50" size="11"><b>Improving</b></font><br/>'
+            trend_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">+{trend_change:.1f} point increase over last 2 weeks</font>'
+        elif trend_change < -0.3:
+            trend_html += f'<font color="#F44336" size="20"><b>↘️</b></font><br/>'
+            trend_html += f'<font color="#F44336" size="11"><b>Declining</b></font><br/>'
+            trend_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">{trend_change:.1f} point decrease over last 2 weeks</font>'
+        else:
+            trend_html += f'<font color="#FF9800" size="20"><b>→</b></font><br/>'
+            trend_html += f'<font color="#FF9800" size="11"><b>Stable</b></font><br/>'
+            trend_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">Consistent pattern with minimal variation</font>'
+        
+        # Volatility analysis
+        mood_values = [MOOD_VALUES.get(mood['mood'], 4) for mood in self.moods[:30]]
+        volatility = sum(abs(mood_values[i] - mood_values[i-1]) for i in range(1, len(mood_values))) / (len(mood_values) - 1) if len(mood_values) > 1 else 0
+        
+        trend_html += f"""
+        </td>
+        <td width="33%" style="background-color: {MD3_COLORS['surface_container_high']}; border-radius: 8px;">
+        <font color="{MD3_COLORS['secondary']}" size="12"><b>📉 Volatility</b></font><br/>
+        """
+        
+        if volatility < 0.5:
+            trend_html += f'<font color="#4CAF50" size="11"><b>Low</b></font><br/>'
+            trend_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">Stable mood patterns with minimal fluctuation</font>'
+        elif volatility < 1.0:
+            trend_html += f'<font color="#FF9800" size="11"><b>Moderate</b></font><br/>'
+            trend_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">Some variation in daily mood levels</font>'
+        else:
+            trend_html += f'<font color="#F44336" size="11"><b>High</b></font><br/>'
+            trend_html += f'<font color="{MD3_COLORS["on_surface"]}" size="10">Significant daily mood fluctuations</font>'
+        
+        # Consistency score
+        consistency = max(0, 100 - (volatility * 50))
+        
+        trend_html += f"""
+        </td>
+        <td width="34%" style="background-color: {MD3_COLORS['surface_container_high']}; border-radius: 8px;">
+        <font color="{MD3_COLORS['primary']}" size="12"><b>🎯 Consistency</b></font><br/>
+        <font color="{MD3_COLORS['primary']}" size="16"><b>{consistency:.0f}%</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="10">Mood stability score based on daily variations</font>
+        </td>
+        </tr>
+        </table>
+        """
+        
+        story.append(Paragraph(trend_html, self.typography['body_medium']))
+        story.append(Spacer(1, 20))
+        
+        return story
     
     def _create_md3_mood_distribution_chart(self):
         """Create premium mood distribution chart with enhanced visual effects"""
@@ -631,6 +827,79 @@ class PDFExporter:
             Spacer(1, 30),
             footer_para
         ]
+    
+    def _create_methodology(self):
+        """Create methodology section with technical details"""
+        story = []
+        
+        # Methodology Header
+        header_html = f"""
+        <table width="100%" style="background-color: {MD3_COLORS['surface_container']}; border-radius: 12px; border: 1px solid {MD3_COLORS['outline_variant']};">
+        <tr>
+        <td align="center" style="padding: 12px;">
+        <font size="16" color="{MD3_COLORS['on_surface']}"><b>📋 Methodology & Data Sources</b></font><br/>
+        <font size="10" color="{MD3_COLORS['on_surface_variant']}">Technical details about data collection and analysis methods</font>
+        </td>
+        </tr>
+        </table>
+        """
+        story.append(Paragraph(header_html, self.typography['title_large']))
+        story.append(Spacer(1, 12))
+        
+        # Methodology content
+        methodology_html = f"""
+        <table width="100%" cellpadding="8">
+        <tr>
+        <td width="50%">
+        <font color="{MD3_COLORS['primary']}" size="11"><b>Data Collection</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="9">
+        • 7-point mood scale (Very Bad to Very Well)<br/>
+        • Self-reported daily entries with optional notes<br/>
+        • Timestamp accuracy to minute precision<br/>
+        • Timezone: Chile (UTC-3) standardization
+        </font><br/><br/>
+        
+        <font color="{MD3_COLORS['secondary']}" size="11"><b>Analysis Methods</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="9">
+        • Statistical averages and trend calculations<br/>
+        • Pattern recognition across weekly cycles<br/>
+        • Volatility analysis using standard deviation<br/>
+        • Streak calculation for consecutive positive days
+        </font>
+        </td>
+        <td width="50%">
+        <font color="{MD3_COLORS['primary']}" size="11"><b>Report Specifications</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="9">
+        • Material Design 3 compliance<br/>
+        • 300 DPI print-quality charts<br/>
+        • A4 international paper format<br/>
+        • Professional typography (Helvetica family)
+        </font><br/><br/>
+        
+        <font color="{MD3_COLORS['secondary']}" size="11"><b>Data Privacy</b></font><br/>
+        <font color="{MD3_COLORS['on_surface']}" size="9">
+        • User-specific data isolation<br/>
+        • No cross-user data sharing<br/>
+        • Local processing and analysis<br/>
+        • Confidential personal analytics
+        </font>
+        </td>
+        </tr>
+        </table>
+        
+        <font color="{MD3_COLORS['on_surface_variant']}" size="8">
+        <b>Disclaimer:</b> This report is generated for personal wellness tracking purposes. 
+        Mood data is self-reported and should not be used as a substitute for professional mental health assessment. 
+        Consult healthcare providers for clinical concerns.
+        </font>
+        """
+        
+        story.append(Paragraph(methodology_html, self.typography['body_medium']))
+        story.append(Spacer(1, 20))
+        
+        return story
+
+    # End of PDFExporter class
     
     def _get_heading_style(self):
         """Get heading paragraph style"""
