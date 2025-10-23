@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 from database import db
 from analytics import MoodAnalytics, MOOD_VALUES
-from pdf_export_beautiful import BeautifulPDFExporter as PDFExporter
+from pdf_export_beautiful import BeautifulPDFExporter
 
 main_bp = Blueprint('main', __name__)
 
@@ -1048,7 +1048,7 @@ def hourly_average_mood():
 def export_pdf():
     """Export mood data as PDF"""
     moods = db.get_user_moods(current_user.id)
-    exporter = PDFExporter(current_user, moods)
+    exporter = BeautifulPDFExporter(current_user, moods)
     buffer = exporter.generate_report()
     
     filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
@@ -1060,7 +1060,7 @@ def simple_pdf_export():
     """Simple server-side PDF export"""
     try:
         moods = db.get_user_moods(current_user.id)
-        exporter = PDFExporter(current_user, moods)
+        exporter = BeautifulPDFExporter(current_user, moods)
         buffer = exporter.generate_report()
         
         filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
