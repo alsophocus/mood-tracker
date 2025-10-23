@@ -897,26 +897,48 @@ def weekly_trends():
 @main_bp.route('/monthly_trends')
 @login_required
 def monthly_trends():
-    """Get monthly mood trends (averages) for specific year"""
+    """Get monthly mood trends with trend analysis - SOLID dependency injection"""
     from datetime import date
     
-    # Get year parameter
-    year = request.args.get('year', type=int)
-    
-    moods = db.get_user_moods(current_user.id)
-    analytics = MoodAnalytics(moods)
-    
-    if year:
-        try:
-            result = analytics.get_monthly_trends_for_year(year)
-            return jsonify(result)
-        except Exception as e:
-            return jsonify({"error": "Invalid year parameter"}), 400
-    else:
-        # Default to current year
-        today = date.today()
-        result = analytics.get_monthly_trends_for_year(today.year)
+    try:
+        # Get year parameter
+        year = request.args.get('year', type=int)
+        if not year:
+            year = date.today().year
+        
+        # Dependency Injection - inject dependencies
+        from analytics import TrendAnalysisService
+        trend_service = TrendAnalysisService()
+        
+        moods = db.get_user_moods(current_user.id)
+        analytics = MoodAnalytics(moods)
+        
+        # Get base monthly trends data
+        result = analytics.get_monthly_trends_for_year(year)
+        
+        if result and 'data' in result:
+            # Add trend analysis using SOLID service
+            regression = trend_service.calculate_linear_regression(result['data'])
+            trend_direction = trend_service.get_trend_direction(regression['slope'])
+            trend_line = trend_service.generate_trend_line_data(result['data'], regression)
+            
+            # Enhance result with trend analysis
+            result['trend_analysis'] = {
+                'regression': regression,
+                'direction': trend_direction,
+                'trend_line': trend_line,
+                'slope_percentage': round(regression['slope'] * 100, 2)
+            }
+        
         return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            'data': [0] * 12,
+            'period': f'Error loading {year if year else "current year"}'
+        }), 500
 
 @main_bp.route('/daily_patterns_minutes')
 @login_required

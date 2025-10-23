@@ -7,6 +7,98 @@ MOOD_VALUES = {
     'slightly well': 5, 'well': 6, 'very well': 7
 }
 
+class TrendAnalysisService:
+    """Single Responsibility: Handle trend analysis and linear regression calculations"""
+    
+    def __init__(self):
+        pass
+    
+    def calculate_linear_regression(self, data_points: List[float]) -> Dict[str, float]:
+        """Calculate linear regression for trend analysis"""
+        if not data_points or len(data_points) < 2:
+            return {'slope': 0, 'intercept': 0, 'correlation': 0}
+        
+        # Filter out None values and create x,y pairs
+        valid_points = [(i, val) for i, val in enumerate(data_points) if val is not None]
+        
+        if len(valid_points) < 2:
+            return {'slope': 0, 'intercept': 0, 'correlation': 0}
+        
+        n = len(valid_points)
+        x_values = [point[0] for point in valid_points]
+        y_values = [point[1] for point in valid_points]
+        
+        # Calculate means
+        x_mean = sum(x_values) / n
+        y_mean = sum(y_values) / n
+        
+        # Calculate slope and intercept
+        numerator = sum((x - x_mean) * (y - y_mean) for x, y in valid_points)
+        denominator = sum((x - x_mean) ** 2 for x in x_values)
+        
+        if denominator == 0:
+            return {'slope': 0, 'intercept': y_mean, 'correlation': 0}
+        
+        slope = numerator / denominator
+        intercept = y_mean - slope * x_mean
+        
+        # Calculate correlation coefficient
+        y_variance = sum((y - y_mean) ** 2 for y in y_values)
+        if y_variance == 0:
+            correlation = 0
+        else:
+            correlation = numerator / (denominator * y_variance) ** 0.5
+        
+        return {
+            'slope': round(slope, 4),
+            'intercept': round(intercept, 4),
+            'correlation': round(correlation, 4)
+        }
+    
+    def get_trend_direction(self, slope: float) -> Dict[str, str]:
+        """Determine trend direction and description"""
+        if slope > 0.1:
+            return {
+                'direction': 'improving',
+                'icon': 'trending_up',
+                'description': 'Improving trend',
+                'color': '#388E3C'  # MD3 Success color
+            }
+        elif slope < -0.1:
+            return {
+                'direction': 'declining',
+                'icon': 'trending_down', 
+                'description': 'Declining trend',
+                'color': '#D32F2F'  # MD3 Error color
+            }
+        else:
+            return {
+                'direction': 'stable',
+                'icon': 'trending_flat',
+                'description': 'Stable trend',
+                'color': '#6750A4'  # MD3 Primary color
+            }
+    
+    def generate_trend_line_data(self, data_points: List[float], regression: Dict[str, float]) -> List[float]:
+        """Generate trend line data points for chart overlay"""
+        if not data_points:
+            return []
+        
+        trend_line = []
+        slope = regression['slope']
+        intercept = regression['intercept']
+        
+        for i in range(len(data_points)):
+            if data_points[i] is not None:
+                trend_value = slope * i + intercept
+                # Clamp to valid mood range (1-7)
+                trend_value = max(1, min(7, trend_value))
+                trend_line.append(round(trend_value, 2))
+            else:
+                trend_line.append(None)
+        
+        return trend_line
+
 class FourWeekComparisonService:
     """Single Responsibility: Handle 4-week comparison data analysis"""
     
