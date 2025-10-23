@@ -5766,8 +5766,10 @@
         let moodCarousel;
         function initializeCarousel() {
             try {
+                console.log('Initializing carousel...');
                 moodCarousel = CarouselFactory.create('moodCarousel');
                 moodCarousel.initialize();
+                console.log('Carousel initialized successfully');
             } catch (error) {
                 console.error('Error initializing carousel:', error);
             }
