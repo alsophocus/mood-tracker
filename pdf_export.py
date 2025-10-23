@@ -94,87 +94,96 @@ class PDFExporter:
         return header_elements
     
     def _create_md3_summary(self):
-        """Create summary section with Material Design 3 grid layout"""
+        """Create premium summary section with enhanced visual effects"""
         if not self.moods:
             return [Paragraph("No mood data available yet.", self.typography['body_large'])]
         
         summary_elements = []
         summary = self.analytics.get_summary()
         
-        # Section header
-        section_title = Paragraph("📊 Analytics Overview", self.typography['headline_large'])
+        # Enhanced section header with gradient background
+        section_html = f"""
+        <table width="100%" style="background: linear-gradient(135deg, {MD3_COLORS['primary_container']}, {MD3_COLORS['surface_container']}); border-radius: 16px;">
+        <tr>
+        <td align="center" style="padding: 16px;">
+        <font size="24" color="{MD3_COLORS['primary']}"><b>📊 Analytics Overview</b></font><br/>
+        <font size="12" color="{MD3_COLORS['on_surface_variant']}">Comprehensive insights from your mood tracking data</font>
+        </td>
+        </tr>
+        </table>
+        """
+        section_title = Paragraph(section_html, self.typography['headline_large'])
         summary_elements.append(section_title)
-        summary_elements.append(Spacer(1, 16))
+        summary_elements.append(Spacer(1, 20))
         
-        # Create metrics in 2x2 grid layout
+        # Premium metrics with enhanced styling
         metrics = [
             {
                 'label': 'Total Entries',
                 'value': str(summary['total_entries']),
                 'color': MD3_COLORS['primary'],
-                'icon': '📈'
+                'icon': '📈',
+                'description': 'Mood records tracked'
             },
             {
                 'label': 'Current Streak',
                 'value': f"{summary['current_streak']} days",
                 'color': MD3_COLORS['secondary'],
-                'icon': '🔥'
+                'icon': '🔥',
+                'description': 'Consecutive positive days'
             },
             {
                 'label': 'Best Day',
                 'value': summary['best_day'],
                 'color': MD3_COLORS['primary'],
-                'icon': '⭐'
+                'icon': '⭐',
+                'description': 'Highest average mood'
             },
             {
                 'label': 'Average Mood',
                 'value': f"{summary['daily_average']:.1f}/7.0",
                 'color': MD3_COLORS['secondary'],
-                'icon': '📊'
+                'icon': '📊',
+                'description': 'Overall mood rating'
             }
         ]
         
-        # Create 2x2 grid of metric cards
+        # Create premium 2x2 grid with enhanced styling
         for i in range(0, len(metrics), 2):
-            row_elements = []
+            row_html = f"""
+            <table width="100%" cellpadding="8" style="margin-bottom: 12px;">
+            <tr>
+            """
+            
             for j in range(2):
                 if i + j < len(metrics):
                     metric = metrics[i + j]
-                    metric_text = f"""
-                    <para align="center">
-                    <font size="24">{metric['icon']}</font><br/>
-                    <font color="{metric['color']}" size="20"><b>{metric['value']}</b></font><br/>
-                    <font color="{MD3_COLORS['on_surface_variant']}" size="11">{metric['label']}</font>
-                    </para>
+                    # Calculate mood quality indicator
+                    if 'Average' in metric['label']:
+                        avg_val = float(metric['value'].split('/')[0])
+                        quality = "Excellent" if avg_val >= 6 else "Good" if avg_val >= 5 else "Fair" if avg_val >= 4 else "Needs Attention"
+                        quality_color = "#4CAF50" if avg_val >= 6 else "#8BC34A" if avg_val >= 5 else "#FF9800" if avg_val >= 4 else "#F44336"
+                    else:
+                        quality = "Active"
+                        quality_color = metric['color']
+                    
+                    row_html += f"""
+                    <td width="50%" align="center" style="background-color: {MD3_COLORS['surface_container_high']}; border-radius: 16px; padding: 20px; margin: 4px;">
+                    <font size="32">{metric['icon']}</font><br/>
+                    <font color="{metric['color']}" size="24"><b>{metric['value']}</b></font><br/>
+                    <font color="{MD3_COLORS['on_surface']}" size="13"><b>{metric['label']}</b></font><br/>
+                    <font color="{MD3_COLORS['on_surface_variant']}" size="10">{metric['description']}</font><br/>
+                    <font color="{quality_color}" size="9"><b>{quality}</b></font>
+                    </td>
                     """
-                    metric_para = Paragraph(metric_text, self.typography['body_medium'])
-                    row_elements.append(metric_para)
             
-            # Add row with proper spacing
-            if len(row_elements) == 2:
-                # Create side-by-side layout using table-like structure
-                combined_text = f"""
-                <table width="100%">
-                <tr>
-                <td width="50%" align="center">
-                <font size="24">{metrics[i]['icon']}</font><br/>
-                <font color="{metrics[i]['color']}" size="20"><b>{metrics[i]['value']}</b></font><br/>
-                <font color="{MD3_COLORS['on_surface_variant']}" size="11">{metrics[i]['label']}</font>
-                </td>
-                <td width="50%" align="center">
-                <font size="24">{metrics[i+1]['icon']}</font><br/>
-                <font color="{metrics[i+1]['color']}" size="20"><b>{metrics[i+1]['value']}</b></font><br/>
-                <font color="{MD3_COLORS['on_surface_variant']}" size="11">{metrics[i+1]['label']}</font>
-                </td>
-                </tr>
-                </table>
-                """
-                combined_para = Paragraph(combined_text, self.typography['body_medium'])
-                summary_elements.append(combined_para)
-            else:
-                summary_elements.extend(row_elements)
+            row_html += """
+            </tr>
+            </table>
+            """
             
-            summary_elements.append(Spacer(1, 12))
+            row_para = Paragraph(row_html, self.typography['body_medium'])
+            summary_elements.append(row_para)
         
         summary_elements.append(Spacer(1, 24))
         return summary_elements
@@ -269,10 +278,11 @@ class PDFExporter:
         return insights[:3]  # Limit to 3 insights
     
     def _create_md3_mood_distribution_chart(self):
-        """Create mood distribution pie chart with enhanced MD3 styling"""
+        """Create premium mood distribution chart with enhanced visual effects"""
         try:
             from datetime import datetime, timedelta
             from collections import Counter
+            import numpy as np
             
             # Get last 30 days of moods
             thirty_days_ago = datetime.now().date() - timedelta(days=30)
@@ -293,53 +303,87 @@ class PDFExporter:
             # Count mood occurrences
             mood_counts = Counter(mood['mood'] for mood in recent_moods)
             
-            # Enhanced MD3 color palette for moods
-            mood_color_map = {
-                'very bad': '#BA1A1A',     # MD3 Error
-                'bad': '#D32F2F',          # Error variant
-                'slightly bad': '#FF9800', # Warning
-                'neutral': '#79747E',      # MD3 Outline
-                'slightly well': '#8BC34A', # Success variant
-                'well': '#4CAF50',         # Success
-                'very well': '#6750A4'     # MD3 Primary
+            # Premium color palette with gradients
+            mood_colors = {
+                'very bad': ['#BA1A1A', '#D32F2F'],     # Error gradient
+                'bad': ['#D32F2F', '#F44336'],          # Error variant
+                'slightly bad': ['#FF9800', '#FFB74D'], # Warning gradient
+                'neutral': ['#79747E', '#9E9E9E'],      # Neutral gradient
+                'slightly well': ['#8BC34A', '#AED581'], # Success variant
+                'well': ['#4CAF50', '#66BB6A'],         # Success gradient
+                'very well': ['#6750A4', '#8B7CC8']     # Primary gradient
             }
             
             # Prepare data
             moods = list(mood_counts.keys())
             counts = list(mood_counts.values())
-            colors = [mood_color_map.get(mood, '#79747E') for mood in moods]
+            colors = [mood_colors.get(mood, ['#79747E', '#9E9E9E'])[0] for mood in moods]
             
-            # Create enhanced pie chart
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), facecolor='#FFFBFE')
+            # Create premium chart with enhanced layout
+            fig = plt.figure(figsize=(14, 8), facecolor='#FFFBFE')
+            gs = fig.add_gridspec(2, 3, height_ratios=[1, 3], width_ratios=[2, 1, 1])
             
-            # Main pie chart
-            wedges, texts, autotexts = ax1.pie(counts, labels=None, colors=colors, 
-                                              autopct='%1.1f%%', startangle=90,
-                                              textprops={'fontsize': 10, 'color': 'white', 'weight': 'bold'},
-                                              wedgeprops={'edgecolor': 'white', 'linewidth': 2})
+            # Title section
+            ax_title = fig.add_subplot(gs[0, :])
+            ax_title.text(0.5, 0.5, 'Mood Distribution Analysis', 
+                         fontsize=20, fontweight='bold', color='#6750A4',
+                         ha='center', va='center', transform=ax_title.transAxes)
+            ax_title.text(0.5, 0.1, f'Based on {sum(counts)} entries from the last 30 days', 
+                         fontsize=12, color='#49454F',
+                         ha='center', va='center', transform=ax_title.transAxes)
+            ax_title.axis('off')
             
-            ax1.set_title('Mood Distribution\n(Last 30 Days)', 
-                         fontsize=16, fontweight='bold', color='#6750A4', pad=20)
+            # Main pie chart with premium effects
+            ax_pie = fig.add_subplot(gs[1, 0])
+            wedges, texts, autotexts = ax_pie.pie(counts, labels=None, colors=colors, 
+                                                 autopct='%1.1f%%', startangle=90,
+                                                 textprops={'fontsize': 11, 'color': 'white', 'weight': 'bold'},
+                                                 wedgeprops={'edgecolor': 'white', 'linewidth': 3,
+                                                           'antialiased': True},
+                                                 explode=[0.05 if count == max(counts) else 0 for count in counts])
             
-            # Enhanced legend
-            ax2.axis('off')
-            legend_y = 0.9
-            ax2.text(0.1, 0.95, 'Legend', fontsize=14, fontweight='bold', color='#6750A4')
+            # Add shadow effect to pie chart
+            shadow_wedges, _, _ = ax_pie.pie(counts, labels=None, colors=['#00000020']*len(counts),
+                                           startangle=90, radius=0.98,
+                                           wedgeprops={'edgecolor': 'none', 'linewidth': 0})
             
-            for mood, count, color in zip(moods, counts, colors):
+            # Enhanced legend with statistics
+            ax_legend = fig.add_subplot(gs[1, 1:])
+            ax_legend.axis('off')
+            
+            legend_y = 0.95
+            ax_legend.text(0.05, legend_y, 'Detailed Breakdown', 
+                          fontsize=14, fontweight='bold', color='#6750A4')
+            legend_y -= 0.12
+            
+            # Sort moods by count for better presentation
+            sorted_data = sorted(zip(moods, counts, colors), key=lambda x: x[1], reverse=True)
+            
+            for mood, count, color in sorted_data:
                 percentage = (count / sum(counts)) * 100
-                # Create colored square
-                ax2.add_patch(plt.Rectangle((0.1, legend_y-0.05), 0.08, 0.08, 
-                                          facecolor=color, edgecolor='white', linewidth=1))
-                # Add text
-                ax2.text(0.25, legend_y, f'{mood.title()}', fontsize=11, 
-                        color='#1C1B1F', va='center')
-                ax2.text(0.7, legend_y, f'{count} ({percentage:.1f}%)', fontsize=10, 
-                        color='#49454F', va='center')
-                legend_y -= 0.12
+                
+                # Colored indicator with gradient effect
+                rect = plt.Rectangle((0.05, legend_y-0.03), 0.06, 0.06, 
+                                   facecolor=color, edgecolor='white', linewidth=1.5)
+                ax_legend.add_patch(rect)
+                
+                # Mood name and statistics
+                ax_legend.text(0.15, legend_y, mood.title(), fontsize=12, 
+                              color='#1C1B1F', va='center', weight='bold')
+                ax_legend.text(0.15, legend_y-0.04, f'{count} entries • {percentage:.1f}%', 
+                              fontsize=10, color='#49454F', va='center')
+                
+                # Progress bar
+                bar_width = percentage / 100 * 0.3
+                ax_legend.add_patch(plt.Rectangle((0.5, legend_y-0.01), bar_width, 0.02,
+                                                facecolor=color, alpha=0.6))
+                ax_legend.add_patch(plt.Rectangle((0.5, legend_y-0.01), 0.3, 0.02,
+                                                facecolor='none', edgecolor='#CAB6CF', linewidth=1))
+                
+                legend_y -= 0.15
             
-            ax2.set_xlim(0, 1)
-            ax2.set_ylim(0, 1)
+            ax_legend.set_xlim(0, 1)
+            ax_legend.set_ylim(0, 1)
             
             plt.tight_layout()
             
@@ -349,7 +393,8 @@ class PDFExporter:
             plt.close()
             
             return chart_file.name
-        except Exception:
+        except Exception as e:
+            print(f"Chart generation error: {e}")
             return None
     
     def _create_md3_weekly_chart(self):
