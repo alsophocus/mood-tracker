@@ -2818,7 +2818,7 @@
                 <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </div>
-            <div class=</i>app-bar-actions">
+            <div class="app-bar-actions">
                 <div class="theme-toggle">
                     <i class="material-symbols-outlined theme-icon">light_mode</i>
                     <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
@@ -2830,7 +2830,7 @@
                         <span>{{ user.name }}</span>
                         <i class="material-symbols-outlined">expand_more</i>
                     </button>
-                    <div class=</i>user-menu-dropdown" id="userMenuDropdown">
+                    <div class="user-menu-dropdown" id="userMenuDropdown">
                         <div class="user-menu-header">
                             <div class="user-menu-name">{{ user.name }}</div>
                             <div class="user-menu-email">{{ user.email if user.email else 'User Account' }}</div>
@@ -2848,7 +2848,7 @@
     </header>
 
     <!-- Navigation Rail -->
-    <nav class=</i>navigation-rail desktop-header">
+    <nav class="navigation-rail desktop-header">
         <a href="/insights" class="navigation-rail-item" data-page="insights">
             <i class="material-symbols-outlined">trending_up</i>
             <span>Insights</span>
@@ -2864,16 +2864,16 @@
     </nav>
 
     <!-- Mobile Header -->
-    <header class=</i>mobile-header">
+    <header class="mobile-header">
         <div class="mobile-header-content">
             <button class="mobile-hamburger" onclick="toggleMobileNav()" aria-label="Open navigation menu">
                 <i class="material-symbols-outlined">menu</i>
             </button>
-            <div class=</i>mobile-title">
+            <div class="mobile-title">
                 <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </div>
-            <div class=</i>mobile-actions">
+            <div class="mobile-actions">
                 <div class="mobile-theme-toggle">
                     <i class="material-symbols-outlined theme-icon">light_mode</i>
                     <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
@@ -2891,11 +2891,11 @@
                 <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </a>
-            <button class=</i>logout-button" onclick="window.location.href='/logout'" aria-label="Sign out">
+            <button class="logout-button" onclick="window.location.href='/logout'" aria-label="Sign out">
                 <i class="material-symbols-outlined">logout</i>
             </button>
         </div>
-        <div class=</i>mobile-nav-user-section">
+        <div class="mobile-nav-user-section">
             <div class="mobile-nav-user-avatar">
                 {{ user.name[0].upper() if user.name else 'U' }}
             </div>
@@ -2919,19 +2919,19 @@
         </div>
     </div>
 
-    <div class=</i>main-content">
+    <div class="main-content">
         <div class="container">
         <!-- System Status -->
         <div class="section">
             <div class="status-container">
                 <div class="status-item">
                     <i class="material-symbols-outlined">storage</i>
-                    <span class=</i>body-medium">Database</span>
+                    <span class="body-medium">Database</span>
                     <div id="db-status" class="status-indicator checking"></div>
                 </div>
                 <div class="status-item">
                     <i class="material-symbols-outlined">trending_up</i>
-                    <span class=</i>body-medium">Analytics</span>
+                    <span class="body-medium">Analytics</span>
                     <div id="analytics-status" class="status-indicator checking"></div>
                 </div>
             </div>
@@ -2992,105 +2992,105 @@
                                 <i class="material-symbols-outlined">work</i>
                                 <span>Work</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="meeting">
+                            <div class="trigger-tag" data-trigger="meeting">
                                 <i class="material-symbols-outlined">group</i>
                                 <span>Meeting</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="deadline">
+                            <div class="trigger-tag" data-trigger="deadline">
                                 <i class="material-symbols-outlined">schedule</i>
                                 <span>Deadline</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="project">
+                            <div class="trigger-tag" data-trigger="project">
                                 <i class="material-symbols-outlined">task</i>
                                 <span>Project</span>
                             </div>
                             
                             <!-- Health Category -->
-                            <div class=</i>trigger-tag" data-trigger="exercise">
+                            <div class="trigger-tag" data-trigger="exercise">
                                 <i class="material-symbols-outlined">fitness_center</i>
                                 <span>Exercise</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="sleep">
+                            <div class="trigger-tag" data-trigger="sleep">
                                 <i class="material-symbols-outlined">bed</i>
                                 <span>Sleep</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="food">
+                            <div class="trigger-tag" data-trigger="food">
                                 <i class="material-symbols-outlined">restaurant</i>
                                 <span>Food</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="medication">
+                            <div class="trigger-tag" data-trigger="medication">
                                 <i class="material-symbols-outlined">medication</i>
                                 <span>Medication</span>
                             </div>
                             
                             <!-- Social Category -->
-                            <div class=</i>trigger-tag" data-trigger="family">
+                            <div class="trigger-tag" data-trigger="family">
                                 <i class="material-symbols-outlined">home</i>
                                 <span>Family</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="friends">
+                            <div class="trigger-tag" data-trigger="friends">
                                 <i class="material-symbols-outlined">people</i>
                                 <span>Friends</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="party">
+                            <div class="trigger-tag" data-trigger="party">
                                 <i class="material-symbols-outlined">celebration</i>
                                 <span>Party</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="date">
+                            <div class="trigger-tag" data-trigger="date">
                                 <i class="material-symbols-outlined">favorite</i>
                                 <span>Date</span>
                             </div>
                             
                             <!-- Activities Category -->
-                            <div class=</i>trigger-tag" data-trigger="music">
+                            <div class="trigger-tag" data-trigger="music">
                                 <i class="material-symbols-outlined">music_note</i>
                                 <span>Music</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="reading">
+                            <div class="trigger-tag" data-trigger="reading">
                                 <i class="material-symbols-outlined">book</i>
                                 <span>Reading</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="gaming">
+                            <div class="trigger-tag" data-trigger="gaming">
                                 <i class="material-symbols-outlined">sports_esports</i>
                                 <span>Gaming</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="cooking">
+                            <div class="trigger-tag" data-trigger="cooking">
                                 <i class="material-symbols-outlined">restaurant_menu</i>
                                 <span>Cooking</span>
                             </div>
                             
                             <!-- Environment Category -->
-                            <div class=</i>trigger-tag" data-trigger="weather">
+                            <div class="trigger-tag" data-trigger="weather">
                                 <i class="material-symbols-outlined">partly_cloudy_day</i>
                                 <span>Weather</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="home">
+                            <div class="trigger-tag" data-trigger="home">
                                 <i class="material-symbols-outlined">house</i>
                                 <span>Home</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="outdoors">
+                            <div class="trigger-tag" data-trigger="outdoors">
                                 <i class="material-symbols-outlined">park</i>
                                 <span>Outdoors</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="travel">
+                            <div class="trigger-tag" data-trigger="travel">
                                 <i class="material-symbols-outlined">flight</i>
                                 <span>Travel</span>
                             </div>
                             
                             <!-- Emotions Category -->
-                            <div class=</i>trigger-tag" data-trigger="stress">
+                            <div class="trigger-tag" data-trigger="stress">
                                 <i class="material-symbols-outlined">warning</i>
                                 <span>Stress</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="relaxation">
+                            <div class="trigger-tag" data-trigger="relaxation">
                                 <i class="material-symbols-outlined">spa</i>
                                 <span>Relaxation</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="excitement">
+                            <div class="trigger-tag" data-trigger="excitement">
                                 <i class="material-symbols-outlined">star</i>
                                 <span>Excitement</span>
                             </div>
-                            <div class=</i>trigger-tag" data-trigger="anxiety">
+                            <div class="trigger-tag" data-trigger="anxiety">
                                 <i class="material-symbols-outlined">psychology_alt</i>
                                 <span>Anxiety</span>
                             </div>
@@ -3113,7 +3113,7 @@
             </div>
 
             <!-- Enhanced Analytics Card -->
-            <div class=</i>md-card">
+            <div class="md-card">
                 <div class="md-card-header">
                     <i class="material-symbols-outlined md-card-icon">bar_chart</i>
                     <h2 class="md-card-title headline-small">Analytics Overview</h2>
@@ -3190,7 +3190,7 @@
         </div>
 
         <!-- Quick Stats Cards -->
-        <div class=</i>section">
+        <div class="section">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <!-- Today's Mood Card -->
                 <div class="md-card" style="text-align: center; padding: 24px;">
@@ -3257,7 +3257,7 @@
                     </button>
                 </div>
                 
-                <div class=</i>chart-container">
+                <div class="chart-container">
                     <canvas id="weeklyChart"></canvas>
                 </div>
             </div>
@@ -3285,7 +3285,7 @@
                                 <button type=</i>button" class="md-calendar-nav" id="prevMonth">
                                     <i class="material-symbols-outlined">chevron_left</i>
                                 </button>
-                                <div class=</i>md-calendar-title" id="calendarTitle"></div>
+                                <div class="md-calendar-title" id="calendarTitle"></div>
                                 <button type="button" class="md-calendar-nav" id="nextMonth">
                                     <i class="material-symbols-outlined">chevron_right</i>
                                 </button>
@@ -3293,7 +3293,7 @@
                                     <i class="material-symbols-outlined">keyboard_double_arrow_right</i>
                                 </button>
                             </div>
-                            <div class=</i>md-calendar-grid">
+                            <div class="md-calendar-grid">
                                 <div class="md-calendar-weekdays">
                                     <div class="md-calendar-weekday">Sun</div>
                                     <div class="md-calendar-weekday">Mon</div>
@@ -3313,7 +3313,7 @@
                     </button>
                 </div>
                 
-                <div class=</i>chart-container daily-patterns-chart">
+                <div class="chart-container daily-patterns-chart">
                     <canvas id="dailyChart"></canvas>
                     <!-- Custom tooltip for FontAwesome icons -->
                     <div id="custom-mood-tooltip" style="
@@ -5083,10 +5083,10 @@
             const slopePercentage = trendAnalysis.slope_percentage;
             
             trendContainer.innerHTML = `
-                <div class=</i>trend-indicator ${direction.direction}" style="background-color: ${direction.color}20; color: ${direction.color};">
+                <div class="trend-indicator ${direction.direction}" style="background-color: ${direction.color}20; color: ${direction.color};">
                     <i class="material-symbols-outlined">${direction.icon}</i>
                     <span>${direction.description}</span>
-                    <span class=</i>trend-percentage">${slopePercentage > 0 ? '+' : ''}${slopePercentage}%</span>
+                    <span class="trend-percentage">${slopePercentage > 0 ? '+' : ''}${slopePercentage}%</span>
                 </div>
             `;
         }
@@ -5808,7 +5808,7 @@
                 .catch(error => {
                     console.error('Error loading insights:', error);
                     document.getElementById('quick-insights').innerHTML = `
-                        <div class=</i>insight-item">
+                        <div class="insight-item">
                             <i class="material-symbols-outlined">warning</i>
                             <span>Error loading insights</span>
                         </div>
