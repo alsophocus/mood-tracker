@@ -38,14 +38,25 @@ class PDFExporter:
         )
         
         story = []
-        story.extend(self._create_md3_header())
-        story.extend(self._create_executive_summary())
-        story.extend(self._create_md3_summary())
-        story.extend(self._create_md3_charts())
-        story.extend(self._create_trend_analysis())
-        story.extend(self._create_md3_recent_history())
-        story.extend(self._create_methodology())
-        story.extend(self._create_md3_footer())
+        
+        # Validate each method returns a list
+        methods = [
+            ('header', self._create_md3_header()),
+            ('executive_summary', self._create_executive_summary()),
+            ('summary', self._create_md3_summary()),
+            ('charts', self._create_md3_charts()),
+            ('trend_analysis', self._create_trend_analysis()),
+            ('recent_history', self._create_md3_recent_history()),
+            ('methodology', self._create_methodology()),
+            ('footer', self._create_md3_footer())
+        ]
+        
+        for name, result in methods:
+            if result is None:
+                raise ValueError(f"Method {name} returned None instead of list")
+            if not isinstance(result, list):
+                raise ValueError(f"Method {name} returned {type(result)} instead of list")
+            story.extend(result)
         
         doc.build(story)
         buffer.seek(0)
