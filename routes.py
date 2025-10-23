@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 from database import db
 from analytics import MoodAnalytics, MOOD_VALUES
-from pdf_export_beautiful import BeautifulPDFExporter
+from pdf_export import PDFExporter
 
 main_bp = Blueprint('main', __name__)
 
@@ -1060,7 +1060,7 @@ def simple_pdf_export():
     """Simple server-side PDF export"""
     try:
         moods = db.get_user_moods(current_user.id)
-        exporter = BeautifulPDFExporter(current_user, moods)
+        exporter = PDFExporter(current_user, moods)
         buffer = exporter.generate_report()
         
         filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
