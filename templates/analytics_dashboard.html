@@ -51,6 +51,13 @@
             --md-sys-color-surface-container: #f3edf7;
             --md-sys-color-surface-container-high: #ece6f0;
             --md-sys-color-surface-container-highest: #e6e0e9;
+            
+            /* Material Design 3 Motion Physics */
+            --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+            --md-sys-motion-duration-short3: 150ms;
+            --md-sys-motion-duration-medium2: 300ms;
+            --md-sys-motion-duration-medium4: 400ms;
+            --md-sys-motion-duration-long2: 500ms;
             --md-sys-shape-corner-extra-large: 28px;
             --md-sys-shape-corner-large: 16px;
             --md-sys-shape-corner-medium: 12px;
@@ -711,6 +718,10 @@
             margin-bottom: 16px;
             box-shadow: var(--md-sys-elevation-level1);
             transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            position: relative;
+            overflow: visible;
+            animation: md-fade-in-up var(--md-sys-motion-duration-long2) var(--md-sys-motion-easing-emphasized);
+        }
             position: relative;
             overflow: hidden;
             animation: md-fade-in-up 600ms var(--md-sys-motion-easing-emphasized);
@@ -1378,7 +1389,7 @@
 
         <div class="md-card">
             <div class="md-card-header">
-                <i class="material-symbols-outlined">trending_up md-card-icon</i>></i>
+                <i class="material-symbols-outlined md-card-icon">trending_up</i>
                 <h2 class="md-card-title">Mood Analytics Overview</h2>
             </div>
             
