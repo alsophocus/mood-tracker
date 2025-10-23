@@ -89,6 +89,84 @@ The application follows SOLID principles with a clean, layered architecture:
 - **All Data Included**: Summary, patterns, trends, and recent history
 - **Visual Charts**: Weekly and monthly trend charts embedded in PDF
 
+## Material Design 3 Expressive Components Implementation Plan
+
+### Phase 6: Complete MD3 Expressive Components Suite
+
+#### 1. **Progress Indicators & Loading States**
+- **Linear Progress Bars**: For data loading, form submissions, analytics processing
+- **Circular Progress Indicators**: For async operations, chart rendering
+- **Skeleton Loaders**: For mood cards, analytics sections while loading
+- **Determinate/Indeterminate**: Based on operation type
+
+#### 2. **Advanced Button Components**
+- **Button Groups**: For mood selection, time period filters
+- **Split Buttons**: Primary action + dropdown for export options, chart types
+- **Toggle Button Groups**: For view modes (chart/table), time ranges
+- **Segmented Buttons**: For analytics sections, filter categories
+
+#### 3. **Enhanced Navigation & Selection**
+- **Navigation Rails**: Side navigation for main sections
+- **Tabs**: For analytics views (Daily/Weekly/Monthly)
+- **Chips**: For mood tags, filter selections, quick actions
+- **Badge Components**: For notifications, streak counters
+
+#### 4. **Data Display Enhancements**
+- **Data Tables**: For mood history with sorting, filtering
+- **List Components**: For recent moods with rich content
+- **Cards with Actions**: Enhanced mood cards with quick actions
+- **Expansion Panels**: For detailed analytics sections
+
+#### 5. **Input & Form Enhancements**
+- **Autocomplete Fields**: For mood notes with suggestions
+- **Slider Components**: For mood intensity selection
+- **Switch Components**: For settings, preferences
+- **Radio Button Groups**: For export formats, chart types
+
+#### 6. **Feedback & Communication**
+- **Enhanced Snackbars**: With actions, different types
+- **Tooltips**: For UI guidance, feature explanations
+- **Dialogs**: For confirmations, detailed actions
+- **Bottom Sheets**: For mobile actions, filters
+
+#### 7. **Material Design 3 Icons Integration**
+- Replace Font Awesome with **Material Symbols**
+- **Outlined, Rounded, Sharp** variants for different contexts
+- **Variable fonts** for dynamic sizing and weight
+- **Semantic icon usage** following MD3 guidelines
+
+#### 8. **Advanced Layout Components**
+- **App Bars**: Top app bar with contextual actions
+- **Bottom App Bar**: For mobile primary actions
+- **Floating Action Buttons**: For quick mood entry
+- **Side Sheets**: For filters, settings
+
+#### 9. **Motion & Transitions**
+- **Shared Element Transitions**: Between views
+- **Container Transforms**: For card expansions
+- **Fade Through**: For content changes
+- **Slide Transitions**: For navigation
+
+#### 10. **Accessibility & Responsive Enhancements**
+- **Focus Management**: Proper tab order, focus indicators
+- **Screen Reader Support**: ARIA labels, descriptions
+- **High Contrast Mode**: Enhanced visibility
+- **Touch Target Sizing**: Minimum 48dp touch targets
+
+### Implementation Strategy:
+
+1. **Setup Material Design 3 Icons** - Replace icon system
+2. **Core Components** - Progress, buttons, navigation
+3. **Data Components** - Tables, lists, enhanced cards
+4. **Input Components** - Advanced form elements
+5. **Layout Components** - App bars, sheets, FABs
+6. **Motion System** - Transitions and animations
+7. **Accessibility Pass** - Ensure full compliance
+8. **Testing & Refinement** - Cross-device testing
+
+### Expected Outcome:
+A fully Material Design 3 compliant application with all expressive components, creating a premium user experience that rivals Google's own applications.
+
 ## Technical Stack
 
 ### Backend
@@ -99,7 +177,9 @@ The application follows SOLID principles with a clean, layered architecture:
 - **Service Layer** for business logic
 
 ### Frontend
-- **Material Design 3** components and styling
+- **Material Design 3** with full expressive components suite
+- **Progress indicators**, button groups, split buttons, and advanced UI patterns
+- **Material Design 3 Icons** for consistent visual language
 - **Chart.js** for interactive charts
 - **D3.js** for calendar heatmaps
 - **Responsive design** for all devices

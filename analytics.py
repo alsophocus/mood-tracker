@@ -60,21 +60,21 @@ class TrendAnalysisService:
         if slope > 0.1:
             return {
                 'direction': 'improving',
-                'icon': 'fas fa-arrow-up',
+                'icon': 'material-symbols-outlined">trending_up',
                 'description': 'Improving trend',
                 'color': '#4CAF50'  # Green for upward
             }
         elif slope < -0.1:
             return {
                 'direction': 'declining',
-                'icon': 'fas fa-arrow-down', 
+                'icon': 'material-symbols-outlined">trending_down', 
                 'description': 'Declining trend',
                 'color': '#F44336'  # Red for downward
             }
         else:
             return {
                 'direction': 'stable',
-                'icon': 'fas fa-arrow-right',
+                'icon': 'material-symbols-outlined">trending_flat',
                 'description': 'Stable trend',
                 'color': '#FF9800'  # Orange for flat
             }
