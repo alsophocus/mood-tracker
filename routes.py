@@ -1057,10 +1057,12 @@ def export_pdf():
 @main_bp.route('/api/pdf-simple')
 @login_required
 def simple_pdf_export():
-    """Simple server-side PDF export"""
+    """Working server-side PDF export with proper styling"""
     try:
+        from pdf_export_working import WorkingPDFExporter
+        
         moods = db.get_user_moods(current_user.id)
-        exporter = PDFExporter(current_user, moods)
+        exporter = WorkingPDFExporter(current_user, moods)
         buffer = exporter.generate_report()
         
         filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
