@@ -3,63 +3,74 @@ import tempfile
 import os
 from datetime import datetime
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.colors import HexColor
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, KeepTogether
+from reportlab.lib.units import inch, mm
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from analytics import MoodAnalytics, MOOD_VALUES
+from pdf_md3_styles import MD3PDFComponents, MD3_COLORS, create_md3_typography, LAYOUT_GRID
 
 class PDFExporter:
     def __init__(self, user, moods):
         self.user = user
         self.moods = moods
         self.analytics = MoodAnalytics(moods)
+        self.md3 = MD3PDFComponents()
+        self.typography = create_md3_typography()
     
     def generate_report(self):
-        """Generate comprehensive PDF report"""
+        """Generate comprehensive PDF report with Material Design 3 styling"""
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+        
+        # Use A4 page size for international standard
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=A4,
+            topMargin=LAYOUT_GRID['margin_top'],
+            bottomMargin=LAYOUT_GRID['margin_bottom'],
+            leftMargin=LAYOUT_GRID['margin_left'],
+            rightMargin=LAYOUT_GRID['margin_right']
+        )
         
         story = []
-        story.extend(self._create_header())
-        story.extend(self._create_summary())
-        story.extend(self._create_charts())
-        story.extend(self._create_recent_history())
-        story.extend(self._create_footer())
+        story.extend(self._create_md3_header())
+        story.extend(self._create_md3_summary())
+        story.extend(self._create_md3_charts())
+        story.extend(self._create_md3_recent_history())
+        story.extend(self._create_md3_footer())
         
         doc.build(story)
         buffer.seek(0)
         return buffer
     
-    def _create_header(self):
-        """Create PDF header"""
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=24,
-            spaceAfter=30,
-            textColor=HexColor('#1e293b'),
-            alignment=1
-        )
+    def _create_md3_header(self):
+        """Create Material Design 3 styled header"""
+        header_elements = []
         
-        body_style = ParagraphStyle(
-            'CustomBody',
-            parent=styles['Normal'],
-            fontSize=11,
-            spaceAfter=6,
-            textColor=HexColor('#374151')
-        )
+        # Main title with MD3 Display Large typography
+        title_text = "🧠 Mood Analytics Report"
+        title = Paragraph(title_text, self.typography['display_large'])
+        header_elements.append(title)
         
-        return [
-            Paragraph("🌈 Mood Tracker Report", title_style),
-            Paragraph(f"<b>User:</b> {self.user.name}<br/><b>Generated:</b> {datetime.now().strftime('%B %d, %Y at %H:%M')}", body_style),
-            Spacer(1, 20)
-        ]
+        # Subtitle with user info and generation date
+        user_name = self.user.name if self.user and self.user.name else "User"
+        generation_date = datetime.now().strftime('%B %d, %Y at %H:%M')
+        
+        subtitle_text = f"""
+        <font color="{MD3_COLORS['primary']}"><b>Generated for:</b></font> {user_name}<br/>
+        <font color="{MD3_COLORS['on_surface_variant']}"><b>Report Date:</b></font> {generation_date}
+        """
+        
+        subtitle = Paragraph(subtitle_text, self.typography['body_large'])
+        header_elements.append(subtitle)
+        header_elements.append(Spacer(1, 20))
+        
+        return header_elements
     
     def _create_summary(self):
         """Create summary section"""
