@@ -429,7 +429,7 @@
 <body>
     <!-- Theme toggle button -->
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <i class="material-symbols-outlined">light_mode</i> id="theme-icon"></i>
+        <i class="material-symbols-outlined" id="theme-icon">light_mode</i>
     </button>
 
     <div class="login-container">
@@ -478,19 +478,19 @@
         
         <div class="features-list">
             <div class="feature-item">
-                <i class="fas fa-lock feature-icon"></i>
+                <i class="material-symbols-outlined feature-icon">lock</i>
                 <span>End-to-end encrypted</span>
             </div>
             <div class="feature-item">
-                <i class="fas fa-chart-line feature-icon"></i>
+                <i class="material-symbols-outlined feature-icon">trending_up</i>
                 <span>Personal analytics</span>
             </div>
             <div class="feature-item">
-                <i class="fas fa-download feature-icon"></i>
+                <i class="material-symbols-outlined feature-icon">download</i>
                 <span>Export your data</span>
             </div>
             <div class="feature-item">
-                <i class="fas fa-mobile-alt feature-icon"></i>
+                <i class="material-symbols-outlined feature-icon">smartphone</i>
                 <span>Works on all devices</span>
             </div>
         </div>
@@ -551,7 +551,8 @@
             updateThemeIcon(theme) {
                 if (this.themeIcon) {
                     // Show current theme icon: moon for dark, sun for light
-                    this.themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+                    this.themeIcon.className = theme === 'dark' ? 'material-symbols-outlined' : 'material-symbols-outlined';
+                    this.themeIcon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
                 }
             }
 
