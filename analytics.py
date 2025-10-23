@@ -60,21 +60,21 @@ class TrendAnalysisService:
         if slope > 0.1:
             return {
                 'direction': 'improving',
-                'icon': 'trending_up',
+                'icon': 'arrow-up',
                 'description': 'Improving trend',
                 'color': '#388E3C'  # MD3 Success color
             }
         elif slope < -0.1:
             return {
                 'direction': 'declining',
-                'icon': 'trending_down', 
+                'icon': 'arrow-down', 
                 'description': 'Declining trend',
                 'color': '#D32F2F'  # MD3 Error color
             }
         else:
             return {
                 'direction': 'stable',
-                'icon': 'trending_flat',
+                'icon': 'arrow-right',
                 'description': 'Stable trend',
                 'color': '#6750A4'  # MD3 Primary color
             }
