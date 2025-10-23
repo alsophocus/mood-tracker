@@ -867,28 +867,32 @@ def weekly_patterns():
 @main_bp.route('/weekly_trends')
 @login_required
 def weekly_trends():
-    """Get weekly mood trends (sums) for specific month"""
-    from datetime import date, timedelta
-    import calendar
-    
-    # Get month parameters
-    year = request.args.get('year', type=int)
-    month = request.args.get('month', type=int)
-    
-    moods = db.get_user_moods(current_user.id)
-    analytics = MoodAnalytics(moods)
-    
-    if year and month:
-        try:
-            result = analytics.get_weekly_trends_for_month(year, month)
+    """Get 4-week comparison data with SOLID dependency injection"""
+    try:
+        # Dependency Injection - inject database dependency
+        from analytics import FourWeekComparisonService
+        four_week_service = FourWeekComparisonService(db)
+        
+        # Get 4-week comparison data
+        result = four_week_service.get_four_week_comparison(current_user.id)
+        
+        if result.get('success'):
             return jsonify(result)
-        except Exception as e:
-            return jsonify({"error": "Invalid date parameters"}), 400
-    else:
-        # Default to current month
-        today = date.today()
-        result = analytics.get_weekly_trends_for_month(today.year, today.month)
-        return jsonify(result)
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Failed to get 4-week comparison'),
+                'weeks': [],
+                'labels': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'weeks': [],
+            'labels': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        }), 500
 
 @main_bp.route('/monthly_trends')
 @login_required

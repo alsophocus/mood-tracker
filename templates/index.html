@@ -3075,25 +3075,12 @@
             </div>
         </div>
         
-        <!-- Weekly Trends -->
+        <!-- 4-Week Comparison -->
         <div class="section">
             <div class="md-card">
                 <div class="md-card-header">
-                    <i class="fas fa-chart-bar md-card-icon"></i>
-                    <h2 class="md-card-title headline-small">Weekly Trends</h2>
-                </div>
-                
-                <div class="controls-container">
-                    <div class="md-select-container">
-                        <select id="trendsYearSelect" class="md-select" value="">
-                        </select>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
-                    </div>
-                    <div class="md-select-container">
-                        <select id="trendsMonthSelect" class="md-select" value="">
-                        </select>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
-                    </div>
+                    <i class="fas fa-chart-line md-card-icon"></i>
+                    <h2 class="md-card-title headline-small">4-Week Comparison</h2>
                 </div>
                 
                 <div class="chart-container">
@@ -3742,16 +3729,6 @@
                         }
                     }
                     
-                    // Weekly Trends auto-load
-                    if (select.id === 'trendsYearSelect' || select.id === 'trendsMonthSelect') {
-                        const year = document.getElementById('trendsYearSelect').value;
-                        const month = document.getElementById('trendsMonthSelect').value;
-                        
-                        if (year && month) {
-                            loadWeeklyTrends();
-                        }
-                    }
-                    
                     // Monthly Trends auto-load
                     if (select.id === 'monthlyYearSelect') {
                         const year = document.getElementById('monthlyYearSelect').value;
@@ -4044,28 +4021,41 @@
                 });
             }
             
-            // Weekly Trends Chart
+            // 4-Week Comparison Chart
             const weeklyTrendCtx = document.getElementById('weeklyTrendChart');
             if (weeklyTrendCtx) {
                 window.weeklyTrendChart = new Chart(weeklyTrendCtx.getContext('2d'), {
-                    type: 'bar',
+                    type: 'line',
                     data: {
-                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                        datasets: [{
-                            label: 'Loading...',
-                            data: [0, 0, 0, 0],
-                            backgroundColor: 'rgba(125, 82, 96, 0.6)',
-                            borderColor: '#7d5260',
-                            borderWidth: 2
-                        }]
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [
+                            {
+                                label: 'Loading...',
+                                data: [null, null, null, null, null, null, null],
+                                borderColor: '#6750A4',
+                                backgroundColor: 'rgba(103, 80, 164, 0.1)',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                spanGaps: false
+                            }
+                        ]
                     },
                     options: {
                         ...chartOptions,
-                        scales: {
-                            ...chartOptions.scales,
-                            y: {
-                                ...chartOptions.scales.y,
-                                min: 0
+                        plugins: {
+                            ...chartOptions.plugins,
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        family: 'Roboto',
+                                        size: 12
+                                    },
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
                             }
                         }
                     }
@@ -4807,39 +4797,46 @@
         }
 
         function loadWeeklyTrends() {
-            const year = document.getElementById('trendsYearSelect').value;
-            const month = document.getElementById('trendsMonthSelect').value;
-            
-            if (!year || !month) {
-                showSnackbar('Please select Year and Month');
-                return;
-            }
-            
-            fetch(`/weekly_trends?year=${year}&month=${month}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (window.weeklyTrendChart) {
-                        window.weeklyTrendChart.data.labels = data.labels || [];
-                        window.weeklyTrendChart.data.datasets[0].data = data.data || [];
-                        window.weeklyTrendChart.data.datasets[0].label = data.period || 'Weekly Trends';
-                        window.weeklyTrendChart.update();
-                    }
-                })
-                .catch(error => console.error('Error loading weekly trends:', error));
-        }
-
-        function loadCurrentMonthTrends() {
+            // No longer needs year/month parameters - loads last 4 weeks automatically
             fetch('/weekly_trends')
                 .then(response => response.json())
                 .then(data => {
-                    if (window.weeklyTrendChart) {
-                        window.weeklyTrendChart.data.labels = data.labels || [];
-                        window.weeklyTrendChart.data.datasets[0].data = data.data || [];
-                        window.weeklyTrendChart.data.datasets[0].label = 'Current Month Trends';
+                    if (window.weeklyTrendChart && data.success) {
+                        // Clear existing datasets
+                        window.weeklyTrendChart.data.datasets = [];
+                        
+                        // Material Design 3 colors for each week
+                        const weekColors = [
+                            '#6750A4', // Primary
+                            '#625B71', // Secondary  
+                            '#7D5260', // Tertiary
+                            '#BA1A1A'  // Error (for oldest week)
+                        ];
+                        
+                        // Add dataset for each week
+                        data.weeks.forEach((week, index) => {
+                            window.weeklyTrendChart.data.datasets.push({
+                                label: week.label,
+                                data: week.data,
+                                borderColor: weekColors[index],
+                                backgroundColor: weekColors[index] + '20',
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                spanGaps: false
+                            });
+                        });
+                        
+                        window.weeklyTrendChart.data.labels = data.labels;
                         window.weeklyTrendChart.update();
                     }
                 })
-                .catch(error => console.error('Error loading current month trends:', error));
+                .catch(error => console.error('Error loading 4-week comparison:', error));
+        }
+
+        function loadCurrentMonthTrends() {
+            // Renamed to load4WeekComparison for clarity
+            loadWeeklyTrends();
         }
 
         function loadMonthlyTrends() {
@@ -5026,7 +5023,7 @@
             // Export existing charts with better spacing
             const existingCharts = [
                 { id: 'weeklyChart', title: 'Weekly Patterns' },
-                { id: 'weeklyTrendChart', title: 'Weekly Trends' },
+                { id: 'weeklyTrendChart', title: '4-Week Comparison' },
                 { id: 'monthlyTrendChart', title: 'Monthly Trends' }
             ];
             

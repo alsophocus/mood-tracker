@@ -1,10 +1,86 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Dict, List, Any
 
 MOOD_VALUES = {
     'very bad': 1, 'bad': 2, 'slightly bad': 3, 'neutral': 4,
     'slightly well': 5, 'well': 6, 'very well': 7
 }
+
+class FourWeekComparisonService:
+    """Single Responsibility: Handle 4-week comparison data analysis"""
+    
+    def __init__(self, db):
+        self.db = db
+    
+    def get_four_week_comparison(self, user_id: int) -> Dict[str, Any]:
+        """Get last 4 weeks of data with date ranges for comparison"""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Get data for last 4 weeks
+                cursor.execute("""
+                    SELECT date, mood 
+                    FROM moods 
+                    WHERE user_id = %s 
+                    AND date >= CURRENT_DATE - INTERVAL '28 days'
+                    ORDER BY date
+                """, (user_id,))
+                
+                rows = cursor.fetchall()
+                
+                # Group data by weeks
+                weeks_data = self._group_by_weeks(rows)
+                
+                return {
+                    'success': True,
+                    'weeks': weeks_data,
+                    'labels': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                }
+                
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+    
+    def _group_by_weeks(self, rows: List[Dict]) -> List[Dict]:
+        """Group mood data by 4-week periods with date ranges"""
+        # Calculate week boundaries (last 4 weeks)
+        today = datetime.now().date()
+        weeks = []
+        
+        for week_offset in range(4):
+            # Calculate start of each week (Monday)
+            days_back = (today.weekday() + 7 * week_offset)
+            week_start = today - timedelta(days=days_back)
+            week_end = week_start + timedelta(days=6)
+            
+            # Get data for this week
+            week_data = [None] * 7  # Mon-Sun
+            week_entries = []
+            
+            for row in rows:
+                mood_date = row['date']
+                if week_start <= mood_date <= week_end:
+                    day_of_week = mood_date.weekday()  # 0=Monday
+                    mood_value = MOOD_VALUES.get(row['mood'].lower(), 4)
+                    week_data[day_of_week] = mood_value
+                    week_entries.append(mood_value)
+            
+            # Calculate week average
+            week_average = sum(week_entries) / len(week_entries) if week_entries else None
+            
+            # Format date range
+            date_range = f"{week_start.strftime('%b %d')} - {week_end.strftime('%b %d')}"
+            
+            weeks.append({
+                'label': date_range,
+                'data': week_data,
+                'average': round(week_average, 1) if week_average else None,
+                'entries_count': len(week_entries)
+            })
+        
+        # Reverse to show oldest to newest
+        return list(reversed(weeks))
 
 class MoodAnalytics:
     def __init__(self, moods):
