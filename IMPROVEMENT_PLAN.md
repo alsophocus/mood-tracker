@@ -316,7 +316,7 @@ Three Material Design 3 cards showing:
 - Poor visual hierarchy and spacing
 
 ### Target State - Professional MD3 PDF Report
-- **Material Design 3 Typography**: Proper font hierarchy with Roboto font family
+- **Material Design 3 Typography**: Proper font hierarchy with Google Sans font family
 - **Color System**: Full MD3 color palette with semantic color usage
 - **Layout Grid**: 12-column grid system with proper margins and gutters
 - **Visual Hierarchy**: Clear information architecture with proper spacing
@@ -403,7 +403,7 @@ Label Large: 14px/20px - Data Labels
 ### Implementation Steps
 
 #### **Phase 6.1: Typography and Color System** ⏳
-1. Implement Roboto font family across all PDF elements
+1. Implement Google Sans font family across all PDF elements
 2. Apply MD3 typography scale consistently
 3. Implement semantic color system
 4. Add proper text hierarchy and spacing
@@ -483,19 +483,19 @@ MD3_COLORS = {
 MD3_TYPOGRAPHY = {
     'display_large': ParagraphStyle(
         'DisplayLarge',
-        fontSize=57, leading=64, fontName='Roboto-Regular'
+        fontSize=57, leading=64, fontName='GoogleSans-Regular'
     ),
     'headline_large': ParagraphStyle(
         'HeadlineLarge', 
-        fontSize=32, leading=40, fontName='Roboto-Regular'
+        fontSize=32, leading=40, fontName='GoogleSans-Regular'
     ),
     'title_large': ParagraphStyle(
         'TitleLarge',
-        fontSize=22, leading=28, fontName='Roboto-Medium'
+        fontSize=22, leading=28, fontName='GoogleSans-Medium'
     ),
     'body_large': ParagraphStyle(
         'BodyLarge',
-        fontSize=16, leading=24, fontName='Roboto-Regular'
+        fontSize=16, leading=24, fontName='GoogleSans-Regular'
     )
 }
 ```
@@ -535,7 +535,7 @@ class MD3PDFComponents:
 ### Quality Standards
 
 #### **Visual Quality Requirements**
-- **Typography**: All text must use Roboto font family
+- **Typography**: All text must use Google Sans font family (Material Design 3 standard)
 - **Spacing**: Consistent 8mm baseline grid throughout
 - **Colors**: Exact MD3 color specifications with proper contrast ratios
 - **Alignment**: Right-aligned numbers, left-aligned text, centered headers
