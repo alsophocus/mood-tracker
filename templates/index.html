@@ -2681,10 +2681,14 @@
             box-shadow: var(--md-sys-elevation-level3);
         }
 
-        .mood-card-emoji {
+        .mood-card-icon {
             font-size: 32px;
             text-align: center;
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
         }
 
         .mood-card-content {
@@ -2715,10 +2719,11 @@
             font-size: var(--md-sys-typescale-body-medium-size);
             color: var(--md-sys-color-on-surface);
             background-color: var(--md-sys-color-surface-variant);
-            padding: 8px 12px;
+            padding: 12px;
             border-radius: var(--md-sys-shape-corner-small);
             margin-bottom: 8px;
-            font-style: italic;
+            font-style: normal;
+            line-height: 1.4;
         }
 
         .mood-card-triggers {
@@ -2726,9 +2731,10 @@
             font-size: var(--md-sys-typescale-label-small-size);
             color: var(--md-sys-color-primary);
             background-color: var(--md-sys-color-primary-container);
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: var(--md-sys-shape-corner-extra-small);
             text-align: center;
+            font-weight: 500;
         }
 
         .carousel-empty {

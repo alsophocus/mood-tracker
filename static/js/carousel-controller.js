@@ -61,7 +61,9 @@ class CarouselController {
     createMoodCard(mood, index) {
         return `
             <div class="mood-carousel-card" style="--mood-color: ${mood.color}" data-index="${index}">
-                <div class="mood-card-emoji">${mood.emoji}</div>
+                <div class="mood-card-icon">
+                    <i class="${mood.icon}" style="color: ${mood.color};"></i>
+                </div>
                 <div class="mood-card-content">
                     <div class="mood-card-mood">${mood.mood}</div>
                     <div class="mood-card-datetime">${mood.date} ${mood.time}</div>
@@ -77,9 +79,9 @@ class CarouselController {
         const nextBtn = document.getElementById('nextBtn');
         const playPauseBtn = document.getElementById('playPauseBtn');
 
-        prevBtn?.addEventListener('click', () => this.previousSlide());
-        nextBtn?.addEventListener('click', () => this.nextSlide());
-        playPauseBtn?.addEventListener('click', () => this.togglePlayPause());
+        if (prevBtn) prevBtn.addEventListener('click', () => this.previousSlide());
+        if (nextBtn) nextBtn.addEventListener('click', () => this.nextSlide());
+        if (playPauseBtn) playPauseBtn.addEventListener('click', () => this.togglePlayPause());
 
         // Pause on hover
         this.container.addEventListener('mouseenter', () => this.pauseAutoScroll());

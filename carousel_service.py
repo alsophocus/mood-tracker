@@ -40,14 +40,14 @@ class CarouselDataService(CarouselDataInterface):
             'neutral': '#757575', 'slightly well': '#689F38', 'well': '#388E3C', 'very well': '#1976D2'
         }
         
-        mood_emojis = {
-            'very bad': '😢', 'bad': '😞', 'slightly bad': '😕',
-            'neutral': '😐', 'slightly well': '🙂', 'well': '😊', 'very well': '😄'
+        mood_icons = {
+            'very bad': 'fas fa-face-frown-open', 'bad': 'fas fa-face-frown', 'slightly bad': 'fas fa-face-meh',
+            'neutral': 'fas fa-face-meh-blank', 'slightly well': 'fas fa-face-smile', 'well': 'fas fa-face-smile-beam', 'very well': 'fas fa-face-grin-stars'
         }
         
         return {
             'mood': mood['mood'],
-            'emoji': mood_emojis.get(mood['mood'], '😐'),
+            'icon': mood_icons.get(mood['mood'], 'fas fa-face-meh-blank'),
             'color': mood_colors.get(mood['mood'], '#757575'),
             'date': mood['date'].strftime('%b %d') if mood['date'] else '',
             'time': mood['timestamp'].strftime('%H:%M') if mood['timestamp'] else '',
