@@ -47,7 +47,7 @@ class CarouselDataService(CarouselDataInterface):
             'neutral': 'sentiment_neutral', 
             'slightly well': 'sentiment_satisfied', 
             'well': 'sentiment_very_satisfied', 
-            'very well': 'sentiment_extremely_satisfied'
+            'very well': 'sentiment_very_satisfied'
         }
         
         return {
