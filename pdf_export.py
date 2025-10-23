@@ -73,7 +73,7 @@ class PDFExporter:
         return header_elements
     
     def _create_md3_summary(self):
-        """Create summary section with Material Design 3 cards"""
+        """Create summary section with Material Design 3 grid layout"""
         if not self.moods:
             return [Paragraph("No mood data available yet.", self.typography['body_large'])]
         
@@ -85,76 +85,167 @@ class PDFExporter:
         summary_elements.append(section_title)
         summary_elements.append(Spacer(1, 16))
         
-        # Create summary cards content
+        # Create metrics in 2x2 grid layout
         metrics = [
             {
                 'label': 'Total Entries',
                 'value': str(summary['total_entries']),
-                'color': MD3_COLORS['primary']
+                'color': MD3_COLORS['primary'],
+                'icon': '📈'
             },
             {
                 'label': 'Current Streak',
                 'value': f"{summary['current_streak']} days",
-                'color': MD3_COLORS['secondary']
+                'color': MD3_COLORS['secondary'],
+                'icon': '🔥'
             },
             {
                 'label': 'Best Day',
                 'value': summary['best_day'],
-                'color': MD3_COLORS['primary']
+                'color': MD3_COLORS['primary'],
+                'icon': '⭐'
             },
             {
                 'label': 'Average Mood',
                 'value': f"{summary['daily_average']:.1f}/7.0",
-                'color': MD3_COLORS['secondary']
+                'color': MD3_COLORS['secondary'],
+                'icon': '📊'
             }
         ]
         
-        # Create metrics display
-        for i, metric in enumerate(metrics):
-            metric_text = f"""
-            <font color="{metric['color']}" size="18"><b>{metric['value']}</b></font><br/>
-            <font color="{MD3_COLORS['on_surface_variant']}" size="12">{metric['label']}</font>
-            """
-            metric_para = Paragraph(metric_text, self.typography['body_medium'])
-            summary_elements.append(metric_para)
+        # Create 2x2 grid of metric cards
+        for i in range(0, len(metrics), 2):
+            row_elements = []
+            for j in range(2):
+                if i + j < len(metrics):
+                    metric = metrics[i + j]
+                    metric_text = f"""
+                    <para align="center">
+                    <font size="24">{metric['icon']}</font><br/>
+                    <font color="{metric['color']}" size="20"><b>{metric['value']}</b></font><br/>
+                    <font color="{MD3_COLORS['on_surface_variant']}" size="11">{metric['label']}</font>
+                    </para>
+                    """
+                    metric_para = Paragraph(metric_text, self.typography['body_medium'])
+                    row_elements.append(metric_para)
             
-            if i < len(metrics) - 1:
-                summary_elements.append(Spacer(1, 8))
+            # Add row with proper spacing
+            if len(row_elements) == 2:
+                # Create side-by-side layout using table-like structure
+                combined_text = f"""
+                <table width="100%">
+                <tr>
+                <td width="50%" align="center">
+                <font size="24">{metrics[i]['icon']}</font><br/>
+                <font color="{metrics[i]['color']}" size="20"><b>{metrics[i]['value']}</b></font><br/>
+                <font color="{MD3_COLORS['on_surface_variant']}" size="11">{metrics[i]['label']}</font>
+                </td>
+                <td width="50%" align="center">
+                <font size="24">{metrics[i+1]['icon']}</font><br/>
+                <font color="{metrics[i+1]['color']}" size="20"><b>{metrics[i+1]['value']}</b></font><br/>
+                <font color="{MD3_COLORS['on_surface_variant']}" size="11">{metrics[i+1]['label']}</font>
+                </td>
+                </tr>
+                </table>
+                """
+                combined_para = Paragraph(combined_text, self.typography['body_medium'])
+                summary_elements.append(combined_para)
+            else:
+                summary_elements.extend(row_elements)
+            
+            summary_elements.append(Spacer(1, 12))
         
         summary_elements.append(Spacer(1, 24))
         return summary_elements
     
     def _create_md3_charts(self):
-        """Create charts section with Material Design 3 styling"""
+        """Create charts section with Material Design 3 grid layout"""
         if not self.moods:
             return []
         
         story = []
         
-        # Charts section header
+        # Charts section header with divider
         charts_title = Paragraph("📈 Mood Analytics", self.typography['headline_large'])
         story.append(charts_title)
+        story.append(Spacer(1, 8))
+        
+        # Add section description
+        description_text = f"""
+        <font color="{MD3_COLORS['on_surface_variant']}" size="12">
+        Comprehensive analysis of your mood patterns and trends over time.
+        </font>
+        """
+        description = Paragraph(description_text, self.typography['body_medium'])
+        story.append(description)
         story.append(Spacer(1, 16))
         
-        # Mood distribution chart
+        # Mood distribution chart (full width)
         distribution_chart_path = self._create_md3_mood_distribution_chart()
         if distribution_chart_path:
-            chart_title = Paragraph("Mood Distribution (Last 30 Days)", self.typography['title_large'])
-            story.append(chart_title)
-            story.append(Spacer(1, 8))
-            story.append(Image(distribution_chart_path, width=6*inch, height=3*inch))
-            story.append(Spacer(1, 16))
+            chart_title = Paragraph("🎯 Mood Distribution (Last 30 Days)", self.typography['title_large'])
+            story.append(KeepTogether([
+                chart_title,
+                Spacer(1, 8),
+                Image(distribution_chart_path, width=6*inch, height=3.5*inch)
+            ]))
+            story.append(Spacer(1, 20))
         
-        # Weekly patterns chart
+        # Weekly patterns chart (full width)
         weekly_chart_path = self._create_md3_weekly_chart()
         if weekly_chart_path:
-            chart_title = Paragraph("Weekly Patterns", self.typography['title_large'])
-            story.append(chart_title)
-            story.append(Spacer(1, 8))
-            story.append(Image(weekly_chart_path, width=6*inch, height=3*inch))
-            story.append(Spacer(1, 16))
+            chart_title = Paragraph("📅 Weekly Patterns", self.typography['title_large'])
+            story.append(KeepTogether([
+                chart_title,
+                Spacer(1, 8),
+                Image(weekly_chart_path, width=6*inch, height=3*inch)
+            ]))
+            story.append(Spacer(1, 20))
         
+        # Add insights section
+        insights_title = Paragraph("💡 Key Insights", self.typography['title_large'])
+        story.append(insights_title)
+        story.append(Spacer(1, 8))
+        
+        # Generate insights based on data
+        insights = self._generate_mood_insights(self.analytics.get_summary())
+        for insight in insights:
+            insight_text = f"""
+            <font color="{MD3_COLORS['primary']}">•</font> 
+            <font color="{MD3_COLORS['on_surface']}">{insight}</font>
+            """
+            insight_para = Paragraph(insight_text, self.typography['body_medium'])
+            story.append(insight_para)
+            story.append(Spacer(1, 6))
+        
+        story.append(Spacer(1, 16))
         return story
+    
+    def _generate_mood_insights(self, summary):
+        """Generate insights based on mood data"""
+        insights = []
+        
+        if summary['total_entries'] > 0:
+            avg_mood = summary['daily_average']
+            if avg_mood >= 5.5:
+                insights.append("Your overall mood trend is positive with an above-average rating.")
+            elif avg_mood >= 4.5:
+                insights.append("Your mood levels are generally balanced and stable.")
+            else:
+                insights.append("Consider focusing on activities that boost your mood.")
+        
+        if summary['current_streak'] > 7:
+            insights.append(f"Excellent! You've maintained a {summary['current_streak']}-day positive mood streak.")
+        elif summary['current_streak'] > 3:
+            insights.append(f"Good progress with a {summary['current_streak']}-day positive streak.")
+        
+        if summary['best_day']:
+            insights.append(f"{summary['best_day']} appears to be your most positive day of the week.")
+        
+        if not insights:
+            insights.append("Continue tracking your mood to discover meaningful patterns.")
+        
+        return insights[:3]  # Limit to 3 insights
     
     def _create_md3_mood_distribution_chart(self):
         """Create mood distribution pie chart with Material Design 3 colors"""
@@ -326,7 +417,7 @@ class PDFExporter:
             return None
     
     def _create_md3_recent_history(self):
-        """Create recent mood history section with Material Design 3 styling"""
+        """Create recent mood history section with Material Design 3 grid layout"""
         if not self.moods:
             return []
         
@@ -335,6 +426,16 @@ class PDFExporter:
         # Section header
         history_title = Paragraph("📝 Recent Mood History", self.typography['headline_large'])
         story.append(history_title)
+        story.append(Spacer(1, 8))
+        
+        # Section description
+        description_text = f"""
+        <font color="{MD3_COLORS['on_surface_variant']}" size="12">
+        Your most recent mood entries with notes and patterns.
+        </font>
+        """
+        description = Paragraph(description_text, self.typography['body_medium'])
+        story.append(description)
         story.append(Spacer(1, 16))
         
         mood_emoji = {
@@ -342,28 +443,45 @@ class PDFExporter:
             'slightly well': '🙂', 'well': '😊', 'very well': '😄'
         }
         
-        for mood_entry in self.moods[:10]:  # Last 10 entries
+        # Create entries in a structured format
+        for i, mood_entry in enumerate(self.moods[:8]):  # Last 8 entries
             date_str = str(mood_entry['date'])
             mood = mood_entry['mood']
             notes = mood_entry.get('notes', '')
             
-            # Create entry with MD3 styling
-            entry_text = f"""
-            <font color="{MD3_COLORS['primary']}"><b>{date_str}</b></font> 
-            {mood_emoji.get(mood, '😐')} 
-            <font color="{MD3_COLORS['on_surface']}">{mood.title()}</font>
+            # Create structured entry
+            entry_html = f"""
+            <table width="100%" style="border-bottom: 1px solid {MD3_COLORS['outline_variant']};">
+            <tr>
+            <td width="15%" align="center">
+            <font size="20">{mood_emoji.get(mood, '😐')}</font>
+            </td>
+            <td width="25%">
+            <font color="{MD3_COLORS['primary']}" size="12"><b>{date_str}</b></font>
+            </td>
+            <td width="25%">
+            <font color="{MD3_COLORS['on_surface']}" size="11">{mood.title()}</font>
+            </td>
+            <td width="35%">
             """
             
             if notes:
-                notes_text = notes[:80] + "..." if len(notes) > 80 else notes
-                entry_text += f"""<br/>
-                <font color="{MD3_COLORS['on_surface_variant']}" size="12"><i>{notes_text}</i></font>
-                """
+                notes_text = notes[:50] + "..." if len(notes) > 50 else notes
+                entry_html += f'<font color="{MD3_COLORS["on_surface_variant"]}" size="10"><i>{notes_text}</i></font>'
+            else:
+                entry_html += f'<font color="{MD3_COLORS["on_surface_variant"]}" size="10">No notes</font>'
             
-            entry_para = Paragraph(entry_text, self.typography['body_medium'])
+            entry_html += """
+            </td>
+            </tr>
+            </table>
+            """
+            
+            entry_para = Paragraph(entry_html, self.typography['body_medium'])
             story.append(entry_para)
-            story.append(Spacer(1, 8))
+            story.append(Spacer(1, 4))
         
+        story.append(Spacer(1, 16))
         return story
     
     def _create_md3_footer(self):

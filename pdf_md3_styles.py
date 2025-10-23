@@ -132,26 +132,66 @@ class MD3PDFComponents:
         self.typography = create_md3_typography()
         self.layout = LAYOUT_GRID
     
-    def create_header_background(self, canvas, x, y, width, height):
-        """Create MD3 header with primary color background"""
-        canvas.setFillColor(self.colors['primary'])
-        canvas.roundRect(x, y, width, height, 12, fill=1, stroke=0)
+    def get_column_width(self, columns=1):
+        """Calculate width for given number of columns in 12-column grid"""
+        column_width = (self.layout['content_width'] - (11 * self.layout['gutter'])) / 12
+        return (column_width * columns) + (self.layout['gutter'] * (columns - 1))
     
-    def create_card_background(self, canvas, x, y, width, height, elevation=1):
-        """Create MD3 card with proper elevation"""
-        # Shadow effect (simplified)
+    def get_column_x(self, column_start=0):
+        """Get X position for column start (0-11)"""
+        column_width = (self.layout['content_width'] - (11 * self.layout['gutter'])) / 12
+        return self.layout['margin_left'] + (column_start * (column_width + self.layout['gutter']))
+    
+    def create_header_background(self, canvas, x, y, width, height):
+        """Create MD3 header with primary color background and elevation"""
+        # Header shadow (elevation level 2)
+        canvas.setFillColor(HexColor('#00000015'))
+        canvas.roundRect(x + 2, y - 2, width, height, 16, fill=1, stroke=0)
+        
+        # Header gradient background
+        canvas.setFillColor(self.colors['primary'])
+        canvas.roundRect(x, y, width, height, 16, fill=1, stroke=0)
+        
+        # Header accent line
+        canvas.setFillColor(self.colors['primary_container'])
+        canvas.roundRect(x, y + height - 8, width, 8, 0, fill=1, stroke=0)
+    
+    def create_analytics_card(self, canvas, x, y, width, height, elevation=1):
+        """Create MD3 analytics card with proper elevation and styling"""
+        # Card shadow (elevation)
         shadow_offset = elevation * 2
-        canvas.setFillColor(HexColor('#00000020'))
+        canvas.setFillColor(HexColor('#00000012'))
         canvas.roundRect(x + shadow_offset, y - shadow_offset, width, height, 12, fill=1, stroke=0)
         
         # Card background
-        canvas.setFillColor(self.colors['surface_container'])
+        canvas.setFillColor(self.colors['surface_container_high'])
         canvas.roundRect(x, y, width, height, 12, fill=1, stroke=0)
         
         # Card border
         canvas.setStrokeColor(self.colors['outline_variant'])
-        canvas.setLineWidth(1)
+        canvas.setLineWidth(0.5)
         canvas.roundRect(x, y, width, height, 12, fill=0, stroke=1)
+        
+        # Card accent (top border)
+        canvas.setFillColor(self.colors['primary'])
+        canvas.roundRect(x, y + height - 4, width, 4, 0, fill=1, stroke=0)
+    
+    def create_chart_container(self, canvas, x, y, width, height):
+        """Create MD3 chart container with proper styling"""
+        # Container background
+        canvas.setFillColor(self.colors['surface_container'])
+        canvas.roundRect(x, y, width, height, 8, fill=1, stroke=0)
+        
+        # Container border
+        canvas.setStrokeColor(self.colors['outline_variant'])
+        canvas.setLineWidth(0.5)
+        canvas.roundRect(x, y, width, height, 8, fill=0, stroke=1)
+    
+    def create_section_divider(self, canvas, x, y, width):
+        """Create MD3 section divider"""
+        canvas.setStrokeColor(self.colors['outline_variant'])
+        canvas.setLineWidth(1)
+        canvas.line(x, y, x + width, y)
     
     def get_chart_colors(self):
         """Get MD3 color palette for charts"""
