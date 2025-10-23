@@ -386,6 +386,8 @@ class PDFExporter:
         if not insights:
             insights.append("Continue tracking your mood to discover meaningful patterns.")
         
+        return insights[:3]  # Limit to 3 insights
+        
     def _create_trend_analysis(self):
         """Create comprehensive trend analysis section"""
         if not self.moods or len(self.moods) < 7:
