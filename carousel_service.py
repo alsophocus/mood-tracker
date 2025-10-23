@@ -41,18 +41,18 @@ class CarouselDataService(CarouselDataInterface):
         }
         
         mood_icons = {
-            'very bad': 'material-symbols-outlined">sentiment_very_dissatisfied', 
-            'bad': 'material-symbols-outlined">sentiment_dissatisfied', 
-            'slightly bad': 'material-symbols-outlined">sentiment_neutral',
-            'neutral': 'material-symbols-outlined">sentiment_neutral', 
-            'slightly well': 'material-symbols-outlined">sentiment_satisfied', 
-            'well': 'material-symbols-outlined">sentiment_very_satisfied', 
-            'very well': 'material-symbols-outlined">sentiment_extremely_satisfied'
+            'very bad': 'sentiment_very_dissatisfied', 
+            'bad': 'sentiment_dissatisfied', 
+            'slightly bad': 'sentiment_neutral',
+            'neutral': 'sentiment_neutral', 
+            'slightly well': 'sentiment_satisfied', 
+            'well': 'sentiment_very_satisfied', 
+            'very well': 'sentiment_extremely_satisfied'
         }
         
         return {
             'mood': mood['mood'],
-            'icon': mood_icons.get(mood['mood'], 'material-symbols-outlined">sentiment_neutral'),
+            'icon': mood_icons.get(mood['mood'], 'sentiment_neutral'),
             'color': mood_colors.get(mood['mood'], '#757575'),
             'date': mood['date'].strftime('%b %d') if mood['date'] else '',
             'time': mood['timestamp'].strftime('%H:%M') if mood['timestamp'] else '',

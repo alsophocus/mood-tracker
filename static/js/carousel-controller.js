@@ -62,7 +62,7 @@ class CarouselController {
         return `
             <div class="mood-carousel-card" style="--mood-color: ${mood.color}" data-index="${index}">
                 <div class="mood-card-icon">
-                    <i class="${mood.icon}" style="color: ${mood.color};"></i>
+                    <i class="material-symbols-outlined" style="color: ${mood.color};">${mood.icon}</i>
                 </div>
                 <div class="mood-card-content">
                     <div class="mood-card-mood">${mood.mood}</div>
@@ -130,7 +130,8 @@ class CarouselController {
         this.isPlaying = !this.isPlaying;
         const icon = document.querySelector('#playPauseBtn i');
         if (icon) {
-            icon.className = `fas fa-${this.isPlaying ? 'pause' : 'play'}`;
+            icon.className = 'material-symbols-outlined';
+            icon.textContent = this.isPlaying ? 'pause' : 'play_arrow';
         }
         
         if (this.isPlaying) {
