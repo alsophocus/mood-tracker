@@ -510,6 +510,26 @@ def get_mood_distribution():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@main_bp.route('/api/carousel/recent-moods')
+@login_required
+def get_carousel_moods():
+    """Get recent moods for carousel display"""
+    try:
+        from carousel_service import CarouselDataService
+        
+        carousel_service = CarouselDataService(db)
+        moods = carousel_service.get_recent_moods(session['user_id'], limit=15)
+        
+        return jsonify({
+            'success': True,
+            'moods': moods
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @main_bp.route('/api/analytics/quick-stats')
 @login_required
 def get_quick_stats():

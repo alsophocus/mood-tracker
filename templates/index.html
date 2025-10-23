@@ -19,6 +19,7 @@
     <script src="/static/js/weekly-data-loader.js"></script>
     <script src="/static/js/weekly-chart-service.js"></script>
     <script src="/static/js/chart-factory.js"></script>
+    <script src="/static/js/carousel-controller.js"></script>
     <style>
         /* Material Design 3 (Material You) Design System */
         :root {
@@ -2585,6 +2586,180 @@
             font-weight: var(--md-sys-typescale-body-medium-weight);
             line-height: var(--md-sys-typescale-body-medium-line-height);
         }
+
+        /* Material Design 3 Carousel Styles */
+        .mood-carousel-container {
+            padding: 0;
+        }
+
+        .carousel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .carousel-title {
+            font-family: var(--md-sys-typescale-headline-small-font);
+            font-size: var(--md-sys-typescale-headline-small-size);
+            font-weight: var(--md-sys-typescale-headline-small-weight);
+            color: var(--md-sys-color-on-surface);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .carousel-title::before {
+            content: '🎠';
+            font-size: 24px;
+        }
+
+        .carousel-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .carousel-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--md-sys-shape-corner-full);
+            background-color: var(--md-sys-color-surface-container-high);
+            color: var(--md-sys-color-on-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+        }
+
+        .carousel-btn:hover {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            transform: scale(1.1);
+            box-shadow: var(--md-sys-elevation-level2);
+        }
+
+        .carousel-track-container {
+            overflow: hidden;
+            padding: 24px;
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 16px;
+            transition: transform var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized);
+        }
+
+        .mood-carousel-card {
+            min-width: 280px;
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 20px;
+            box-shadow: var(--md-sys-elevation-level1);
+            border-left: 4px solid var(--mood-color);
+            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mood-carousel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--mood-color) 0%, transparent 50%);
+            opacity: 0.05;
+        }
+
+        .mood-carousel-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--md-sys-elevation-level3);
+        }
+
+        .mood-card-emoji {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .mood-card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .mood-card-mood {
+            font-family: var(--md-sys-typescale-title-medium-font);
+            font-size: var(--md-sys-typescale-title-medium-size);
+            font-weight: var(--md-sys-typescale-title-medium-weight);
+            color: var(--md-sys-color-on-surface);
+            text-align: center;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .mood-card-datetime {
+            font-family: var(--md-sys-typescale-body-small-font);
+            font-size: var(--md-sys-typescale-body-small-size);
+            color: var(--md-sys-color-on-surface-variant);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .mood-card-notes {
+            font-family: var(--md-sys-typescale-body-medium-font);
+            font-size: var(--md-sys-typescale-body-medium-size);
+            color: var(--md-sys-color-on-surface);
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 8px 12px;
+            border-radius: var(--md-sys-shape-corner-small);
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .mood-card-triggers {
+            font-family: var(--md-sys-typescale-label-small-font);
+            font-size: var(--md-sys-typescale-label-small-size);
+            color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-primary-container);
+            padding: 4px 8px;
+            border-radius: var(--md-sys-shape-corner-extra-small);
+            text-align: center;
+        }
+
+        .carousel-empty {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-family: var(--md-sys-typescale-body-large-font);
+            font-size: var(--md-sys-typescale-body-large-size);
+        }
+
+        .carousel-empty::before {
+            content: '📭';
+            display: block;
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .mood-carousel-card {
+                min-width: 240px;
+            }
+            
+            .carousel-track-container {
+                padding: 16px;
+            }
+            
+            .carousel-header {
+                padding: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3152,120 +3327,12 @@
             </div>
         </div>
         
-        <!-- Mood History -->
+        <!-- Recent Moods Carousel -->
         <div class="section">
             <div class="md-card">
-                <div class="md-card-header">
-                    <i class="fas fa-history md-card-icon"></i>
-                    <h2 class="md-card-title headline-small">Recent Moods</h2>
+                <div id="moodCarousel" class="mood-carousel-container">
+                    <!-- Carousel will be populated by JavaScript -->
                 </div>
-                
-                {% for mood in moods %}
-                <div class="history-item">
-                    <div class="history-content">
-                        <div class="mood-icon-history">
-                            {% if mood.mood == 'very bad' %}
-                                <i class="fas fa-face-frown-open" style="color: var(--md-sys-color-error);"></i>
-                            {% elif mood.mood == 'bad' %}
-                                <i class="fas fa-face-frown" style="color: #ff5722;"></i>
-                            {% elif mood.mood == 'slightly bad' %}
-                                <i class="fas fa-face-meh" style="color: #ff9800;"></i>
-                            {% elif mood.mood == 'neutral' %}
-                                <i class="fas fa-face-meh-blank" style="color: var(--md-sys-color-on-surface-variant);"></i>
-                            {% elif mood.mood == 'slightly well' %}
-                                <i class="fas fa-face-smile" style="color: #8bc34a;"></i>
-                            {% elif mood.mood == 'well' %}
-                                <i class="fas fa-face-smile-beam" style="color: #4caf50;"></i>
-                            {% elif mood.mood == 'very well' %}
-                                <i class="fas fa-face-grin-stars" style="color: var(--md-sys-color-tertiary);"></i>
-                            {% else %}
-                                <i class="fas fa-circle" style="color: var(--md-sys-color-on-surface-variant);"></i>
-                            {% endif %}
-                        </div>
-                        <div class="history-details">
-                            <div class="history-date body-medium">{{ mood.date }}</div>
-                            <div class="history-mood body-large">{{ mood.mood|title }}</div>
-                            {% if mood.triggers %}
-                            <div class="history-triggers" style="margin-top: 4px;">
-                                {% for trigger in mood.triggers.split(',') %}
-                                    {% if trigger.strip() %}
-                                    <span class="trigger-chip">
-                                        {% if trigger.strip() == 'work' %}
-                                            <i class="fas fa-briefcase"></i>
-                                        {% elif trigger.strip() == 'meeting' %}
-                                            <i class="fas fa-users"></i>
-                                        {% elif trigger.strip() == 'deadline' %}
-                                            <i class="fas fa-clock"></i>
-                                        {% elif trigger.strip() == 'project' %}
-                                            <i class="fas fa-tasks"></i>
-                                        {% elif trigger.strip() == 'exercise' %}
-                                            <i class="fas fa-dumbbell"></i>
-                                        {% elif trigger.strip() == 'sleep' %}
-                                            <i class="fas fa-bed"></i>
-                                        {% elif trigger.strip() == 'food' %}
-                                            <i class="fas fa-utensils"></i>
-                                        {% elif trigger.strip() == 'medication' %}
-                                            <i class="fas fa-pills"></i>
-                                        {% elif trigger.strip() == 'family' %}
-                                            <i class="fas fa-home"></i>
-                                        {% elif trigger.strip() == 'friends' %}
-                                            <i class="fas fa-user-friends"></i>
-                                        {% elif trigger.strip() == 'party' %}
-                                            <i class="fas fa-glass-cheers"></i>
-                                        {% elif trigger.strip() == 'date' %}
-                                            <i class="fas fa-heart"></i>
-                                        {% elif trigger.strip() == 'music' %}
-                                            <i class="fas fa-music"></i>
-                                        {% elif trigger.strip() == 'reading' %}
-                                            <i class="fas fa-book"></i>
-                                        {% elif trigger.strip() == 'gaming' %}
-                                            <i class="fas fa-gamepad"></i>
-                                        {% elif trigger.strip() == 'cooking' %}
-                                            <i class="fas fa-cookie-bite"></i>
-                                        {% elif trigger.strip() == 'weather' %}
-                                            <i class="fas fa-cloud-sun"></i>
-                                        {% elif trigger.strip() == 'home' %}
-                                            <i class="fas fa-house"></i>
-                                        {% elif trigger.strip() == 'outdoors' %}
-                                            <i class="fas fa-tree"></i>
-                                        {% elif trigger.strip() == 'travel' %}
-                                            <i class="fas fa-plane"></i>
-                                        {% elif trigger.strip() == 'stress' %}
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                        {% elif trigger.strip() == 'relaxation' %}
-                                            <i class="fas fa-spa"></i>
-                                        {% elif trigger.strip() == 'excitement' %}
-                                            <i class="fas fa-star"></i>
-                                        {% elif trigger.strip() == 'anxiety' %}
-                                            <i class="fas fa-dizzy"></i>
-                                        {% else %}
-                                            <i class="fas fa-tag"></i>
-                                        {% endif %}
-                                        {{ trigger.strip()|title }}
-                                    </span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            {% if mood.notes %}
-                            <div class="history-notes body-medium">{{ mood.notes }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% if mood.timestamp %}
-                    <div class="history-time">
-                        {{ (mood.timestamp|utc_to_local).strftime('%H:%M') if mood.timestamp else 'Unknown time' }}
-                    </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-                
-                {% if not moods %}
-                <div style="color: var(--md-sys-color-on-surface-variant); text-align: center; padding: 48px;">
-                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                    <div class="body-large">No mood entries yet. Start tracking your mood above!</div>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -5318,6 +5385,7 @@
                 loadCurrentMonthTrends();
                 loadCurrentYearTrends();
                 loadEnhancedAnalytics();
+                initializeCarousel();
             }, 500);
             
             // Check system status
@@ -5429,28 +5497,11 @@
             }, 4000);
         }
         
-        // Function to refresh Recent Moods section
+        // Function to refresh carousel
         function refreshRecentMoods() {
-            fetch('/recent_moods')
-                .then(response => response.json())
-                .then(data => {
-                    const historyContainer = document.querySelector('.history-container');
-                    if (historyContainer && data.moods) {
-                        let html = '';
-                        data.moods.forEach(mood => {
-                            const date = new Date(mood.date).toLocaleDateString();
-                            html += `
-                                <div class="history-item">
-                                    <div class="history-date">${date}</div>
-                                    <div class="history-mood">${mood.mood}</div>
-                                    ${mood.notes ? `<div class="history-notes">${mood.notes}</div>` : ''}
-                                </div>
-                            `;
-                        });
-                        historyContainer.innerHTML = html;
-                    }
-                })
-                .catch(error => console.error('Error refreshing recent moods:', error));
+            if (moodCarousel) {
+                moodCarousel.initialize();
+            }
         }
         
         // Enhanced Analytics Functions
@@ -5677,6 +5728,17 @@
                 .catch(error => {
                     console.error('Error loading week comparison:', error);
                 });
+        }
+        
+        // Initialize carousel
+        let moodCarousel;
+        function initializeCarousel() {
+            try {
+                moodCarousel = CarouselFactory.create('moodCarousel');
+                moodCarousel.initialize();
+            } catch (error) {
+                console.error('Error initializing carousel:', error);
+            }
         }
         
         function loadQuickInsights() {

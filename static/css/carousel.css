@@ -1,0 +1,308 @@
+/**
+ * Material Design 3 Recent Moods Carousel Styling
+ * Following MD3 specifications for elevation, motion, and typography
+ */
+
+/* Carousel Container */
+.recent-moods-carousel {
+    background-color: var(--md-sys-color-surface-container);
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--md-sys-elevation-level1);
+    overflow: hidden;
+    animation: md-fade-in-up var(--md-sys-motion-duration-long2) var(--md-sys-motion-easing-emphasized);
+}
+
+/* Carousel Header */
+.carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.carousel-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.carousel-title i {
+    color: var(--md-sys-color-primary);
+    font-size: 24px;
+}
+
+.carousel-title h3 {
+    font-family: var(--md-sys-typescale-headline-small-font);
+    font-size: var(--md-sys-typescale-headline-small-size);
+    font-weight: var(--md-sys-typescale-headline-small-weight);
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+}
+
+/* Carousel Controls */
+.carousel-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.carousel-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.carousel-btn:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    transform: scale(1.05);
+    box-shadow: var(--md-sys-elevation-level2);
+}
+
+.carousel-btn:hover::before {
+    opacity: var(--md-sys-state-hover-opacity);
+}
+
+.carousel-btn:active {
+    transform: scale(0.95);
+}
+
+.carousel-btn i {
+    font-size: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Scroll Container */
+.carousel-scroll-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.carousel-scroll-container::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* Carousel Track */
+.carousel-track {
+    display: flex;
+    gap: 16px;
+    padding: 8px 0;
+    min-width: min-content;
+}
+
+/* Mood Cards */
+.mood-carousel-card {
+    min-width: 264px;
+    max-width: 264px;
+    background-color: var(--md-sys-color-surface-container-highest);
+    border-radius: var(--md-sys-shape-corner-large);
+    padding: 16px;
+    box-shadow: var(--md-sys-elevation-level1);
+    transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.mood-carousel-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+}
+
+.mood-carousel-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--md-sys-elevation-level3);
+}
+
+.mood-carousel-card:hover::before {
+    opacity: var(--md-sys-state-hover-opacity);
+}
+
+/* Card Header */
+.mood-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.mood-emoji {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.mood-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.mood-name {
+    font-family: var(--md-sys-typescale-title-medium-font);
+    font-size: var(--md-sys-typescale-title-medium-size);
+    font-weight: var(--md-sys-typescale-title-medium-weight);
+    color: var(--md-sys-color-on-surface);
+    text-transform: capitalize;
+}
+
+.mood-datetime {
+    font-family: var(--md-sys-typescale-body-small-font);
+    font-size: var(--md-sys-typescale-body-small-size);
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Card Notes */
+.mood-notes {
+    font-family: var(--md-sys-typescale-body-medium-font);
+    font-size: var(--md-sys-typescale-body-medium-size);
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.4;
+    margin-top: 4px;
+}
+
+/* Loading State */
+.carousel-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--md-sys-color-outline-variant);
+    border-top: 3px solid var(--md-sys-color-primary);
+    border-radius: 50%;
+    animation: spin var(--md-sys-motion-duration-extra-long1) linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.carousel-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.carousel-error i {
+    font-size: 48px;
+    color: var(--md-sys-color-error);
+}
+
+.retry-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-large);
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+}
+
+.retry-btn:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .mood-carousel-card {
+        min-width: 240px;
+        max-width: 240px;
+    }
+    
+    .carousel-track {
+        gap: 12px;
+    }
+    
+    .recent-moods-carousel {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mood-carousel-card {
+        min-width: 200px;
+        max-width: 200px;
+    }
+    
+    .carousel-controls {
+        gap: 4px;
+    }
+    
+    .carousel-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .carousel-btn i {
+        font-size: 18px;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .carousel-scroll-container {
+        scroll-behavior: auto;
+    }
+    
+    .mood-carousel-card {
+        transition: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+    }
+}
