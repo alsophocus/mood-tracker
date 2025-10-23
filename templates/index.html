@@ -3648,13 +3648,6 @@
             }
         });
 
-        function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        }
-
         // System status check
         async function checkSystemStatus() {
             const dbStatus = document.getElementById('db-status');
@@ -5420,7 +5413,7 @@
 
         // Initialize everything when DOM loads
         document.addEventListener('DOMContentLoaded', function() {
-            initializeTheme();
+            // Theme manager is already initialized above
             initializeMaterialSelects();
             initializeDropdowns();
             initializeCharts();
