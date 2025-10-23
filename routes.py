@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 from database import db
 from analytics import MoodAnalytics, MOOD_VALUES
-from pdf_export import PDFExporter
+from pdf_export_clean import PDFExporter
 
 main_bp = Blueprint('main', __name__)
 
