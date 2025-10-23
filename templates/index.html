@@ -5595,7 +5595,7 @@
                 document.getElementById('todayMoodName').textContent = data.today.mood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                 document.getElementById('todayMoodTime').textContent = `Last entry: ${data.today.time}`;
             } else {
-                todayIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">edit</i>';</i>';
+                todayIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">edit</i>';;
                 document.getElementById('todayMoodName').textContent = 'No entries yet';
                 document.getElementById('todayMoodTime').textContent = 'Add your first mood';
             }
@@ -5637,7 +5637,7 @@
                 document.getElementById('trendChange').textContent = `${changeText} vs last week`;
                 document.getElementById('trendChange').style.color = iconColor;
             } else {
-                trendIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">trending_up</i>';</i>';
+                trendIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">trending_up</i>';;
                 document.getElementById('trendDirection').textContent = 'Not enough data';
                 document.getElementById('trendChange').textContent = 'Need 2 weeks';
             }
