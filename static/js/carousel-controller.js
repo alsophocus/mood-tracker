@@ -40,13 +40,13 @@ class CarouselController {
                 <h3 class="carousel-title">Recent Moods</h3>
                 <div class="carousel-controls">
                     <button class="carousel-btn" id="prevBtn">
-                        <i class="fas fa-chevron-left"></i>
+                        <i class="material-symbols-outlined">chevron_left</i>
                     </button>
                     <button class="carousel-btn" id="playPauseBtn">
-                        <i class="fas fa-${this.isPlaying ? 'pause' : 'play'}"></i>
+                        <i class="material-symbols-outlined">${this.isPlaying ? 'pause' : 'play_arrow'}</i>
                     </button>
                     <button class="carousel-btn" id="nextBtn">
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="material-symbols-outlined">chevron_right</i>
                     </button>
                 </div>
             </div>
