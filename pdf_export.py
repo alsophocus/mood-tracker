@@ -94,6 +94,8 @@ class PDFExporter:
         header_elements.append(metadata)
         header_elements.append(Spacer(1, 24))
         
+        return header_elements
+        
     def _create_executive_summary(self):
         """Create executive summary with key insights and recommendations"""
         if not self.moods:
