@@ -2982,7 +2982,7 @@
                     <!-- Mood Triggers Section -->
                     <div class="triggers-section" style="margin: 24px 0;">
                         <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                            <i class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary);">label</i></i>
+                            <i class="material-symbols-outlined">label</i>
                             What's affecting your mood? (optional)
                         </h3>
                         
@@ -3141,7 +3141,7 @@
                 <!-- Mood Distribution Chart -->
                 <div style="margin: 24px 0;">
                     <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
-                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px;">pie_chart</i></i>
+                        <i class="material-symbols-outlined">pie_chart</i>
                         Mood Distribution (Last 30 Days)
                     </h3>
                     <div class="chart-container" style="height: 200px;">
@@ -3152,7 +3152,7 @@
                 <!-- Top Triggers -->
                 <div style="margin: 24px 0;">
                     <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
-                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary); margin-right: 8px;">label</i></i>
+                        <i class="material-symbols-outlined">label</i>
                         Top Mood Triggers
                     </h3>
                     <div id="top-triggers" class="triggers-analytics">
@@ -3163,7 +3163,7 @@
                 <!-- Weekly Trend -->
                 <div style="margin: 24px 0;">
                     <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
-                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-secondary); margin-right: 8px;">trending_up</i></i>
+                        <i class="material-symbols-outlined">trending_up</i>
                         This Week vs Last Week
                     </h3>
                     <div class="week-comparison">
@@ -3228,7 +3228,7 @@
                 
                 <div id="quick-insights" class="insights-list">
                     <div class="insight-item">
-                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">today</i></i>
+                        <i class="material-symbols-outlined">today</i>
                         <span>Loading personalized insights...</span>
                     </div>
                 </div>
@@ -5591,7 +5591,7 @@
             if (data.today) {
                 const iconName = moodIcons[data.today.mood] || 'circle';
                 const iconColor = moodColors[data.today.mood] || '#9e9e9e';
-                todayIconEl.innerHTML = `<i class=</i>material-symbols-outlined" style="color: ${iconColor};">${iconName}</i>`;
+                todayIconEl.innerHTML = `<i class="material-symbols-outlined" style="color: ${iconColor};">${iconName}</i>`;
                 document.getElementById('todayMoodName').textContent = data.today.mood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                 document.getElementById('todayMoodTime').textContent = `Last entry: ${data.today.time}`;
             } else {
