@@ -165,7 +165,58 @@ Three Material Design 3 cards showing:
 
 ---
 
-## Phase 4: Weekly Trends Improvement
+## Phase 4: 4-Week Comparison ✅ COMPLETE
+**Priority**: MEDIUM  
+**Complexity**: MEDIUM  
+**Risk**: LOW  
+**Status**: ✅ DEPLOYED AND TESTED (Oct 22, 2025)
+
+### Current State
+- Showed weekly trends for a month with confusing week-of-month concept
+
+### Target State
+- Renamed to "4-Week Comparison"
+- Show last 4 weeks as separate lines
+- Each week labeled with date range
+- Clear trend visualization
+
+### Implementation Steps
+1. ✅ Create FourWeekComparisonService with SOLID principles
+2. ✅ Update backend endpoint with dependency injection
+3. ✅ Modify chart to show multiple lines with MD3 colors
+4. ✅ Update labels with date ranges
+5. ✅ Add legend and remove year/month selectors
+6. ✅ Test with Railway deployment
+
+### Files Modified
+- `analytics.py`: Added FourWeekComparisonService class
+- `routes.py`: Updated /weekly_trends endpoint with dependency injection
+- `templates/index.html`: Updated chart configuration and loading functions
+
+### Material Design 3 Specifications Applied
+- Chart type: Line chart with multiple datasets
+- Colors: Primary (#6750A4), Secondary (#625B71), Tertiary (#7D5260), Error (#BA1A1A)
+- Icon: fas fa-chart-line
+- Typography: Roboto font family with proper sizing
+
+### Testing Checklist
+- [x] 4-week data loads automatically
+- [x] Each week shows as separate colored line
+- [x] Date ranges display correctly (e.g., "Oct 16 - Oct 22")
+- [x] Chart legend shows all 4 weeks
+- [x] No year/month selectors needed
+- [x] Loads on page initialization
+- [x] Updates after mood submission
+- [x] PDF export title updated
+- [x] No JavaScript errors
+- [x] Material Design 3 compliance
+
+**Completion Date**: October 22, 2025  
+**Issues Resolved**: Confusing week-of-month concept, automatic loading, SOLID architecture implementation
+
+---
+
+## Phase 5: Monthly Trends Enhancement
 **Priority**: LOW  
 **Complexity**: MEDIUM  
 **Risk**: LOW
@@ -195,20 +246,35 @@ Three Material Design 3 cards showing:
 ## Phase 5: Monthly Trends Enhancement
 **Priority**: LOW  
 **Complexity**: LOW  
-**Risk**: LOW
+**Risk**: LOW  
+**Status**: ⏸️ READY FOR IMPLEMENTATION
 
 ### Current State
-- Shows monthly averages (good!)
+- Shows monthly averages (good foundation)
 
 ### Target State
 - Keep current functionality
-- Add trend line overlay
-- Show if improving/declining
+- Add trend line overlay showing linear regression
+- Show improvement/declining indicators
+- Display trend direction and slope information
 
 ### Implementation Steps
-1. Calculate linear regression
-2. Add trend line to chart
-3. Add trend indicator
+1. Create TrendAnalysisService with linear regression calculation
+2. Enhance /monthly_trends endpoint with trend data
+3. Add trend line overlay to existing chart
+4. Add trend indicator with direction and change percentage
+5. Apply Material Design 3 styling to trend indicators
+
+### Files to Modify
+- `analytics.py`: Add TrendAnalysisService class
+- `routes.py`: Enhance /monthly_trends endpoint
+- `templates/index.html`: Add trend line to monthly chart configuration
+
+### Material Design 3 Specifications
+- Trend line: Dashed line with primary color
+- Trend indicators: Surface container with appropriate colors
+- Icons: trending_up, trending_down, trending_flat
+- Typography: Label-large for trend text
 
 ---
 
@@ -216,12 +282,13 @@ Three Material Design 3 cards showing:
 1. ✅ Weekly Patterns (COMPLETE - Oct 22, 2025)
 2. ⏸️ Recent Moods Carousel (PENDING)
 3. ✅ Quick Stats Cards (COMPLETE - Oct 22, 2025)
-4. ⏸️ Weekly Trends (PENDING)
-5. ⏸️ Monthly Trends (PENDING)
+4. ✅ 4-Week Comparison (COMPLETE - Oct 22, 2025)
+5. ⏸️ Monthly Trends Enhancement (PENDING)
 
 ## Current Status
-- **Completed**: 2 of 5 phases
-- **Current Tag**: v0.4.4-working
+- **Completed**: 3 of 5 phases
+- **Current Tag**: v0.4.5-working
+- **Stable Tag**: v0.4.4-stable
 - **Last Updated**: October 22, 2025
 
 ## Session Summary - October 22, 2025
