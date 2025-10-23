@@ -134,7 +134,17 @@ class PDFExporter:
             
             # Get last 30 days of moods
             thirty_days_ago = datetime.now().date() - timedelta(days=30)
-            recent_moods = [mood for mood in self.moods if mood['date'] >= thirty_days_ago]
+            recent_moods = []
+            for mood in self.moods:
+                mood_date = mood['date']
+                # Handle both string and date objects
+                if isinstance(mood_date, str):
+                    mood_date = datetime.fromisoformat(mood_date).date()
+                elif hasattr(mood_date, 'date'):
+                    mood_date = mood_date.date()
+                
+                if mood_date >= thirty_days_ago:
+                    recent_moods.append(mood)
             
             if not recent_moods:
                 return None
