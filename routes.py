@@ -1070,8 +1070,18 @@ def simple_pdf_export():
         return jsonify({
             'success': False,
             'error': str(e),
-            'message': 'PDF generation failed'
+            'message': 'Enhanced PDF generation failed'
         }), 500
+
+@main_bp.route('/api/pdf-test-endpoint')
+@login_required
+def pdf_test_endpoint():
+    """Test if PDF endpoint is accessible"""
+    return jsonify({
+        'success': True,
+        'message': 'PDF endpoint is accessible',
+        'user': current_user.name if current_user else 'No user'
+    })
 
 @main_bp.route('/api/pdf-test')
 @login_required
