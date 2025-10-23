@@ -518,7 +518,7 @@ def get_carousel_moods():
         from carousel_service import CarouselDataService
         
         carousel_service = CarouselDataService(db)
-        moods = carousel_service.get_recent_moods(session['user_id'], limit=15)
+        moods = carousel_service.get_recent_moods(current_user.id, limit=15)
         
         return jsonify({
             'success': True,
