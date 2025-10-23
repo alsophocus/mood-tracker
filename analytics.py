@@ -62,21 +62,21 @@ class TrendAnalysisService:
                 'direction': 'improving',
                 'icon': 'arrow-up',
                 'description': 'Improving trend',
-                'color': '#388E3C'  # MD3 Success color
+                'color': '#4CAF50'  # Green for upward
             }
         elif slope < -0.1:
             return {
                 'direction': 'declining',
                 'icon': 'arrow-down', 
                 'description': 'Declining trend',
-                'color': '#D32F2F'  # MD3 Error color
+                'color': '#F44336'  # Red for downward
             }
         else:
             return {
                 'direction': 'stable',
                 'icon': 'arrow-right',
                 'description': 'Stable trend',
-                'color': '#6750A4'  # MD3 Primary color
+                'color': '#FF9800'  # Orange for flat
             }
     
     def generate_trend_line_data(self, data_points: List[float], regression: Dict[str, float]) -> List[float]:
