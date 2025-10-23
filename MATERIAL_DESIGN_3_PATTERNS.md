@@ -3,6 +3,23 @@
 ## Overview
 This document outlines the complete Material Design 3 implementation patterns used in the Mood Tracker application, including color systems, typography, animations, and component patterns.
 
+## 🚨 DESIGN CONSISTENCY REQUIREMENT
+**ALL NEW TEMPLATES AND FEATURES MUST FOLLOW THESE PATTERNS**
+
+When creating new templates, pages, or components:
+1. **Copy the complete CSS variables** from `templates/index.html` (lines 20-130)
+2. **Use the standardized component classes** (.md-card, .md-button, etc.)
+3. **Follow the motion system** with proper easing curves and durations
+4. **Apply entrance animations** to all cards and major elements
+5. **Use Material Symbols icons** with correct syntax: `<i class="material-symbols-outlined md-card-icon">icon_name</i>`
+6. **Include typography classes** like `headline-small`, `title-medium`, etc.
+
+**Reference Templates:**
+- `templates/index.html` - Complete MD3 implementation (PRIMARY REFERENCE)
+- `templates/goals_dashboard.html` - Consistent MD3 patterns
+- `templates/analytics_dashboard.html` - Consistent MD3 patterns  
+- `templates/insights_dashboard.html` - Consistent MD3 patterns
+
 ## 🎨 Color System
 
 ### Light Theme Colors

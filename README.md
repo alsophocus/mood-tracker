@@ -248,6 +248,19 @@ A fully Material Design 3 compliant application with all expressive components, 
 - **Dependency Injection** for testability
 - **Single Responsibility** for maintainability
 - **Comprehensive Documentation** with docstrings and type hints
+
+### Material Design 3 Consistency
+**🚨 MANDATORY: All new templates and features MUST follow Material Design 3 patterns**
+
+When creating new pages or components:
+1. **Copy complete CSS variables** from `templates/index.html` (MD3 color system, motion tokens)
+2. **Use standardized classes**: `.md-card`, `.md-button`, `.md-card-header`, `.md-card-title`
+3. **Apply entrance animations**: `animation: md-fade-in-up var(--md-sys-motion-duration-long2)`
+4. **Use Material Symbols icons**: `<i class="material-symbols-outlined md-card-icon">icon_name</i>`
+5. **Include typography classes**: `headline-small`, `title-medium`, `body-large`
+6. **Follow motion system**: Use `--md-sys-motion-easing-emphasized` and duration tokens
+
+**Reference**: See `MATERIAL_DESIGN_3_PATTERNS.md` for complete implementation guide.
 - **Inline Comments** explaining complex logic and design decisions
 - **Self-documenting Code** with clear variable and function names
 
