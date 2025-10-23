@@ -72,73 +72,92 @@ class PDFExporter:
         
         return header_elements
     
-    def _create_summary(self):
-        """Create summary section"""
+    def _create_md3_summary(self):
+        """Create summary section with Material Design 3 cards"""
         if not self.moods:
-            return [Paragraph("No mood data available yet.", self._get_body_style())]
+            return [Paragraph("No mood data available yet.", self.typography['body_large'])]
         
+        summary_elements = []
         summary = self.analytics.get_summary()
         
-        summary_text = f"""
-        <b>Total Mood Entries:</b> {summary['total_entries']}<br/>
-        <b>Current Good Mood Streak:</b> {summary['current_streak']} days<br/>
-        <b>Best Day of Week:</b> {summary['best_day']}<br/>
-        <b>Overall Average Mood:</b> {summary['daily_average']:.2f}/7.0
-        """
+        # Section header
+        section_title = Paragraph("📊 Analytics Overview", self.typography['headline_large'])
+        summary_elements.append(section_title)
+        summary_elements.append(Spacer(1, 16))
         
-        return [
-            Paragraph("📊 Summary", self._get_heading_style()),
-            Paragraph(summary_text, self._get_body_style()),
-            Spacer(1, 20)
+        # Create summary cards content
+        metrics = [
+            {
+                'label': 'Total Entries',
+                'value': str(summary['total_entries']),
+                'color': MD3_COLORS['primary']
+            },
+            {
+                'label': 'Current Streak',
+                'value': f"{summary['current_streak']} days",
+                'color': MD3_COLORS['secondary']
+            },
+            {
+                'label': 'Best Day',
+                'value': summary['best_day'],
+                'color': MD3_COLORS['primary']
+            },
+            {
+                'label': 'Average Mood',
+                'value': f"{summary['daily_average']:.1f}/7.0",
+                'color': MD3_COLORS['secondary']
+            }
         ]
+        
+        # Create metrics display
+        for i, metric in enumerate(metrics):
+            metric_text = f"""
+            <font color="{metric['color']}" size="18"><b>{metric['value']}</b></font><br/>
+            <font color="{MD3_COLORS['on_surface_variant']}" size="12">{metric['label']}</font>
+            """
+            metric_para = Paragraph(metric_text, self.typography['body_medium'])
+            summary_elements.append(metric_para)
+            
+            if i < len(metrics) - 1:
+                summary_elements.append(Spacer(1, 8))
+        
+        summary_elements.append(Spacer(1, 24))
+        return summary_elements
     
-    def _create_charts(self):
-        """Create and embed charts"""
+    def _create_md3_charts(self):
+        """Create charts section with Material Design 3 styling"""
         if not self.moods:
             return []
         
         story = []
         
+        # Charts section header
+        charts_title = Paragraph("📈 Mood Analytics", self.typography['headline_large'])
+        story.append(charts_title)
+        story.append(Spacer(1, 16))
+        
         # Mood distribution chart
-        distribution_chart_path = self._create_mood_distribution_chart()
+        distribution_chart_path = self._create_md3_mood_distribution_chart()
         if distribution_chart_path:
-            story.extend([
-                Paragraph("🎯 Mood Distribution (Last 30 Days)", self._get_heading_style()),
-                Image(distribution_chart_path, width=6*inch, height=4*inch),
-                Spacer(1, 20)
-            ])
+            chart_title = Paragraph("Mood Distribution (Last 30 Days)", self.typography['title_large'])
+            story.append(chart_title)
+            story.append(Spacer(1, 8))
+            story.append(Image(distribution_chart_path, width=6*inch, height=3*inch))
+            story.append(Spacer(1, 16))
         
         # Weekly patterns chart
-        weekly_chart_path = self._create_weekly_chart()
+        weekly_chart_path = self._create_md3_weekly_chart()
         if weekly_chart_path:
-            story.extend([
-                Paragraph("📅 Weekly Patterns", self._get_heading_style()),
-                Image(weekly_chart_path, width=6*inch, height=3*inch),
-                Spacer(1, 20)
-            ])
-        
-        # Monthly trends chart
-        monthly_chart_path = self._create_monthly_chart()
-        if monthly_chart_path:
-            story.extend([
-                Paragraph("📈 Monthly Trends", self._get_heading_style()),
-                Image(monthly_chart_path, width=6*inch, height=3*inch),
-                Spacer(1, 20)
-            ])
-        
-        # Daily patterns chart
-        daily_chart_path = self._create_daily_patterns_chart()
-        if daily_chart_path:
-            story.extend([
-                Paragraph("🕐 Daily Patterns", self._get_heading_style()),
-                Image(daily_chart_path, width=6*inch, height=3*inch),
-                Spacer(1, 20)
-            ])
+            chart_title = Paragraph("Weekly Patterns", self.typography['title_large'])
+            story.append(chart_title)
+            story.append(Spacer(1, 8))
+            story.append(Image(weekly_chart_path, width=6*inch, height=3*inch))
+            story.append(Spacer(1, 16))
         
         return story
     
-    def _create_mood_distribution_chart(self):
-        """Create mood distribution pie chart"""
+    def _create_md3_mood_distribution_chart(self):
+        """Create mood distribution pie chart with Material Design 3 colors"""
         try:
             from datetime import datetime, timedelta
             from collections import Counter
@@ -163,68 +182,85 @@ class PDFExporter:
             # Count mood occurrences
             mood_counts = Counter(mood['mood'] for mood in recent_moods)
             
-            # Define colors for each mood
-            mood_colors = {
-                'very bad': '#dc2626',
-                'bad': '#ff5722', 
-                'slightly bad': '#ff9800',
-                'neutral': '#6b7280',
-                'slightly well': '#8bc34a',
-                'well': '#4caf50',
-                'very well': '#7d5260'
+            # MD3 color palette for moods
+            md3_mood_colors = self.md3.get_chart_colors()
+            mood_color_map = {
+                'very bad': '#BA1A1A',     # Error
+                'bad': '#FF5722',          # Error variant
+                'slightly bad': '#FF9800', # Warning
+                'neutral': '#79747E',      # Outline
+                'slightly well': '#8BC34A', # Success variant
+                'well': '#4CAF50',         # Success
+                'very well': '#6750A4'     # Primary
             }
             
             # Prepare data
             moods = list(mood_counts.keys())
             counts = list(mood_counts.values())
-            colors = [mood_colors.get(mood, '#6b7280') for mood in moods]
+            colors = [mood_color_map.get(mood, '#79747E') for mood in moods]
             
-            # Create pie chart
-            fig, ax = plt.subplots(figsize=(8, 6), facecolor='white')
+            # Create pie chart with MD3 styling
+            fig, ax = plt.subplots(figsize=(8, 6), facecolor='#FFFBFE')  # MD3 surface
             wedges, texts, autotexts = ax.pie(counts, labels=[mood.title() for mood in moods], 
                                             colors=colors, autopct='%1.1f%%', startangle=90,
-                                            textprops={'fontsize': 10})
+                                            textprops={'fontsize': 11, 'color': '#1C1B1F'})
             
-            # Style the chart
-            ax.set_title('Mood Distribution (Last 30 Days)', fontsize=14, fontweight='bold', 
-                        color='#1e293b', pad=20)
+            # MD3 styling
+            ax.set_title('Mood Distribution (Last 30 Days)', 
+                        fontsize=16, fontweight='bold', color='#6750A4', pad=20)
             
-            # Make percentage text bold and white
+            # Style percentage text
             for autotext in autotexts:
                 autotext.set_color('white')
                 autotext.set_fontweight('bold')
-                autotext.set_fontsize(9)
+                autotext.set_fontsize(10)
             
             plt.tight_layout()
             
             chart_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-            plt.savefig(chart_file.name, dpi=150, bbox_inches='tight', facecolor='white')
+            plt.savefig(chart_file.name, dpi=300, bbox_inches='tight', 
+                       facecolor='#FFFBFE', edgecolor='none')
             plt.close()
             
             return chart_file.name
         except Exception:
             return None
     
-    def _create_weekly_chart(self):
-        """Create weekly patterns chart"""
+    def _create_md3_weekly_chart(self):
+        """Create weekly patterns chart with Material Design 3 styling"""
         try:
             weekly_data = self.analytics.get_weekly_patterns()
             
-            fig, ax = plt.subplots(figsize=(8, 4), facecolor='white')
-            ax.plot(weekly_data['labels'], weekly_data['data'], marker='o', linewidth=3, 
-                   markersize=8, color='#f59e0b', markerfacecolor='#f59e0b', 
+            fig, ax = plt.subplots(figsize=(8, 4), facecolor='#FFFBFE')  # MD3 surface
+            
+            # MD3 primary color for the line
+            primary_color = '#6750A4'
+            ax.plot(weekly_data['labels'], weekly_data['data'], 
+                   marker='o', linewidth=3, markersize=8, 
+                   color=primary_color, markerfacecolor=primary_color, 
                    markeredgecolor='white', markeredgewidth=2)
-            ax.fill_between(weekly_data['labels'], weekly_data['data'], alpha=0.3, color='#f59e0b')
+            
+            # MD3 primary container for fill
+            ax.fill_between(weekly_data['labels'], weekly_data['data'], 
+                           alpha=0.2, color=primary_color)
+            
             ax.set_ylim(1, 7)
-            ax.set_ylabel('Average Mood', fontsize=12, color='#374151')
-            ax.set_title('Weekly Patterns', fontsize=14, fontweight='bold', color='#1e293b', pad=20)
-            ax.grid(True, alpha=0.3)
-            ax.set_facecolor('#f8fafc')
-            plt.xticks(rotation=45)
+            ax.set_ylabel('Average Mood', fontsize=12, color='#1C1B1F')  # MD3 on-surface
+            ax.set_title('Weekly Patterns', fontsize=16, fontweight='bold', 
+                        color=primary_color, pad=20)
+            
+            # MD3 grid styling
+            ax.grid(True, alpha=0.2, color='#79747E')  # MD3 outline
+            ax.set_facecolor('#F3EDF7')  # MD3 surface-container
+            
+            # MD3 text styling
+            ax.tick_params(colors='#49454F')  # MD3 on-surface-variant
+            plt.xticks(rotation=45, fontsize=10)
             plt.tight_layout()
             
             chart_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
-            plt.savefig(chart_file.name, dpi=150, bbox_inches='tight', facecolor='white')
+            plt.savefig(chart_file.name, dpi=300, bbox_inches='tight', 
+                       facecolor='#FFFBFE', edgecolor='none')
             plt.close()
             
             return chart_file.name
@@ -289,49 +325,62 @@ class PDFExporter:
         except Exception:
             return None
     
-    def _create_recent_history(self):
-        """Create recent mood history section"""
+    def _create_md3_recent_history(self):
+        """Create recent mood history section with Material Design 3 styling"""
         if not self.moods:
             return []
         
-        story = [Paragraph("📝 Recent Mood History", self._get_heading_style())]
+        story = []
+        
+        # Section header
+        history_title = Paragraph("📝 Recent Mood History", self.typography['headline_large'])
+        story.append(history_title)
+        story.append(Spacer(1, 16))
         
         mood_emoji = {
             'very bad': '😭', 'bad': '😢', 'slightly bad': '😔', 'neutral': '😐',
             'slightly well': '🙂', 'well': '😊', 'very well': '😄'
         }
         
-        for mood_entry in self.moods[:15]:  # Last 15 entries
+        for mood_entry in self.moods[:10]:  # Last 10 entries
             date_str = str(mood_entry['date'])
             mood = mood_entry['mood']
             notes = mood_entry.get('notes', '')
             
-            entry_text = f"<b>{date_str}</b> {mood_emoji.get(mood, '😐')} {mood.title()}"
+            # Create entry with MD3 styling
+            entry_text = f"""
+            <font color="{MD3_COLORS['primary']}"><b>{date_str}</b></font> 
+            {mood_emoji.get(mood, '😐')} 
+            <font color="{MD3_COLORS['on_surface']}">{mood.title()}</font>
+            """
             
             if notes:
-                notes_text = notes[:100] + "..." if len(notes) > 100 else notes
-                entry_text += f"<br/><i>Notes: {notes_text}</i>"
+                notes_text = notes[:80] + "..." if len(notes) > 80 else notes
+                entry_text += f"""<br/>
+                <font color="{MD3_COLORS['on_surface_variant']}" size="12"><i>{notes_text}</i></font>
+                """
             
-            story.extend([
-                Paragraph(entry_text, self._get_body_style()),
-                Spacer(1, 8)
-            ])
+            entry_para = Paragraph(entry_text, self.typography['body_medium'])
+            story.append(entry_para)
+            story.append(Spacer(1, 8))
         
         return story
     
-    def _create_footer(self):
-        """Create PDF footer"""
-        footer_style = ParagraphStyle(
-            'Footer',
-            parent=getSampleStyleSheet()['Normal'],
-            fontSize=9,
-            textColor=HexColor('#6b7280'),
-            alignment=1
-        )
+    def _create_md3_footer(self):
+        """Create Material Design 3 styled footer"""
+        footer_text = f"""
+        <font color="{MD3_COLORS['on_surface_variant']}" size="10">
+        Generated by Mood Tracker • {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br/>
+        Material Design 3 • Professional Analytics Report
+        </font>
+        """
+        
+        footer_para = Paragraph(footer_text, self.typography['body_medium'])
+        footer_para.alignment = TA_CENTER
         
         return [
             Spacer(1, 30),
-            Paragraph(f"Generated by Mood Tracker • {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", footer_style)
+            footer_para
         ]
     
     def _get_heading_style(self):
