@@ -2590,14 +2590,29 @@
         /* Material Design 3 Carousel Styles */
         .mood-carousel-container {
             padding: 0;
+            background: linear-gradient(135deg, var(--md-sys-color-surface-container-low) 0%, var(--md-sys-color-surface-container) 100%);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            overflow: hidden;
         }
 
         .carousel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 24px 24px 16px;
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            padding: 24px 32px 20px;
+            background: var(--md-sys-color-surface-container-highest);
+            border-bottom: none;
+            position: relative;
+        }
+
+        .carousel-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 32px;
+            right: 32px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--md-sys-color-outline-variant) 50%, transparent 100%);
         }
 
         .carousel-title {
@@ -2608,63 +2623,91 @@
             margin: 0;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .carousel-title::before {
             content: '';
-            width: 24px;
-            height: 24px;
-            background: var(--md-sys-color-primary);
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
             mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z'/%3E%3C/svg%3E") no-repeat center;
             mask-size: contain;
+            border-radius: var(--md-sys-shape-corner-small);
         }
 
         .carousel-controls {
             display: flex;
-            gap: 8px;
+            gap: 12px;
+            background: var(--md-sys-color-surface-container);
+            padding: 8px;
+            border-radius: var(--md-sys-shape-corner-large);
+            box-shadow: var(--md-sys-elevation-level1);
         }
 
         .carousel-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--md-sys-shape-corner-full);
-            background-color: var(--md-sys-color-surface-container-high);
+            width: 44px;
+            height: 44px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            background: var(--md-sys-color-surface-container-high);
             color: var(--md-sys-color-on-surface);
-            border: 1px solid var(--md-sys-color-outline-variant);
+            border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+            transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-emphasized);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--md-sys-color-primary);
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
         }
 
         .carousel-btn:hover {
-            background-color: var(--md-sys-color-primary-container);
+            background: var(--md-sys-color-primary-container);
             color: var(--md-sys-color-on-primary-container);
-            transform: scale(1.1);
-            box-shadow: var(--md-sys-elevation-level2);
+            transform: scale(1.08);
+            box-shadow: var(--md-sys-elevation-level3);
+        }
+
+        .carousel-btn:hover::before {
+            opacity: 0.08;
+        }
+
+        .carousel-btn:active {
+            transform: scale(0.96);
         }
 
         .carousel-track-container {
             overflow: hidden;
-            padding: 24px;
+            padding: 32px;
+            background: var(--md-sys-color-surface-container-low);
         }
 
         .carousel-track {
             display: flex;
-            gap: 16px;
-            transition: transform var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized);
+            gap: 20px;
+            transition: transform var(--md-sys-motion-duration-long1) var(--md-sys-motion-easing-emphasized);
         }
 
         .mood-carousel-card {
-            min-width: 280px;
-            background-color: var(--md-sys-color-surface-container);
-            border-radius: var(--md-sys-shape-corner-large);
-            padding: 20px;
-            box-shadow: var(--md-sys-elevation-level1);
-            border-left: 4px solid var(--mood-color);
-            transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-emphasized);
+            min-width: 300px;
+            background: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-extra-large);
+            padding: 24px;
+            box-shadow: var(--md-sys-elevation-level2);
+            border: none;
+            transition: all var(--md-sys-motion-duration-medium4) var(--md-sys-motion-easing-emphasized);
             position: relative;
             overflow: hidden;
         }
@@ -2675,99 +2718,127 @@
             top: 0;
             left: 0;
             right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--mood-color) 0%, transparent 100%);
+        }
+
+        .mood-carousel-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, var(--mood-color) 0%, transparent 50%);
-            opacity: 0.05;
+            background: radial-gradient(circle at top right, var(--mood-color)10, transparent 60%);
+            opacity: 0.03;
         }
 
         .mood-carousel-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: var(--md-sys-elevation-level3);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--md-sys-elevation-level4);
         }
 
         .mood-card-icon {
-            font-size: 32px;
+            font-size: 36px;
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 48px;
+            height: 56px;
+            background: var(--md-sys-color-surface-container-highest);
+            border-radius: var(--md-sys-shape-corner-large);
+            position: relative;
+            z-index: 2;
         }
 
         .mood-card-content {
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
 
         .mood-card-mood {
-            font-family: var(--md-sys-typescale-title-medium-font);
-            font-size: var(--md-sys-typescale-title-medium-size);
-            font-weight: var(--md-sys-typescale-title-medium-weight);
+            font-family: var(--md-sys-typescale-title-large-font);
+            font-size: var(--md-sys-typescale-title-large-size);
+            font-weight: var(--md-sys-typescale-title-large-weight);
             color: var(--md-sys-color-on-surface);
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             text-transform: capitalize;
         }
 
         .mood-card-datetime {
-            font-family: var(--md-sys-typescale-body-small-font);
-            font-size: var(--md-sys-typescale-body-small-size);
+            font-family: var(--md-sys-typescale-body-medium-font);
+            font-size: var(--md-sys-typescale-body-medium-size);
             color: var(--md-sys-color-on-surface-variant);
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
+            font-weight: 500;
         }
 
         .mood-card-notes {
             font-family: var(--md-sys-typescale-body-medium-font);
             font-size: var(--md-sys-typescale-body-medium-size);
             color: var(--md-sys-color-on-surface);
-            background-color: var(--md-sys-color-surface-variant);
-            padding: 12px;
-            border-radius: var(--md-sys-shape-corner-small);
-            margin-bottom: 8px;
+            background: var(--md-sys-color-surface-container-high);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin-bottom: 12px;
             font-style: normal;
-            line-height: 1.4;
+            line-height: 1.5;
+            border-left: 3px solid var(--mood-color);
         }
 
         .mood-card-triggers {
-            font-family: var(--md-sys-typescale-label-small-font);
-            font-size: var(--md-sys-typescale-label-small-size);
-            color: var(--md-sys-color-primary);
-            background-color: var(--md-sys-color-primary-container);
-            padding: 6px 12px;
-            border-radius: var(--md-sys-shape-corner-extra-small);
+            font-family: var(--md-sys-typescale-label-medium-font);
+            font-size: var(--md-sys-typescale-label-medium-size);
+            color: var(--md-sys-color-on-primary-container);
+            background: var(--md-sys-color-primary-container);
+            padding: 8px 16px;
+            border-radius: var(--md-sys-shape-corner-full);
             text-align: center;
             font-weight: 500;
+            display: inline-block;
+            width: 100%;
         }
 
         .carousel-empty {
             text-align: center;
-            padding: 48px 24px;
+            padding: 64px 32px;
             color: var(--md-sys-color-on-surface-variant);
             font-family: var(--md-sys-typescale-body-large-font);
             font-size: var(--md-sys-typescale-body-large-size);
+            background: var(--md-sys-color-surface-container-low);
         }
 
         .carousel-empty::before {
-            content: '📭';
+            content: '';
             display: block;
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            background: var(--md-sys-color-outline-variant);
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V192c0-35.3-28.7-64-64-64H80c-8.8 0-16-7.2-16-16s7.2-16 16-16H448c17.7 0 32-14.3 32-32s-14.3-32-32-32H64zM416 272a32 32 0 1 1 0 64 32 32 0 1 1 0-64z'/%3E%3C/svg%3E") no-repeat center;
+            mask-size: contain;
+            opacity: 0.3;
         }
 
         @media (max-width: 768px) {
             .mood-carousel-card {
-                min-width: 240px;
+                min-width: 280px;
             }
             
             .carousel-track-container {
-                padding: 16px;
+                padding: 24px;
             }
             
             .carousel-header {
-                padding: 16px;
+                padding: 20px 24px 16px;
+            }
+
+            .carousel-header::after {
+                left: 24px;
+                right: 24px;
             }
         }
     </style>
