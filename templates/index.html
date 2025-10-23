@@ -2820,9 +2820,9 @@
             </div>
             <div class="app-bar-actions">
                 <div class="theme-toggle">
-                    <i class="fas fa-sun theme-icon"></i>
+                    <i class="material-symbols-outlined theme-icon">light_mode</i>
                     <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
-                    <i class="fas fa-moon theme-icon"></i>
+                    <i class="material-symbols-outlined theme-icon">dark_mode</i>
                 </div>
                 <div class="user-menu">
                     <button class="user-menu-button" onclick="toggleUserMenu()" aria-label="User menu">
@@ -2837,7 +2837,7 @@
                         </div>
                         <div class="user-menu-items">
                             <button class="user-menu-item destructive" onclick="window.location.href='/logout'">
-                                <i class="material-symbols-outlined">logout</i>></i>
+                                <i class="material-symbols-outlined">logout</i>
                                 <span>Sign out</span>
                             </button>
                         </div>
@@ -2850,15 +2850,15 @@
     <!-- Navigation Rail -->
     <nav class="navigation-rail desktop-header">
         <a href="/insights" class="navigation-rail-item" data-page="insights">
-            <i class="material-symbols-outlined">trending_up</i>></i>
+            <i class="material-symbols-outlined">trending_up</i>
             <span>Insights</span>
         </a>
         <a href="/features/goals" class="navigation-rail-item" data-page="goals">
-            <i class="material-symbols-outlined">target</i>></i>
+            <i class="material-symbols-outlined">target</i>
             <span>Goals</span>
         </a>
         <a href="/features/analytics" class="navigation-rail-item" data-page="analytics">
-            <i class="material-symbols-outlined">bar_chart</i>></i>
+            <i class="material-symbols-outlined">bar_chart</i>
             <span>Analytics</span>
         </a>
     </nav>
@@ -2867,17 +2867,17 @@
     <header class="mobile-header">
         <div class="mobile-header-content">
             <button class="mobile-hamburger" onclick="toggleMobileNav()" aria-label="Open navigation menu">
-                <i class="material-symbols-outlined">menu</i>></i>
+                <i class="material-symbols-outlined">menu</i>
             </button>
             <div class="mobile-title">
-                <i class="material-symbols-outlined">psychology</i>></i>
+                <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </div>
             <div class="mobile-actions">
                 <div class="mobile-theme-toggle">
-                    <i class="fas fa-sun theme-icon"></i>
+                    <i class="material-symbols-outlined theme-icon">light_mode</i>
                     <button class="theme-switch" onclick="toggleTheme(); return false;" aria-label="Toggle theme"></button>
-                    <i class="fas fa-moon theme-icon"></i>
+                    <i class="material-symbols-outlined theme-icon">dark_mode</i>
                 </div>
             </div>
         </div>
@@ -2888,11 +2888,11 @@
     <div class="mobile-nav-drawer" id="mobileNavDrawer">
         <div class="mobile-nav-header">
             <a href="/" class="mobile-nav-title" style="text-decoration: none; color: inherit;">
-                <i class="material-symbols-outlined">psychology</i>></i>
+                <i class="material-symbols-outlined">psychology</i>
                 <span>Mood Tracker</span>
             </a>
             <button class="logout-button" onclick="window.location.href='/logout'" aria-label="Sign out">
-                <i class="material-symbols-outlined">logout</i>></i>
+                <i class="material-symbols-outlined">logout</i>
             </button>
         </div>
         <div class="mobile-nav-user-section">
@@ -2905,15 +2905,15 @@
         </div>
         <div class="mobile-nav-items">
             <a href="/insights" class="mobile-nav-item">
-                <i class="material-symbols-outlined">trending_up</i>></i>
+                <i class="material-symbols-outlined">trending_up</i>
                 <span>Insights</span>
             </a>
             <a href="/features/goals" class="mobile-nav-item">
-                <i class="material-symbols-outlined">target</i>></i>
+                <i class="material-symbols-outlined">target</i>
                 <span>Goals</span>
             </a>
             <a href="/features/analytics" class="mobile-nav-item">
-                <i class="material-symbols-outlined">bar_chart</i>></i>
+                <i class="material-symbols-outlined">bar_chart</i>
                 <span>Analytics</span>
             </a>
         </div>
@@ -2925,12 +2925,12 @@
         <div class="section">
             <div class="status-container">
                 <div class="status-item">
-                    <i class="material-symbols-outlined">storage</i>></i>
+                    <i class="material-symbols-outlined">storage</i>
                     <span class="body-medium">Database</span>
                     <div id="db-status" class="status-indicator checking"></div>
                 </div>
                 <div class="status-item">
-                    <i class="material-symbols-outlined">trending_up</i>></i>
+                    <i class="material-symbols-outlined">trending_up</i>
                     <span class="body-medium">Analytics</span>
                     <div id="analytics-status" class="status-indicator checking"></div>
                 </div>
@@ -2941,38 +2941,38 @@
             <!-- Mood Entry Card -->
             <div class="md-card">
                 <div class="md-card-header">
-                    <i class="fas fa-heart md-card-icon"></i>
+                    <i class="material-symbols-outlined md-card-icon">favorite</i>
                     <h2 class="md-card-title headline-medium">How are you feeling today?</h2>
                 </div>
                 
                 <form class="mood-form" action="/save_mood" method="post">
                     <div class="mood-grid">
                         <button type="button" class="mood-card" data-mood="very bad">
-                            <i class="fas fa-face-frown-open mood-icon" style="color: var(--md-sys-color-error);"></i>
+                            <i class="material-symbols-outlined mood-icon" style="color: var(--md-sys-color-error);">sentiment_very_dissatisfied</i>
                             <span class="mood-label">Very Bad</span>
                         </button>
                         <button type="button" class="mood-card" data-mood="bad">
-                            <i class="fas fa-face-frown mood-icon" style="color: #ff5722;"></i>
+                            <i class="material-symbols-outlined mood-icon" style="color: #ff5722;">sentiment_dissatisfied</i>
                             <span class="mood-label">Bad</span>
                         </button>
                         <button type="button" class="mood-card" data-mood="slightly bad">
-                            <i class="fas fa-face-meh mood-icon" style="color: #ff9800;"></i>
+                            <i class="material-symbols-outlined mood-icon" style="color: #ff9800;">sentiment_neutral</i>
                             <span class="mood-label">Slightly Bad</span>
                         </button>
                         <button type="button" class="mood-card" data-mood="neutral">
-                            <i class="fas fa-face-meh-blank mood-icon" style="color: var(--md-sys-color-on-surface-variant);"></i>
+                            <i class="material-symbols-outlined mood-icon" style="color: var(--md-sys-color-on-surface-variant);">sentiment_neutral</i>
                             <span class="mood-label">Neutral</span>
                         </button>
                         <button type="button" class="mood-card" data-mood="slightly well">
-                            <i class="fas fa-face-smile mood-icon" style="color: #8bc34a;"></i>
+                            <i class="material-symbols-outlined mood-icon" style="color: #8bc34a;">sentiment_satisfied</i>
                             <span class="mood-label">Slightly Well</span>
                         </button>
                         <button type="button" class="mood-card" data-mood="well">
-                            <i class="fas fa-face-smile-beam mood-icon" style="color: #4caf50;"></i>
+                            <i class="material-symbols-outlined mood-icon" style="color: #4caf50;">sentiment_very_satisfied</i>
                             <span class="mood-label">Well</span>
                         </button>
                         <button type="button" class="mood-card" data-mood="very well">
-                            <i class="fas fa-face-grin-stars mood-icon" style="color: var(--md-sys-color-tertiary);"></i>
+                            <i class="material-symbols-outlined mood-icon" style="color: var(--md-sys-color-tertiary);">sentiment_extremely_satisfied</i>
                             <span class="mood-label">Very Well</span>
                         </button>
                     </div>
@@ -2982,116 +2982,116 @@
                     <!-- Mood Triggers Section -->
                     <div class="triggers-section" style="margin: 24px 0;">
                         <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                            <i class="material-symbols-outlined">label</i> style="color: var(--md-sys-color-tertiary);"></i>
+                            <i class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary);">label</i></i>
                             What's affecting your mood? (optional)
                         </h3>
                         
                         <div class="triggers-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
                             <!-- Work Category -->
                             <div class="trigger-tag" data-trigger="work">
-                                <i class="material-symbols-outlined">work</i>></i>
+                                <i class="material-symbols-outlined">work</i>
                                 <span>Work</span>
                             </div>
                             <div class="trigger-tag" data-trigger="meeting">
-                                <i class="material-symbols-outlined">group</i>></i>
+                                <i class="material-symbols-outlined">group</i>
                                 <span>Meeting</span>
                             </div>
                             <div class="trigger-tag" data-trigger="deadline">
-                                <i class="material-symbols-outlined">schedule</i>></i>
+                                <i class="material-symbols-outlined">schedule</i>
                                 <span>Deadline</span>
                             </div>
                             <div class="trigger-tag" data-trigger="project">
-                                <i class="material-symbols-outlined">task</i>></i>
+                                <i class="material-symbols-outlined">task</i>
                                 <span>Project</span>
                             </div>
                             
                             <!-- Health Category -->
                             <div class="trigger-tag" data-trigger="exercise">
-                                <i class="material-symbols-outlined">fitness_center</i>></i>
+                                <i class="material-symbols-outlined">fitness_center</i>
                                 <span>Exercise</span>
                             </div>
                             <div class="trigger-tag" data-trigger="sleep">
-                                <i class="material-symbols-outlined">bed</i>></i>
+                                <i class="material-symbols-outlined">bed</i>
                                 <span>Sleep</span>
                             </div>
                             <div class="trigger-tag" data-trigger="food">
-                                <i class="material-symbols-outlined">restaurant</i>></i>
+                                <i class="material-symbols-outlined">restaurant</i>
                                 <span>Food</span>
                             </div>
                             <div class="trigger-tag" data-trigger="medication">
-                                <i class="material-symbols-outlined">medication</i>></i>
+                                <i class="material-symbols-outlined">medication</i>
                                 <span>Medication</span>
                             </div>
                             
                             <!-- Social Category -->
                             <div class="trigger-tag" data-trigger="family">
-                                <i class="material-symbols-outlined">home</i>></i>
+                                <i class="material-symbols-outlined">home</i>
                                 <span>Family</span>
                             </div>
                             <div class="trigger-tag" data-trigger="friends">
-                                <i class="material-symbols-outlined">people</i>></i>
+                                <i class="material-symbols-outlined">people</i>
                                 <span>Friends</span>
                             </div>
                             <div class="trigger-tag" data-trigger="party">
-                                <i class="material-symbols-outlined">celebration</i>></i>
+                                <i class="material-symbols-outlined">celebration</i>
                                 <span>Party</span>
                             </div>
                             <div class="trigger-tag" data-trigger="date">
-                                <i class="material-symbols-outlined">favorite</i>></i>
+                                <i class="material-symbols-outlined">favorite</i>
                                 <span>Date</span>
                             </div>
                             
                             <!-- Activities Category -->
                             <div class="trigger-tag" data-trigger="music">
-                                <i class="material-symbols-outlined">music_note</i>></i>
+                                <i class="material-symbols-outlined">music_note</i>
                                 <span>Music</span>
                             </div>
                             <div class="trigger-tag" data-trigger="reading">
-                                <i class="material-symbols-outlined">book</i>></i>
+                                <i class="material-symbols-outlined">book</i>
                                 <span>Reading</span>
                             </div>
                             <div class="trigger-tag" data-trigger="gaming">
-                                <i class="material-symbols-outlined">sports_esports</i>></i>
+                                <i class="material-symbols-outlined">sports_esports</i>
                                 <span>Gaming</span>
                             </div>
                             <div class="trigger-tag" data-trigger="cooking">
-                                <i class="material-symbols-outlined">restaurant_menu</i>></i>
+                                <i class="material-symbols-outlined">restaurant_menu</i>
                                 <span>Cooking</span>
                             </div>
                             
                             <!-- Environment Category -->
                             <div class="trigger-tag" data-trigger="weather">
-                                <i class="material-symbols-outlined">partly_cloudy_day</i>></i>
+                                <i class="material-symbols-outlined">partly_cloudy_day</i>
                                 <span>Weather</span>
                             </div>
                             <div class="trigger-tag" data-trigger="home">
-                                <i class="material-symbols-outlined">house</i>></i>
+                                <i class="material-symbols-outlined">house</i>
                                 <span>Home</span>
                             </div>
                             <div class="trigger-tag" data-trigger="outdoors">
-                                <i class="material-symbols-outlined">park</i>></i>
+                                <i class="material-symbols-outlined">park</i>
                                 <span>Outdoors</span>
                             </div>
                             <div class="trigger-tag" data-trigger="travel">
-                                <i class="material-symbols-outlined">flight</i>></i>
+                                <i class="material-symbols-outlined">flight</i>
                                 <span>Travel</span>
                             </div>
                             
                             <!-- Emotions Category -->
                             <div class="trigger-tag" data-trigger="stress">
-                                <i class="material-symbols-outlined">warning</i>></i>
+                                <i class="material-symbols-outlined">warning</i>
                                 <span>Stress</span>
                             </div>
                             <div class="trigger-tag" data-trigger="relaxation">
-                                <i class="material-symbols-outlined">spa</i>></i>
+                                <i class="material-symbols-outlined">spa</i>
                                 <span>Relaxation</span>
                             </div>
                             <div class="trigger-tag" data-trigger="excitement">
-                                <i class="material-symbols-outlined">star</i>></i>
+                                <i class="material-symbols-outlined">star</i>
                                 <span>Excitement</span>
                             </div>
                             <div class="trigger-tag" data-trigger="anxiety">
-                                <i class="material-symbols-outlined">psychology_alt</i>></i>
+                                <i class="material-symbols-outlined">psychology_alt</i>
                                 <span>Anxiety</span>
                             </div>
                         </div>
@@ -3101,12 +3101,12 @@
                     <div class="md-text-field">
                         <textarea name="notes" class="md-text-field-input" rows="3" placeholder=" "></textarea>
                         <label class="md-text-field-label">
-                            <i class="material-symbols-outlined">comment</i>></i> Notes (optional)
+                            <i class="material-symbols-outlined">comment</i> Notes (optional)
                         </label>
                     </div>
                     
                     <button type="submit" class="md-button md-button-filled">
-                        <i class="material-symbols-outlined">save</i>></i>
+                        <i class="material-symbols-outlined">save</i>
                         <span>Save Mood</span>
                     </button>
                 </form>
@@ -3115,7 +3115,7 @@
             <!-- Enhanced Analytics Card -->
             <div class="md-card">
                 <div class="md-card-header">
-                    <i class="fas fa-chart-bar md-card-icon"></i>
+                    <i class="material-symbols-outlined md-card-icon">bar_chart</i>
                     <h2 class="md-card-title headline-small">Analytics Overview</h2>
                 </div>
                 
@@ -3141,7 +3141,7 @@
                 <!-- Mood Distribution Chart -->
                 <div style="margin: 24px 0;">
                     <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
-                        <i class="material-symbols-outlined">pie_chart</i> style="color: var(--md-sys-color-primary); margin-right: 8px;"></i>
+                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-primary); margin-right: 8px;">pie_chart</i></i>
                         Mood Distribution (Last 30 Days)
                     </h3>
                     <div class="chart-container" style="height: 200px;">
@@ -3152,7 +3152,7 @@
                 <!-- Top Triggers -->
                 <div style="margin: 24px 0;">
                     <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
-                        <i class="material-symbols-outlined">label</i> style="color: var(--md-sys-color-tertiary); margin-right: 8px;"></i>
+                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-tertiary); margin-right: 8px;">label</i></i>
                         Top Mood Triggers
                     </h3>
                     <div id="top-triggers" class="triggers-analytics">
@@ -3163,7 +3163,7 @@
                 <!-- Weekly Trend -->
                 <div style="margin: 24px 0;">
                     <h3 style="font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 12px;">
-                        <i class="material-symbols-outlined">trending_up</i> style="color: var(--md-sys-color-secondary); margin-right: 8px;"></i>
+                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-secondary); margin-right: 8px;">trending_up</i></i>
                         This Week vs Last Week
                     </h3>
                     <div class="week-comparison">
@@ -3183,7 +3183,7 @@
                 </div>
                 
                 <a href="/api/pdf-simple" class="md-button md-button-outlined" target="_blank">
-                    <i class="material-symbols-outlined">download</i>></i>
+                    <i class="material-symbols-outlined">download</i>
                     <span>Export PDF</span>
                 </a>
             </div>
@@ -3222,13 +3222,13 @@
         <div class="section">
             <div class="md-card">
                 <div class="md-card-header">
-                    <i class="fas fa-lightbulb md-card-icon"></i>
+                    <i class="material-symbols-outlined md-card-icon">lightbulb</i>
                     <h2 class="md-card-title headline-small">Quick Insights</h2>
                 </div>
                 
                 <div id="quick-insights" class="insights-list">
                     <div class="insight-item">
-                        <i class="material-symbols-outlined">today</i> style="color: var(--md-sys-color-primary);"></i>
+                        <i class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">today</i></i>
                         <span>Loading personalized insights...</span>
                     </div>
                 </div>
@@ -3239,13 +3239,13 @@
         <div class="section">
             <div class="md-card">
                 <div class="md-card-header">
-                    <i class="fas fa-calendar-week md-card-icon"></i>
+                    <i class="material-symbols-outlined md-card-icon">date_range</i>
                     <h2 class="md-card-title headline-small">Weekly Patterns</h2>
                 </div>
                 
                 <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 24px;">
                     <button class="md-button md-button-outlined" onclick="navigateWeek(-1)" style="min-width: 120px;">
-                        <i class="material-symbols-outlined">chevron_left</i>></i>
+                        <i class="material-symbols-outlined">chevron_left</i>
                         <span>Previous</span>
                     </button>
                     <div id="weekRangeDisplay" style="font-size: 16px; font-weight: 500; min-width: 200px; text-align: center; color: var(--md-sys-color-on-surface);">
@@ -3253,7 +3253,7 @@
                     </div>
                     <button class="md-button md-button-outlined" onclick="navigateWeek(1)" style="min-width: 120px;">
                         <span>Next</span>
-                        <i class="material-symbols-outlined">chevron_right</i>></i>
+                        <i class="material-symbols-outlined">chevron_right</i>
                     </button>
                 </div>
                 
@@ -3267,7 +3267,7 @@
         <div class="section">
             <div class="md-card daily-patterns-card">
                 <div class="md-card-header">
-                    <i class="fas fa-clock md-card-icon"></i>
+                    <i class="material-symbols-outlined md-card-icon">schedule</i>
                     <h2 class="md-card-title headline-small">Daily Patterns</h2>
                 </div>
                 
@@ -3275,22 +3275,22 @@
                     <div class="md-date-picker">
                         <div class="md-date-field">
                             <input type="text" id="dailyDatePicker" class="md-date-input" placeholder="Select date" readonly>
-                            <i class="fas fa-calendar-alt md-date-icon"></i>
+                            <i class="material-symbols-outlined md-date-icon">calendar_month</i>
                         </div>
                         <div class="md-date-calendar" id="dailyDateCalendar">
                             <div class="md-calendar-header">
                                 <button type="button" class="md-calendar-nav" id="prevYear">
-                                    <i class="material-symbols-outlined">keyboard_double_arrow_left</i>></i>
+                                    <i class="material-symbols-outlined">keyboard_double_arrow_left</i>
                                 </button>
                                 <button type="button" class="md-calendar-nav" id="prevMonth">
-                                    <i class="material-symbols-outlined">chevron_left</i>></i>
+                                    <i class="material-symbols-outlined">chevron_left</i>
                                 </button>
                                 <div class="md-calendar-title" id="calendarTitle"></div>
                                 <button type="button" class="md-calendar-nav" id="nextMonth">
-                                    <i class="material-symbols-outlined">chevron_right</i>></i>
+                                    <i class="material-symbols-outlined">chevron_right</i>
                                 </button>
                                 <button type="button" class="md-calendar-nav" id="nextYear">
-                                    <i class="material-symbols-outlined">keyboard_double_arrow_right</i>></i>
+                                    <i class="material-symbols-outlined">keyboard_double_arrow_right</i>
                                 </button>
                             </div>
                             <div class="md-calendar-grid">
@@ -3308,7 +3308,7 @@
                         </div>
                     </div>
                     <button class="md-button md-button-filled" onclick="loadAverageMoodData()" id="averageMoodBtn">
-                        <i class="material-symbols-outlined">trending_up</i>></i>
+                        <i class="material-symbols-outlined">trending_up</i>
                         <span>Average Mood</span>
                     </button>
                 </div>
@@ -3340,7 +3340,7 @@
         <div class="section">
             <div class="md-card">
                 <div class="md-card-header">
-                    <i class="fas fa-chart-line md-card-icon"></i>
+                    <i class="material-symbols-outlined md-card-icon">trending_up</i>
                     <h2 class="md-card-title headline-small">4-Week Comparison</h2>
                 </div>
                 
@@ -3354,7 +3354,7 @@
         <div class="section">
             <div class="md-card">
                 <div class="md-card-header">
-                    <i class="fas fa-chart-area md-card-icon"></i>
+                    <i class="material-symbols-outlined md-card-icon">area_chart</i>
                     <h2 class="md-card-title headline-small">Monthly Trends</h2>
                 </div>
                 
@@ -3362,7 +3362,7 @@
                     <div class="md-select-container">
                         <select id="monthlyYearSelect" class="md-select" value="">
                         </select>
-                        <i class="fas fa-chevron-down md-select-icon"></i>
+                        <i class="material-symbols-outlined md-select-icon">expand_more</i>
                     </div>
                 </div>
                 
@@ -3387,7 +3387,7 @@
 
     <!-- Material Design 3 Expressive FAB -->
     <button class="md-fab" onclick="scrollToTop()" aria-label="Scroll to top">
-        <i class="material-symbols-outlined">arrow_upward</i>></i>
+        <i class="material-symbols-outlined">arrow_upward</i>
     </button>
     <script>
         // Expressive scroll to top function
@@ -4384,15 +4384,15 @@
         // Function to get mood icon
         function getMoodIcon(mood) {
             const moodIcons = {
-                'very bad': 'fas fa-face-frown-open',
-                'bad': 'fas fa-face-frown',
-                'slightly bad': 'fas fa-face-meh',
-                'neutral': 'fas fa-face-meh-blank',
-                'slightly well': 'fas fa-face-smile',
-                'well': 'fas fa-face-smile-beam',
-                'very well': 'fas fa-face-grin-stars'
+                'very bad': 'sentiment_very_dissatisfied',
+                'bad': 'sentiment_dissatisfied',
+                'slightly bad': 'sentiment_neutral',
+                'neutral': 'sentiment_neutral',
+                'slightly well': 'sentiment_satisfied',
+                'well': 'sentiment_very_satisfied',
+                'very well': 'sentiment_extremely_satisfied'
             };
-            return moodIcons[mood] || 'fas fa-circle';
+            return moodIcons[mood] || 'circle';
         }
 
         // Function to get mood color
@@ -5486,7 +5486,7 @@
                     
                     const submitBtn = this.querySelector('button[type="submit"]');
                     const originalText = submitBtn.innerHTML;
-                    submitBtn.innerHTML = '<i class="material-symbols-outlined">progress_activity</i>></i> <span>Saving...</span>';
+                    submitBtn.innerHTML = '<i class="material-symbols-outlined">progress_activity</i> <span>Saving...</span>';
                     submitBtn.disabled = true;
                     
                     const formData = new FormData(this);
@@ -5574,13 +5574,13 @@
         
         function updateQuickStatsCards(data) {
             const moodIcons = {
-                'very bad': 'fas fa-face-frown-open',
-                'bad': 'fas fa-face-frown',
-                'slightly bad': 'fas fa-face-meh',
-                'neutral': 'fas fa-face-meh-blank',
-                'slightly well': 'fas fa-face-smile',
-                'well': 'fas fa-face-smile-beam',
-                'very well': 'fas fa-face-grin-stars'
+                'very bad': 'sentiment_very_dissatisfied',
+                'bad': 'sentiment_dissatisfied',
+                'slightly bad': 'sentiment_neutral',
+                'neutral': 'sentiment_neutral',
+                'slightly well': 'sentiment_satisfied',
+                'well': 'sentiment_very_satisfied',
+                'very well': 'sentiment_extremely_satisfied'
             };
             
             const moodColors = {
@@ -5596,13 +5596,13 @@
             // Today's Mood
             const todayIconEl = document.getElementById('todayMoodIcon');
             if (data.today) {
-                const iconClass = moodIcons[data.today.mood] || 'fas fa-circle';
+                const iconName = moodIcons[data.today.mood] || 'circle';
                 const iconColor = moodColors[data.today.mood] || '#9e9e9e';
-                todayIconEl.innerHTML = `<i class="${iconClass}" style="color: ${iconColor};"></i>`;
+                todayIconEl.innerHTML = `<i class="material-symbols-outlined" style="color: ${iconColor};">${iconName}</i>`;
                 document.getElementById('todayMoodName').textContent = data.today.mood.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                 document.getElementById('todayMoodTime').textContent = `Last entry: ${data.today.time}`;
             } else {
-                todayIconEl.innerHTML = '<i class="material-symbols-outlined">edit</i> style="color: var(--md-sys-color-on-surface-variant);"></i>';
+                todayIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">edit</i>';</i>';
                 document.getElementById('todayMoodName').textContent = 'No entries yet';
                 document.getElementById('todayMoodTime').textContent = 'Add your first mood';
             }
@@ -5623,9 +5623,9 @@
             const trendIconEl = document.getElementById('trendIcon');
             if (data.trend) {
                 const trendIcons = { 
-                    'up': 'fas fa-arrow-trend-up', 
-                    'down': 'fas fa-arrow-trend-down', 
-                    'stable': 'fas fa-arrows-left-right' 
+                    'up': 'trending_up', 
+                    'down': 'trending_down', 
+                    'stable': 'trending_flat' 
                 };
                 const trendColors = {
                     'up': 'var(--md-sys-color-tertiary)',
@@ -5634,9 +5634,9 @@
                 };
                 const trendLabels = { 'up': 'Improving', 'down': 'Declining', 'stable': 'Stable' };
                 
-                const iconClass = trendIcons[data.trend.direction];
+                const iconName = trendIcons[data.trend.direction];
                 const iconColor = trendColors[data.trend.direction];
-                trendIconEl.innerHTML = `<i class="${iconClass}" style="color: ${iconColor};"></i>`;
+                trendIconEl.innerHTML = `<i class="material-symbols-outlined" style="color: ${iconColor};">${iconName}</i>`;
                 document.getElementById('trendDirection').textContent = trendLabels[data.trend.direction];
                 document.getElementById('trendDirection').style.color = iconColor;
                 
@@ -5644,7 +5644,7 @@
                 document.getElementById('trendChange').textContent = `${changeText} vs last week`;
                 document.getElementById('trendChange').style.color = iconColor;
             } else {
-                trendIconEl.innerHTML = '<i class="material-symbols-outlined">trending_up</i> style="color: var(--md-sys-color-on-surface-variant);"></i>';
+                trendIconEl.innerHTML = '<i class="material-symbols-outlined" style="color: var(--md-sys-color-on-surface-variant);">trending_up</i>';</i>';
                 document.getElementById('trendDirection').textContent = 'Not enough data';
                 document.getElementById('trendChange').textContent = 'Need 2 weeks';
             }
@@ -5806,7 +5806,7 @@
                     } else {
                         container.innerHTML = `
                             <div class="insight-item">
-                                <i class="material-symbols-outlined">info</i>></i>
+                                <i class="material-symbols-outlined">info</i>
                                 <span>Keep logging moods to see personalized insights!</span>
                             </div>
                         `;
@@ -5816,7 +5816,7 @@
                     console.error('Error loading insights:', error);
                     document.getElementById('quick-insights').innerHTML = `
                         <div class="insight-item">
-                            <i class="material-symbols-outlined">warning</i>></i>
+                            <i class="material-symbols-outlined">warning</i>
                             <span>Error loading insights</span>
                         </div>
                     `;
