@@ -229,16 +229,31 @@ class PDFExporter:
             return [Paragraph("No mood data available for analysis.", self.styles['body_large'])]
 
         elements = []
-        summary = self.analytics.get_summary()
+
+        # Get summary with error handling
+        try:
+            summary = self.analytics.get_summary()
+        except Exception as e:
+            print(f"Error getting summary: {e}")
+            return [Paragraph("Unable to generate summary due to insufficient data.", self.styles['body_large'])]
+
+        # Validate summary data structure
+        if not summary or not isinstance(summary, dict):
+            return [Paragraph("Unable to generate summary due to insufficient data.", self.styles['body_large'])]
 
         # Section header
         header = Paragraph("📊 Executive Summary", self.styles['headline_large'])
         elements.append(header)
 
-        # Generate insights
-        avg_mood = summary['daily_average']
-        total_entries = summary['total_entries']
-        streak = summary['current_streak']
+        # Generate insights with safe defaults
+        avg_mood = summary.get('daily_average', 4.0)
+        total_entries = summary.get('total_entries', 0)
+        streak = summary.get('current_streak', 0)
+        best_day = summary.get('best_day', 'N/A')
+
+        # Additional validation - ensure best_day is a string and not empty
+        if not isinstance(best_day, str) or not best_day or best_day == "N/A":
+            best_day = 'N/A'
 
         # Determine assessment
         if avg_mood >= 5.5:
@@ -254,6 +269,12 @@ class PDFExporter:
             assessment_color = MD3_COLORS['error']
             trend_icon = "↘️"
 
+        # Create best_day text with conditional wording
+        if best_day != "N/A":
+            best_day_text = f"<b>{best_day}</b> appears to be your strongest day of the week."
+        else:
+            best_day_text = "Continue tracking to identify your strongest day of the week."
+
         summary_text = f"""
         <para align="left" spaceAfter="12">
         <font size="12" color="{MD3_COLORS['on_surface']}">
@@ -265,7 +286,7 @@ class PDFExporter:
         <para align="left" spaceAfter="12">
         <font size="12" color="{MD3_COLORS['on_surface']}">
         You currently maintain a <font color="{MD3_COLORS['primary']}"><b>{streak}-day</b></font> positive mood streak.
-        <b>{summary['best_day']}</b> appears to be your strongest day of the week.
+        {best_day_text}
         </font>
         </para>
         <para align="left" spaceAfter="12">

@@ -299,34 +299,50 @@ class MoodAnalytics:
     
     def get_summary(self):
         """Get complete analytics summary"""
-        averages = self.calculate_averages()
-        streak = self.calculate_streak()
-        weekly = self.get_weekly_patterns()
+        try:
+            averages = self.calculate_averages()
+        except Exception as e:
+            print(f"Error calculating averages: {e}")
+            averages = {'daily': 4.0, 'good_days': 4.0, 'bad_days': 4.0, 'total_entries': 0}
+
+        try:
+            streak = self.calculate_streak()
+        except Exception as e:
+            print(f"Error calculating streak: {e}")
+            streak = 0
+
+        try:
+            weekly = self.get_weekly_patterns()
+        except Exception as e:
+            print(f"Error getting weekly patterns: {e}")
+            weekly = None
 
         # Find best day with validation
         best_day = "N/A"
         best_avg = 0
 
-        if weekly and 'labels' in weekly and 'data' in weekly:
-            labels = weekly['labels']
-            data = weekly['data']
+        if weekly and isinstance(weekly, dict) and 'labels' in weekly and 'data' in weekly:
+            labels = weekly.get('labels', [])
+            data = weekly.get('data', [])
 
-            # Validate that labels and data have the same length
-            if len(labels) == len(data):
+            # Validate that labels and data have the same length and are lists
+            if isinstance(labels, list) and isinstance(data, list) and len(labels) == len(data) and len(data) > 0:
                 for i, day in enumerate(labels):
                     try:
-                        if data[i] > best_avg:
+                        # Check if data[i] is a valid number and greater than 0 (not just default 0)
+                        if isinstance(data[i], (int, float)) and data[i] > best_avg:
                             best_avg = data[i]
                             best_day = day
-                    except (IndexError, TypeError):
+                    except (IndexError, TypeError) as e:
+                        print(f"Error processing day {i}: {e}")
                         continue
 
         return {
             'current_streak': streak,
-            'daily_average': averages['daily'],
-            'good_days_average': averages['good_days'],
-            'bad_days_average': averages['bad_days'],
-            'total_entries': averages['total_entries'],
+            'daily_average': averages.get('daily', 4.0),
+            'good_days_average': averages.get('good_days', 4.0),
+            'bad_days_average': averages.get('bad_days', 4.0),
+            'total_entries': averages.get('total_entries', 0),
             'best_day': best_day,
             'weekly_patterns': weekly
         }
