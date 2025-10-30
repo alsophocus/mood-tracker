@@ -1046,33 +1046,31 @@ def hourly_average_mood():
 @main_bp.route('/export_pdf')
 @login_required
 def export_pdf():
-    """Export mood data as PDF"""
+    """Export comprehensive mood analytics as Material Design 3 PDF"""
     moods = db.get_user_moods(current_user.id)
-    exporter = BeautifulPDFExporter(current_user, moods)
+    exporter = PDFExporter(current_user, moods)
     buffer = exporter.generate_report()
-    
+
     filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
     return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
 @main_bp.route('/api/pdf-simple')
 @login_required
 def simple_pdf_export():
-    """Working server-side PDF export with proper styling"""
+    """Comprehensive Material Design 3 PDF export with all analytics"""
     try:
-        from pdf_export_working import WorkingPDFExporter
-        
         moods = db.get_user_moods(current_user.id)
-        exporter = WorkingPDFExporter(current_user, moods)
+        exporter = PDFExporter(current_user, moods)
         buffer = exporter.generate_report()
-        
+
         filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
         return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
-        
+
     except Exception as e:
         return jsonify({
             'success': False,
             'error': str(e),
-            'message': 'Enhanced PDF generation failed'
+            'message': 'PDF generation failed'
         }), 500
 
 @main_bp.route('/api/pdf-test-endpoint')
