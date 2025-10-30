@@ -1047,19 +1047,10 @@ def hourly_average_mood():
 @login_required
 def export_pdf():
     """Export comprehensive mood analytics as Material Design 3 PDF"""
-    moods = db.get_user_moods(current_user.id)
-    exporter = PDFExporter(current_user, moods)
-    buffer = exporter.generate_report()
-
-    filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
-    return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
-
-@main_bp.route('/api/pdf-simple')
-@login_required
-def simple_pdf_export():
-    """Comprehensive Material Design 3 PDF export with all analytics"""
     try:
         moods = db.get_user_moods(current_user.id)
+        print(f"PDF export: Retrieved {len(moods) if moods else 0} moods for user {current_user.id}")
+
         exporter = PDFExporter(current_user, moods)
         buffer = exporter.generate_report()
 
@@ -1067,10 +1058,47 @@ def simple_pdf_export():
         return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
     except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"PDF generation error: {error_traceback}")
+
+        # Return a user-friendly error page
+        return f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; padding: 40px; text-align: center;">
+                <h1 style="color: #BA1A1A;">PDF Generation Failed</h1>
+                <p style="color: #49454F;">We encountered an error while generating your PDF report.</p>
+                <p style="color: #79747E; font-size: 14px;">Error: {str(e)}</p>
+                <a href="/" style="color: #6750A4; text-decoration: none; font-weight: bold;">Return to Dashboard</a>
+            </body>
+        </html>
+        """, 500
+
+@main_bp.route('/api/pdf-simple')
+@login_required
+def simple_pdf_export():
+    """Comprehensive Material Design 3 PDF export with all analytics"""
+    try:
+        moods = db.get_user_moods(current_user.id)
+        print(f"PDF export: Retrieved {len(moods) if moods else 0} moods for user {current_user.id}")
+
+        exporter = PDFExporter(current_user, moods)
+        buffer = exporter.generate_report()
+
+        filename = f'mood_report_{datetime.now().strftime("%Y%m%d")}.pdf'
+        return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
+
+    except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"PDF generation error: {error_traceback}")
+
         return jsonify({
             'success': False,
             'error': str(e),
-            'message': 'PDF generation failed'
+            'error_type': type(e).__name__,
+            'message': 'PDF generation failed',
+            'details': error_traceback if current_user else None  # Only show details if authenticated
         }), 500
 
 @main_bp.route('/api/pdf-test-endpoint')

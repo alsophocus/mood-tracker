@@ -472,10 +472,21 @@ class PDFExporter:
             if not weekly_data or not weekly_data.get('data'):
                 return None
 
-            fig, ax = plt.subplots(figsize=(12, 7), facecolor=MD3_COLORS['surface'])
+            labels = weekly_data.get('labels', [])
+            data_points = weekly_data.get('data', [])
 
-            labels = weekly_data['labels']
-            data_points = weekly_data['data']
+            # Validate data structure
+            if not labels or not data_points or len(labels) != len(data_points):
+                print(f"Invalid weekly data structure: labels={len(labels)}, data={len(data_points)}")
+                return None
+
+            # Filter out zero values (days with no data)
+            non_zero_data = [d for d in data_points if d > 0]
+            if not non_zero_data:
+                print("No valid weekly mood data available")
+                return None
+
+            fig, ax = plt.subplots(figsize=(12, 7), facecolor=MD3_COLORS['surface'])
 
             # Main line with filled area
             line = ax.plot(labels, data_points,
@@ -488,18 +499,40 @@ class PDFExporter:
             ax.fill_between(labels, data_points, alpha=0.2,
                            color=MD3_COLORS['primary'], zorder=1)
 
-            # Highlight best and worst days
-            max_mood = max(data_points)
-            min_mood = min(data_points)
-            max_day = labels[data_points.index(max_mood)]
-            min_day = labels[data_points.index(min_mood)]
+            # Highlight best and worst days (only if we have valid data)
+            try:
+                max_mood = max(data_points)
+                min_mood = min(data_points)
 
-            ax.scatter([max_day], [max_mood],
-                      color=MD3_COLORS['success'], s=200, marker='^',
-                      edgecolor='white', linewidth=2.5, zorder=4,
-                      label='Best Day')
+                if max_mood > 0:  # Only highlight if there's actual data
+                    max_idx = data_points.index(max_mood)
+                    min_idx = data_points.index(min_mood)
 
-            if max_mood != min_mood:
+                    if 0 <= max_idx < len(labels):
+                        max_day = labels[max_idx]
+                    else:
+                        max_day = None
+
+                    if 0 <= min_idx < len(labels):
+                        min_day = labels[min_idx]
+                    else:
+                        min_day = None
+                else:
+                    max_day = None
+                    min_day = None
+            except (ValueError, IndexError) as e:
+                print(f"Error finding best/worst days: {e}")
+                max_day = None
+                min_day = None
+
+            # Only add highlights if we have valid day labels
+            if max_day is not None:
+                ax.scatter([max_day], [max_mood],
+                          color=MD3_COLORS['success'], s=200, marker='^',
+                          edgecolor='white', linewidth=2.5, zorder=4,
+                          label='Best Day')
+
+            if max_mood != min_mood and min_day is not None:
                 ax.scatter([min_day], [min_mood],
                           color=MD3_COLORS['warning'], s=200, marker='v',
                           edgecolor='white', linewidth=2.5, zorder=4,
@@ -556,13 +589,28 @@ class PDFExporter:
         try:
             monthly_data = self.analytics.get_monthly_trends()
 
-            if not monthly_data or len(monthly_data) < 2:
+            if not monthly_data or len(monthly_data) < 1:
+                print("No monthly trend data available")
                 return None
 
             # Get last 12 months
-            recent_data = monthly_data[-12:]
-            months = [item['month'] for item in recent_data]
-            values = [item['mood'] for item in recent_data]
+            recent_data = monthly_data[-12:] if len(monthly_data) > 0 else []
+
+            if not recent_data:
+                print("No recent monthly data to display")
+                return None
+
+            # Validate data structure
+            try:
+                months = [item['month'] for item in recent_data]
+                values = [item['mood'] for item in recent_data]
+            except (KeyError, TypeError) as e:
+                print(f"Invalid monthly data structure: {e}")
+                return None
+
+            if not months or not values or len(months) != len(values):
+                print(f"Monthly data mismatch: months={len(months)}, values={len(values)}")
+                return None
 
             # Calculate linear regression
             regression = self.trend_service.calculate_linear_regression(values)

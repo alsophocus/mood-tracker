@@ -302,15 +302,25 @@ class MoodAnalytics:
         averages = self.calculate_averages()
         streak = self.calculate_streak()
         weekly = self.get_weekly_patterns()
-        
-        # Find best day
+
+        # Find best day with validation
         best_day = "N/A"
         best_avg = 0
-        for i, day in enumerate(weekly['labels']):
-            if weekly['data'][i] > best_avg:
-                best_avg = weekly['data'][i]
-                best_day = day
-        
+
+        if weekly and 'labels' in weekly and 'data' in weekly:
+            labels = weekly['labels']
+            data = weekly['data']
+
+            # Validate that labels and data have the same length
+            if len(labels) == len(data):
+                for i, day in enumerate(labels):
+                    try:
+                        if data[i] > best_avg:
+                            best_avg = data[i]
+                            best_day = day
+                    except (IndexError, TypeError):
+                        continue
+
         return {
             'current_streak': streak,
             'daily_average': averages['daily'],
